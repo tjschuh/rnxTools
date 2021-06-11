@@ -1,0 +1,37 @@
+#!/bin/tcsh
+
+# given a desired length of RINEX file in seconds
+# compute the appropriate end time from the start time
+
+# requires GipsyX (date2sec and sec2date built-in functions)
+
+set mon1 = `echo "$2"`
+if ($mon1 < 10) then
+   set mon1 = `printf "%2.2i" $mon1`
+endif
+
+set day1 = `echo "$3"`
+if ($day1 < 10) then
+   set day1 = `printf "%2.2i" $day1`
+endif
+
+set hr1 = `echo "$4"`
+if ($hr1 < 10) then
+   set hr1 = `printf "%2.2i" $hr1`
+endif
+
+set min1 = `echo "$5"`
+if ($min1 < 10) then
+   set min1 = `printf "%2.2i" $min1`
+endif
+
+set sec1 = `printf "%02i" $6`
+
+set start = `date2sec $1-$mon1-$day1 ${hr1}:${min1}:${sec1}`
+set end = `echo "$start+(${7}-1)" | bc`
+
+touch endtime
+sec2date $end >> endtime
+
+sed -i 's/-/ /g' endtime
+sed -i 's/:/ /g' endtime
