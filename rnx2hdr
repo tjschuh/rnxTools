@@ -1,0 +1,3 @@
+#!/bin/tcsh
+
+awk '/END OF HEADER/ {print NR}' $1
