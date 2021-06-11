@@ -1,0 +1,109 @@
+#!/bin/tcsh
+
+# $1 is original file
+# $2 is desired number of seconds for rinex length
+
+set hlength = `awk '/END OF HEADER/ {print NR}' $1`
+
+# save the start and end time variables (yr,mm,dd,hr,min,sec)
+set yr1 = `awk '/FIRST/ {print $1}' $1`
+set mon1 = `awk '/FIRST/ {print $2}' $1`
+set day1 = `awk '/FIRST/ {print $3}' $1`
+set hr1 = `awk '/FIRST/ {print $4}' $1`
+set min1 = `awk '/FIRST/ {print $5}' $1`
+set sec1 = `awk '/FIRST/ {print $6}' $1`
+
+set yr2 = `awk '/LAST/ {print $1}' $1`
+set mon2 = `awk '/LAST/ {print $2}' $1`
+set day2 = `awk '/LAST/ {print $3}' $1`
+set hr2 = `awk '/LAST/ {print $4}' $1`
+set min2 = `awk '/LAST/ {print $5}' $1`
+set sec2 = `awk '/LAST/ {print $6}' $1`
+
+# take start time and $2, and compute the necessary end time
+./rnx2end $yr1 $mon1 $day1 $hr1 $min1 $sec1 $2
+
+# save the end time variables (yr,mm,dd,hr,min,sec)
+# need to make if statements like I did for the seconds at the end
+set yr = `awk '/ / {print $1}' endtime`
+
+set mon = `awk '/ / {print $2}' endtime`
+if ($mon < 10) then
+   set mon = `printf "%1.1i" $mon`
+endif
+
+set day = `awk '/ / {print $3}' endtime`
+if ($day < 10) then
+   set day = `printf "%1.1i" $day`
+endif
+
+set hr = `awk '/ / {print $4}' endtime`
+if ($hr < 10) then
+   set hr = `printf "%1.1i" $hr`
+endif
+
+set min = `awk '/ / {print $5}' endtime`
+if ($min < 10) then
+   set min = `printf "%1.1i" $min`
+endif
+
+set sec = `awk '/ / {print $6}' endtime`
+# dont add leading zero to $sec, just add 7 trailing zeros
+set sec = `printf "%2.7f" $sec`
+
+set seci = `printf "%i" $sec`
+set sec2i = `printf "%i" $sec2`
+
+rm endtime
+
+# copy header from $1 to new file rinex
+# which we will use to run gd2e.py on
+sed -n '1,'"$hlength"'p' $1 >! rinex
+
+# replace end time in new file with
+# the new, appropriate end time
+set etline = `awk '/TIME OF LAST OBS/ {print NR}' $1`
+sed -i ''"$etline"' s/'"$yr2"'/'"$yr"'/' rinex
+sed -i ''"$etline"' s/'"$mon2"'/'"$mon"'/' rinex
+sed -i ''"$etline"' s/'"$day2"'/'"$day"'/' rinex
+sed -i ''"$etline"' s/'"$hr2"'/'"$hr"'/' rinex
+sed -i ''"$etline"' s/'"$min2"'/'"$min"'/' rinex
+
+# this is to make the spacing correct in the new file
+if ($sec2i < 10 && $seci >= 10) then
+    sed -i ''"$etline"' s/    '"$sec2"'/   '"$sec"'/' rinex
+else if ($sec2i < 10 && $seci < 10) then
+    sed -i ''"$etline"' s/    '"$sec2"'/    '"$sec"'/' rinex
+else if ($sec2i >= 10 && $seci < 10) then
+    sed -i ''"$etline"' s/   '"$sec2"'/    '"$sec"'/' rinex
+else if ($sec2i >= 10 && $seci >= 10) then
+    sed -i ''"$etline"' s/   '"$sec2"'/   '"$sec"'/' rinex
+endif
+
+# text match the end time of rinex in the original file
+# then copy all the lines in between start time
+# and end time + the block after end time 
+set yrstart = `echo "$yr1-2000" | bc`
+set yrend = `echo "$yr-2000" | bc`
+
+# text match the appropriate start and end times to 
+# obtain the line numbers of each
+# \s+ means expect at least one space
+set startln = `awk '/'"$yrstart"'\s+'"$mon1"'\s+'"$day1"'\s+'"$hr1"'\s+'"$min1"'\s+'"$sec1"'/ && NR>'"$hlength"' {print NR}' $1`
+
+# each block length is (3*#obs) where #obs is the first numbr in column 8 of the time line
+set multiple = `awk '/'"$yrend"'\s+'"$mon"'\s+'"$day"'\s+'"$hr"'\s+'"$min"'\s+'"$seci"'/ && NR>'"$hlength"' {print substr($8,1,2)}' $1`
+
+set endln = `awk '/'"$yrend"'\s+'"$mon"'\s+'"$day"'\s+'"$hr"'\s+'"$min"'\s+'"$seci"'/ && NR>'"$hlength"' {print NR}' $1`
+# to calculate the final line # of the endtime
+# we take the endtime line # and add to it the
+# length of the corresponding block
+# each block is (3*multiple) but we also need
+# to add 2 more because the header of each block
+# is 3 lines, but we already took ino account the
+# fist line of the block header
+set endln = `echo "$multiple*3+$endln+2" | bc`
+
+# copy everything from startln to endln to rinex
+# to get all the necessary data
+sed -n ''"$startln"','"$endln"'p' $1 >> rinex
