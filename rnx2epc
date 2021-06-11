@@ -1,0 +1,60 @@
+#!/bin/tcsh
+
+# compute the length of a given RINEX file in seconds 
+# need to fix bc part at end to round result to x minutes x seconds
+
+set yr1 = `awk '/FIRST/ {print $1}' $1`
+set mon1 = `awk '/FIRST/ {print $2}' $1`
+set day1 = `awk '/FIRST/ {print $3}' $1`
+set hr1 = `awk '/FIRST/ {print $4}' $1`
+set min1 = `awk '/FIRST/ {print $5}' $1`
+set sec1 = `awk '/FIRST/ {print $6}' $1`
+
+if ($mon1 < 10) then
+   set mon1 = `printf "%2.2i" $mon1`
+endif
+
+if ($day1 < 10) then
+   set day1 = `printf "%2.2i" $day1`
+endif
+
+if ($hr1 < 10) then
+   set hr1 = `printf "%2.2i" $hr1`
+endif
+
+if ($min1 < 10) then
+   set min1 = `printf "%2.2i" $min1`
+endif
+
+set sec1 = `printf "%02i" $sec1` 
+
+set yr2 = `awk '/LAST/ {print $1}' $1`
+set mon2 = `awk '/LAST/ {print $2}' $1`
+set day2 = `awk '/LAST/ {print $3}' $1`
+set hr2 = `awk '/LAST/ {print $4}' $1`
+set min2 = `awk '/LAST/ {print $5}' $1`
+set sec2 = `awk '/LAST/ {print $6}' $1`
+
+if ($mon2 < 10) then
+   set mon2 = `printf "%2.2i" $mon2`
+endif
+
+if ($day2 < 10) then
+   set day2 = `printf "%2.2i" $day2`
+endif
+
+if ($hr2 < 10) then
+   set hr2 = `printf "%2.2i" $hr2`
+endif
+
+if ($min2 < 10) then
+   set min2 = `printf "%2.2i" $min2`
+endif
+
+set sec2 = `printf "%02i" $sec2`
+
+set first = `date2sec $yr1-$mon1-$day1 ${hr1}:${min1}:${sec1}`
+set last = `date2sec $yr2-$mon2-$day2 ${hr2}:${min2}:${sec2}`
+
+set length = `echo "$last-$first+1" | bc`
+echo "Length of RINEX file = $length seconds"
