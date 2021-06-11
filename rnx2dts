@@ -1,7 +1,6 @@
 #!/bin/tcsh
 #
-# Takes a RINEX file and determine if it's missing any seconds of
-# measurements....  
+# Takes a RINEX file and determines whether its sampling rate is constant
 #
 # INPUT:
 #
@@ -17,7 +16,9 @@
 #
 # Last modified by tschuh-at-princeton.edu on 06/11/2021
 
-set hlength = `./rnx2hdr $1`
+set fname = $1
+
+set hlength = `rnx2hdr $1`
 
 # text match all the dates in the RINEX file
 
@@ -31,10 +32,13 @@ set dum = `awk '/[A-z]/ && NR>'"$hlength"' && $1!~/[A-z]/ {printf "20%2.2i-%2.2i
 set thedif = $dum[1]
 
 # if the difference between lines is something
-# other than 1, then report this (make variable err)
+# other than that one, then report this (make variable err)
+set index = 0
 foreach num ($dum[*])
+    @ index +=1
     if ($num != $thedif) then
-       set err = "0"
+       printf "File %s Block %4.4i Increment %2.2i\n" $fname $index $num
+       set err = anything
     endif
 end
 
