@@ -1,0 +1,29 @@
+#!/bin/tcsh
+#
+# takes a RINEX file and outputs to screen the start and end times
+#
+# INPUT:
+#
+# $1      RINEX file
+#
+# OUTPUT:
+#
+# start/end time to screen
+#
+# Last modified by tschuh-at-princeton.edu, 06/15/2021
+
+set yr1 = `awk '/TIME OF FIRST OBS/ {print $1}' $1`
+set mm1 = `awk '/TIME OF FIRST OBS/ {print $2}' $1`
+set dd1 = `awk '/TIME OF FIRST OBS/ {print $3}' $1`
+set hr1 = `awk '/TIME OF FIRST OBS/ {print $4}' $1`
+set mn1 = `awk '/TIME OF FIRST OBS/ {print $5}' $1`
+set ss1 = `awk '/TIME OF FIRST OBS/ {print $6}' $1`
+
+set yr2 = `awk '/TIME OF LAST OBS/ {print $1}' $1`
+set mm2 = `awk '/TIME OF LAST OBS/ {print $2}' $1`
+set dd2 = `awk '/TIME OF LAST OBS/ {print $3}' $1`
+set hr2 = `awk '/TIME OF LAST OBS/ {print $4}' $1`
+set mn2 = `awk '/TIME OF LAST OBS/ {print $5}' $1`
+set ss2 = `awk '/TIME OF LAST OBS/ {print $6}' $1`
+
+printf "START TIME: %4.4i-%2.2i-%2.2i %2.2i:%2.2i:%02.0f\nEND TIME:   %4.4i-%2.2i-%2.2i %2.2i:%2.2i:%02.0f\n" $yr1 $mm1 $dd1 $hr1 $mn1 $ss1 $yr2 $mm2 $dd2 $hr2 $mn2 $ss2
