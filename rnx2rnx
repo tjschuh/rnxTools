@@ -1,8 +1,21 @@
 #!/bin/tcsh
+#
+# Takes a RINEX file and creates another RINEX file from it that
+# begins at # a user defined start time and ends at a user defined
+# end time
+#
+# INPUT:
+#
+# $1      a RINEX file
+# $2      desired length of RINEX output file in seconds
+#
+# OUTPUT:
+#
+# rinex   RINEX file with new start and end times
+#
+# Last modified by tschuh-at-princeton.edu on 06/11/2021
 
-# $1 is original file
-# $2 is desired number of seconds for rinex length
-
+# compute the number of header lines
 set hlength = `awk '/END OF HEADER/ {print NR}' $1`
 
 # save the start and end time variables (yr,mm,dd,hr,min,sec)
@@ -19,6 +32,8 @@ set day2 = `awk '/LAST/ {print $3}' $1`
 set hr2 = `awk '/LAST/ {print $4}' $1`
 set min2 = `awk '/LAST/ {print $5}' $1`
 set sec2 = `awk '/LAST/ {print $6}' $1`
+
+# this is where computation of start time has to go
 
 # take start time and $2, and compute the necessary end time
 ./rnx2end $yr1 $mon1 $day1 $hr1 $min1 $sec1 $2
