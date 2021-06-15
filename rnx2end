@@ -1,9 +1,27 @@
 #!/bin/tcsh
-
+#
 # given a desired length of RINEX file in seconds
 # compute the appropriate end time from the start time
-
-# requires GipsyX (date2sec and sec2date built-in functions)
+#
+# INPUT:
+#
+# $1         start year
+# $2         start month
+# $3         start day
+# $4         start hour
+# $5         start minute
+# $6         start second
+# $7         desired # of seconds following start time
+#
+# OUTPUT:
+#
+# endtime    file that contains computed end time
+#
+# REQUIRES:
+#
+# A full installation of GipsyX, in particular, DATE2SEC and SEC2DATE 
+#
+#  Last modified by tschuh-at-princeton.edu on 06/11/2021
 
 set mon1 = `echo "$2"`
 if ($mon1 < 10) then
