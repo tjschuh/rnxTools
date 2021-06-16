@@ -23,33 +23,18 @@
 #
 #  Last modified by tschuh-at-princeton.edu on 06/11/2021
 
-set mon1 = `echo "$2"`
-if ($mon1 < 10) then
-   set mon1 = `printf "%2.2i" $mon1`
-endif
+set yr = `printf "%04.0f" $1`
+set mon = `printf "%02.0f" $2`
+set day = `printf "%02.0f" $3`
+set hr = `printf "%02.0f" $4`
+set min = `printf "%02.0f" $5`
+set sec = `printf "%02.0f" $6`
 
-set day1 = `echo "$3"`
-if ($day1 < 10) then
-   set day1 = `printf "%2.2i" $day1`
-endif
+set start = `date2sec $yr-$mon-$day ${hr}:${min}:${sec}`
 
-set hr1 = `echo "$4"`
-if ($hr1 < 10) then
-   set hr1 = `printf "%2.2i" $hr1`
-endif
-
-set min1 = `echo "$5"`
-if ($min1 < 10) then
-   set min1 = `printf "%2.2i" $min1`
-endif
-
-set sec1 = `printf "%02i" $6`
-
-set start = `date2sec $1-$mon1-$day1 ${hr1}:${min1}:${sec1}`
 set end = `echo "$start+(${7}-1)" | bc`
 
-touch endtime
-sec2date $end >> endtime
+sec2date $end >! endtime
 
 sed -i 's/-/ /g' endtime
 sed -i 's/:/ /g' endtime
