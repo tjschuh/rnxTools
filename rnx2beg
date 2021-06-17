@@ -1,4 +1,4 @@
-#!/bin/tcsh
+#!/bin/tcsh -f
 #
 # Takes a time (year, month, day, hour, minute, second)
 # and a given offset in seconds and computes a new time
