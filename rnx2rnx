@@ -1,4 +1,4 @@
-#!/bin/tcsh
+#!/bin/tcsh -f
 #
 # Takes a RINEX file and creates another RINEX file from it that
 # begins at # a user defined start time and ends at a user defined
@@ -38,6 +38,9 @@ set duration  = $3
 
 # New extension
 set outfile = `echo $infile:r.rnx` 
+
+# Warn if the output file already exist
+test -f $outfile && echo Overwriting $outfile
 
 # compute the number of header lines
 set hlength = `awk '/END OF HEADER/ {print NR}' $infile`
@@ -96,6 +99,12 @@ set etline = `awk '/TIME OF LAST OBS/ {print NR}' $infile`
 sed -i ''"$etline"'d' $outfile
 sed -i ''"$etline"' i \ \ '"$yr2p"'    '"$mon2p"'    '"$day2p"'    '"$hr2p"'    '"$min2p"'   '"$sec2p"'.0000000     GPS         TIME OF LAST OBS' $outfile
 
+# text match the end time of rinex in the original file
+# then copy all the lines in between start time
+# and end time + the block after end time 
+set yrstart = `echo "$yr1p-2000" | bc`
+set yrend = `echo "$yr2p-2000" | bc`
+
 set mon1p = `printf "%1.0f" $mon1p`
 set day1p = `printf "%1.0f" $day1p`
 set hr1p = `printf "%1.0f" $hr1p`
@@ -106,12 +115,6 @@ set day2p = `printf "%1.0f" $day2p`
 set hr2p = `printf "%1.0f" $hr2p`
 set min2p = `printf "%1.0f" $min2p`
 set sec2p = `printf "%1.0f" $sec2p`
-
-# text match the end time of rinex in the original file
-# then copy all the lines in between start time
-# and end time + the block after end time 
-set yrstart = `echo "$yr1p-2000" | bc`
-set yrend = `echo "$yr2p-2000" | bc`
 
 # text match the appropriate start and end times to 
 # obtain the line numbers of each
