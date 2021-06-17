@@ -1,4 +1,4 @@
-#!/bin/tcsh
+#!/bin/tcsh -f
 #
 # given a desired length of RINEX file in seconds
 # compute the appropriate end time from the start time
