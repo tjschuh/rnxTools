@@ -40,7 +40,7 @@ set duration  = $3
 set outfile = `echo $infile:r.rnx` 
 
 # Warn if the output file already exist
-test -f $outfile && echo Overwriting $outfile
+#test -f $outfile && echo Overwriting $outfile
 
 # compute the number of header lines
 set hlength = `awk '/END OF HEADER/ {print NR}' $infile`
@@ -116,23 +116,35 @@ set hr2p = `printf "%1.0f" $hr2p`
 set min2p = `printf "%1.0f" $min2p`
 set sec2p = `printf "%1.0f" $sec2p`
 
-# text match the appropriate start and end times to 
-# obtain the line numbers of each
+# text match the appropriate start time to 
+# obtain the line number so we know where
+# to start copying from
 # \s+ means expect at least one space
 set startln = `awk '/'"$yrstart"'\s+'"$mon1p"'\s+'"$day1p"'\s+'"$hr1p"'\s+'"$min1p"'\s+'"$sec1p"'/ && NR>'"$hlength"' {print NR}' $infile`
 
 # each block length is (3*#obs) where #obs is the first numbr in column 8 of the time line
 set multiple = `awk '/'"$yrend"'\s+'"$mon2p"'\s+'"$day2p"'\s+'"$hr2p"'\s+'"$min2p"'\s+'"$sec2p"'/ && NR>'"$hlength"' {print substr($8,1,2)}' $infile`
+# each blk hdr is either 1, 2, or 3 lines
+# long depending on value of $multiple
+# because we already account for 1 hdr line,
+# we need to either add 0, 1, or 2 more lines
+if ($multiple <= 12) then
+    set extra = 0
+else if (12 < $multiple && $multiple <= 24) then
+    set extra = 1
+else
+    set extra = 2
+endif
  
+# text match the appropriate end time to
+# obtain the line number so we know where
+# to copy up to, HOWEVER, we also want to
+# copy the entire last block, not just up
+# to the last block so we need to use
+# $multiple and $extra to figure out the
+# precise length of the last block
 set endln = `awk '/'"$yrend"'\s+'"$mon2p"'\s+'"$day2p"'\s+'"$hr2p"'\s+'"$min2p"'\s+'"$sec2p"'/ && NR>'"$hlength"' {print NR}' $infile`
-# to calculate the final line # of the endtime
-# we take the endtime line # and add to it the
-# length of the corresponding block
-# each block is (3*multiple) but we also need
-# to add 2 more because the header of each block
-# is 3 lines, but we already took ino account the
-# fist line of the block header
-set endln = `echo "${multiple}*3+${endln}+2" | bc`
+set endln = `echo "${multiple}*3+${endln}+${extra}" | bc`
 
 # copy everything from startln to endln to outfile
 # to get all the necessary data
