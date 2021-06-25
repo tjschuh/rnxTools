@@ -1,0 +1,45 @@
+#!/bin/tcsh
+#
+# takes an unaltered RINEX file and
+# outputs the approx position along
+# with the start date both listed
+# in the header
+#
+# INPUT:
+#
+# $1    unaltered RINEX file
+#
+# OUTPUT:
+#
+# XYZ approximate position to screen
+#
+# Originally written by tschuh-at-princeton.edu, 06/25/2021
+
+#set infile = $1
+
+set files = `/usr/bin/ls *.rnx`
+
+
+foreach file ($files[*]) 
+    # Fine the heard bottom
+    set nrh = `rnx2hdr $file`
+
+set fyr = `awk 'NR < '"$nrh"' && /TIME OF FIRST OBS/ {printf "%4.4i", $1}' $file`
+set fmn = `awk 'NR < '"$nrh"' && /TIME OF FIRST OBS/ {printf "%2.2i", $2}' $file`
+set fdy = `awk 'NR < '"$nrh"' && /TIME OF FIRST OBS/ {printf "%2.2i", $3}' $file`
+set fhr = `awk 'NR < '"$nrh"' && /TIME OF FIRST OBS/ {printf "%2.2i", $4}' $file`
+set fmn = `awk 'NR < '"$nrh"' && /TIME OF FIRST OBS/ {printf "%2.2i", $5}' $file`
+set fsc = `awk 'NR < '"$nrh"' && /TIME OF FIRST OBS/ {printf "%2.2i", $6}' $file`
+
+set lyr = `awk 'NR < '"$nrh"' && /TIME OF LAST OBS/ {printf "%4.4i", $1}' $file`
+set lmn = `awk 'NR < '"$nrh"' && /TIME OF LAST OBS/ {printf "%2.2i", $2}' $file`
+set ldy = `awk 'NR < '"$nrh"' && /TIME OF LAST OBS/ {printf "%2.2i", $3}' $file`
+set lhr = `awk 'NR < '"$nrh"' && /TIME OF LAST OBS/ {printf "%2.2i", $4}' $file`
+set lmn = `awk 'NR < '"$nrh"' && /TIME OF LAST OBS/ {printf "%2.2i", $5}' $file`
+set lsc = `awk 'NR < '"$nrh"' && /TIME OF LAST OBS/ {printf "%2.2i", $6}' $file`
+
+set pos = `awk '/APPROX POSITION/ {print $1,$2,$3}' $file`
+
+echo $pos "  " $fyr $fmn $fdy $fhr $fmn $fsc "  "  $lyr $lmn $ldy $lhr $lmn $lsc >! $file:r.pos
+
+end
