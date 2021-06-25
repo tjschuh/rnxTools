@@ -37,7 +37,8 @@ set duration  = $3
 # Now the code starts
 
 # New extension
-set outfile = `echo $infile:r.rnx` 
+set outfile = `echo  $infile:r`
+set outfile = `echo {$infile:r}_$offset_$duration.rnx` 
 
 # Warn if the output file already exist
 #test -f $outfile && echo Overwriting $outfile
