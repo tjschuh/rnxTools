@@ -1,0 +1,20 @@
+#!/bin/tcsh
+#
+# Add 4 character marker name to RINEX file
+# currently without a marker name
+#
+# INPUT:
+#
+# $1      RINEX file
+# $2      4-character marker name
+#
+# OUTPUT:
+#
+# Modified RINEX file
+#
+# Originally written by tschuh-at-princeton.edu, 06/18/2021
+# Last modified by tschuh-at-princeton.edu, 07/02/2021
+
+set mark = `awk '/MARKER NAME/ {print NR}' $1`
+
+sed -i ''"$mark"' s/                                                            /'"$2"'                                                        /' $1
