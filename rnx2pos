@@ -36,7 +36,7 @@ foreach file ($files[*])
     set lmn = `awk 'NR < '"$nrh"' && /TIME OF LAST OBS/ {printf "%2.2i", $5}' $file`
     set lsc = `awk 'NR < '"$nrh"' && /TIME OF LAST OBS/ {printf "%2.2i", $6}' $file`
 
-    set pos = `awk '/APPROX POSITION/ {print $1,$2,$3}' $file`
+    set pos = `awk 'NR < '"$nrh"' && /APPROX POSITION/ {print $1,$2,$3}' $file`
 
     #set int = `rnx2epc $file`
 
