@@ -1,0 +1,40 @@
+#!/bin/tcsh
+#
+# run GipsyX on a set of RINEX files
+# and write solution to a new file
+# side by side with approx position
+#
+# INPUT:
+#
+# OUTPUT:
+#
+# data.ppp    6 column data file with XYZ positions before and after GipsyX
+#
+# REQUIRES:
+#
+# A full installation of GipsyX, in particular, GD2E 
+#
+# Originally written by tschuh-at-princeton.edu, 07/07/2021
+
+# currently doesnt tell the difference between
+# prepos and postpos (done in post-script in MATLAB)
+
+set files = `/usr/bin/ls *.obs`
+
+mkdir junk
+
+touch data.ppp
+
+foreach file ($files[*])
+	set mark = `awk '/MARKER NAME/ {print $1}' $file`
+	set nrh = `rnx2hdr $file`
+	set prepos = `awk 'NR < '"$nrh"' && /APPROX POSITION/ {print $1,$2,$3}' $file`
+
+	cp $file junk
+	cd junk
+	gd2e.py -rnxFile $file
+	set postpos = `awk '/'"$mark"'/ {print $2,$3,$4}' Summary`
+        echo $prepos "  " $postpos >> ../data.ppp
+	rm -rf *
+	cd ..
+end
