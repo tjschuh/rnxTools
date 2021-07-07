@@ -38,3 +38,5 @@ foreach file ($files[*])
 	rm -rf *
 	cd ..
 end
+
+rmdir junk
