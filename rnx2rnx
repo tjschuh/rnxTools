@@ -19,7 +19,7 @@
 set warnin = 0
 if($#argv < 3)then
   echo ' '
-  echo 'RNX2RNX: At least three input argument expected:'
+  echo 'RNX2RNX: At least three input arguments expected:'
   echo ' '
   echo '----------> RNX2RNX file offset duration'
   echo '----------> where offset and duration in s'
@@ -157,6 +157,6 @@ echo ' '
 if ($warnin == 1) then
     echo "Script RNX2RNX stopped, $warnin warning message generated"
 else
-    echo "Script RNX2RNX stopped, $warnin warning messages generated"
+    echo "Script RNX2RNX finished, $warnin warning messages generated"
 endif
 echo ' '
