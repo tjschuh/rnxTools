@@ -14,27 +14,32 @@
 #
 # A full installation of GipsyX, in particular, DATE2SEC
 #
-# Last modified by tschuh-at-princeton.edu
+# Originally written by tschuh-at-princeton.edu, 06/17/2021
+# Last modified by tschuh-at-princeton.edu, 07/09/2021
 
 set infile = $1
 
-set yr1 = `awk '/FIRST/ {printf "%04.0f",$1}' $infile`
-set mon1 = `awk '/FIRST/ {printf "%02.0f",$2}' $infile`
-set day1 = `awk '/FIRST/ {printf "%02.0f",$3}' $infile`
-set hr1 = `awk '/FIRST/ {printf "%02.0f",$4}' $infile`
-set min1 = `awk '/FIRST/ {printf "%02.0f",$5}' $infile`
-set sec1 = `awk '/FIRST/ {printf "%02.0f",$6}' $infile`
+set nrh = `rnx2hdr $infile`
 
-set yr2 = `awk '/LAST/ {printf "%04.0f",$1}' $infile`
-set mon2 = `awk '/LAST/ {printf "%02.0f",$2}' $infile`
-set day2 = `awk '/LAST/ {printf "%02.0f",$3}' $infile`
-set hr2 = `awk '/LAST/ {printf "%02.0f",$4}' $infile`
-set min2 = `awk '/LAST/ {printf "%02.0f",$5}' $infile`
-set sec2 = `awk '/LAST/ {printf "%02.0f",$6}' $infile`
+set line = `head -$nrh $infile | awk '/TIME OF FIRST OBS/'`
 
-set first = `date2sec $yr1-$mon1-$day1 ${hr1}:${min1}:${sec1}`
-set last = `date2sec $yr2-$mon2-$day2 ${hr2}:${min2}:${sec2}`
+set yr1 = `printf "%04.0f" $line[1]`
+set mo1 = `printf "%02.0f" $line[2]`
+set dy1 = `printf "%02.0f" $line[3]`
+set hr1 = `printf "%02.0f" $line[4]`
+set mn1 = `printf "%02.0f" $line[5]`
+set sc1 = `printf "%02.0f" $line[6]`
 
-set length = `echo "$last-$first+1" | bc`
+set line = `head -$nrh $infile | awk '/TIME OF LAST OBS/'`
 
-printf "Length of $infile = %.0f seconds\n" $length
+set yr2 = `printf "%04.0f" $line[1]`
+set mo2 = `printf "%02.0f" $line[2]`
+set dy2 = `printf "%02.0f" $line[3]`
+set hr2 = `printf "%02.0f" $line[4]`
+set mn2 = `printf "%02.0f" $line[5]`
+set sc2 = `printf "%02.0f" $line[6]`
+
+set first = `date2sec $yr1-$mo1-$dy1 ${hr1}:${mn1}:${sc1}`
+set last = `date2sec $yr2-$mo2-$dy2 ${hr2}:${mn2}:${sc2}`
+
+echo "$last-$first+1" | bc
