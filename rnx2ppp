@@ -18,7 +18,7 @@
 # A full installation of GipsyX, in particular, GD2E 
 #
 # Originally written by tschuh-at-princeton.edu, 07/07/2021
-# Last modified by tschuh-at-princeton.edu, 07/08/2021
+# Last modified by tschuh-at-princeton.edu, 07/09/2021
 
 # currently doesnt tell the difference between
 # prepos and postpos (done in post-script in MATLAB)
@@ -46,9 +46,9 @@ foreach file ($files[*])
 	    rnx2rnx $file $offset $durations[$counter]
  	    gd2e.py -rnxFile $file:r.rnx
             set prepos = `rnx2pos $file:r.rnx`
-            # maybe also compute record length with rnx2epc
+            set epc = `rnx2epc $file:r.rnx`
  	    set postpos = `awk '/'"$mark"'/ {print $2,$3,$4}' Summary`
-            echo $prepos "  " $postpos $offset $durations[$counter] >>! ../data.ppp
+            echo $prepos $epc $postpos $offset $durations[$counter] >>! ../data.ppp
 	    rm -rf *
          end 
     cd ..
