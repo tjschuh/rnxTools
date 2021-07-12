@@ -1,0 +1,38 @@
+#!/bin/tcsh
+#
+# convert a RINEX file from
+# static mode to kinematic mode
+# sister function to KIN2STA
+#
+# INPUT:
+#
+# $1        static RINEX file
+#
+# OUTPUT:
+#
+# file      kinematic RINEX file
+#
+# Originally written by tschuh-at-princeton.edu, 07/12/2021
+
+set file = $1
+
+# find end of header line number
+set nrh = `rnx2hdr $file`
+
+# new line to be created is one below end of header
+set new = `echo "$nrh+1" | bc`
+
+# copy the first 6 columns of start
+# time line bc we need the date
+set line = `head -$nrh $file | awk '/TIME OF FIRST OBS/'`
+
+# format the date elements correctly
+set fyr = `echo "$line[1]-2000" | bc`
+set fmo = `printf "%2.2i" $line[2]`
+set fdy = `printf "%2.2i" $line[3]`
+set fhr = `printf "%2.2i" $line[4]`
+set fmn = `printf "%2.2i" $line[5]`
+set fsc = `printf "%010.7f" $line[6]`
+
+# copy date and kinematic identifier (2) to new line
+sed -i ''"$new"' i \\ '"$fyr"' '"$fmo"' '"$fdy"' '"$fhr"' '"$fmn"' '"$fsc"'  2' $file
