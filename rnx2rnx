@@ -14,7 +14,8 @@
 #
 # *.rnx   RINEX file with new start and end times, newly named *.rnx
 #
-# Last modified by tschuh-at-princeton.edu on 06/11/2021
+# Originally written by tschuh-at-princeton.edu, 06/11/2021 
+# Last modified by tschuh-at-princeton.edu, 07/15/2021
 
 set warnin = 0
 if($#argv < 3)then
@@ -37,8 +38,8 @@ set duration = $3
 # Now the code starts
 
 # New extension
-set outfile = `echo $infile:r.rnx`
-#set outfile = `echo {$infile:r}_$offset_$duration.rnx`
+#set outfile = `echo $infile:r.rnx`
+set outfile = `echo $infile:r_{$offset}_{$duration}.rnx`
 
 # Warn if the output file already exist
 #test -f $outfile && echo Overwriting $outfile
