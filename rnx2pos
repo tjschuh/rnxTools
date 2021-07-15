@@ -1,8 +1,9 @@
 #!/bin/tcsh -f
 #
 # takes an unaltered RINEX file and
-# outputs the approx position along
-# with the start and end times
+# outputs the approx position in XYZ 
+# and Lat Lon Ht, and the RINEX file
+# start and end times
 #
 # INPUT:
 #
@@ -13,7 +14,7 @@
 # output to screen
 #
 # Originally written by tschuh-at-princeton.edu, 06/25/2021
-# Last modified by tschuh-at-princeton.edu, 07/08/2021
+# Last modified by tschuh-at-princeton.edu, 07/15/2021
 
 # need to comment!
 
@@ -40,6 +41,10 @@ set lhr = `printf "%2.2i" $line[4]`
 set lmn = `printf "%2.2i" $line[5]`
 set lsc = `printf "%9.7f" $line[6]`
 
-set pos = `head -$nrh $file | awk '/APPROX POSITION/ {print $1,$2,$3}'`
+set x = `head -$nrh $file | awk '/APPROX POSITION/ {print $1}'`
+set y = `head -$nrh $file | awk '/APPROX POSITION/ {print $2}'`
+set z = `head -$nrh $file | awk '/APPROX POSITION/ {print $3}'`
 
-echo $pos "  " $fyr $fmo $fdy $fhr $fmn $fsc "  " $lyr $lmo $ldy $lhr $lmn $lsc
+set llh = `xyz2llh.py -xyz $x $y $z`
+
+echo $x $y $z "  " $llh "  " $fyr $fmo $fdy $fhr $fmn $fsc "  " $lyr $lmo $ldy $lhr $lmn $lsc
