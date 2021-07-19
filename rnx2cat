@@ -1,0 +1,68 @@
+#!/bin/tcsh -f
+#
+# Takes 2 RINEX files and merges them into
+# 1 new concatenated RINEX file
+#
+# INPUT:
+#
+# $1       first RINEX file
+# $2       second RINEX file
+#
+# OUTPUT:
+#
+# *.rnx    new concatenated RINEX file
+#
+# Originially written by tschuh-at-princeton.edu, 07/19/2021
+
+set warnin = 0
+if($#argv < 2)then
+  echo ' '
+  echo 'RNX2CAT: At least two input arguments expected.'
+  echo ' '
+  echo '---------> RNX2CAT file1 file2'
+  echo '---------> where file1 and file2 are consecutive RINEX files'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+# Input parsing
+set infile1 = $1
+set infile2 = $2
+
+#####################################################################
+# now the code starts
+
+set outfile = `echo cat.rnx`
+
+# copy all the contents of $infile1 to
+# $outfile
+cp $infile1 $outfile
+
+# find the end time from the 2nd file
+set nrh = `rnx2hdr $infile2`
+
+set line = `head -$nrh $infile2 | awk '/TIME OF LAST OBS/'`
+
+set yr = `printf "%4.4i" $line[1]`
+set mo = `printf "%2.2i" $line[2]`
+set dy = `printf "%2.2i" $line[3]`
+set hr = `printf "%2.2i" $line[4]`
+set mn = `printf "%2.2i" $line[5]`
+set sc = `printf "%9.7f" $line[6]`
+
+set stln = `echo "$nrh+1" | bc`
+
+sed -n ''"$stln"',endp' $infile2 >> $outfile
+
+
+
+#####################################################################
+label999;
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNX2CAT stopped, $warnin warning message generated"
+else
+    echo "Script RNX2CAT finished, $warnin warning messages generated"
+endif
+echo ' ' 
