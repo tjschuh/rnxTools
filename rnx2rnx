@@ -20,7 +20,7 @@
 set warnin = 0
 if($#argv < 3)then
   echo ' '
-  echo 'RNX2RNX: At least three input arguments expected:'
+  echo 'RNX2RNX: At least three input arguments expected.'
   echo ' '
   echo '----------> RNX2RNX file offset duration'
   echo '----------> where offset and duration in s'
@@ -45,7 +45,7 @@ set outfile = `echo $infile:r_{$offset}_{$duration}.rnx`
 #test -f $outfile && echo Overwriting $outfile
 
 # compute the number of header lines
-set hlength = `awk '/END OF HEADER/ {print NR}' $infile`
+set hlength = `awk '/END OF HEADER/ {print NR; exit}' $infile`
 
 # copy header from $1 to new file 
 # which we will use to run gd2e.py on
