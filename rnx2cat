@@ -1,6 +1,6 @@
 #!/bin/tcsh -f
 #
-# Takes 2 RINEX files and merges them into
+# Take 2 RINEX files and merge them into
 # 1 new concatenated RINEX file
 #
 # INPUT:
@@ -10,9 +10,10 @@
 #
 # OUTPUT:
 #
-# *.rnx    new concatenated RINEX file
+# cat.rnx    new concatenated RINEX file
 #
-# Originially written by tschuh-at-princeton.edu, 07/19/2021
+# Originally written by tschuh-at-princeton.edu, 07/19/2021
+# Last modified by tschuh-at-princeton.edu, 07/20/2021
 
 set warnin = 0
 if($#argv < 2)then
@@ -35,30 +36,42 @@ set infile2 = $2
 
 set outfile = `echo cat.rnx`
 
-# copy all the contents of $infile1 to
-# $outfile
-cp $infile1 $outfile
+# copy all the contents of $infile1 to $outfile
+
+set fstln = 1
+set fedln = `awk 'END {print NR}' $infile1`
+sed -n ''"$fstln"','"$fedln"'p' $infile1 >> $outfile
 
 # find the end time from the 2nd file
 set nrh = `rnx2hdr $infile2`
 
 set line = `head -$nrh $infile2 | awk '/TIME OF LAST OBS/'`
 
-set yr = `printf "%4.4i" $line[1]`
-set mo = `printf "%2.2i" $line[2]`
-set dy = `printf "%2.2i" $line[3]`
-set hr = `printf "%2.2i" $line[4]`
-set mn = `printf "%2.2i" $line[5]`
-set sc = `printf "%9.7f" $line[6]`
+set lyr = `printf "%4.4i" $line[1]`
+set lmo = `printf "%2.2i" $line[2]`
+set ldy = `printf "%2.2i" $line[3]`
+set lhr = `printf "%2.2i" $line[4]`
+set lmn = `printf "%2.2i" $line[5]`
+set lsc = `printf "%010.7f" $line[6]`
 
-set stln = `echo "$nrh+1" | bc`
+# find the start line and end line of the data
+# to be copied from $infile2 to $outfile
+set lstln = `echo "$nrh+1" | bc`
+set ledln = `awk 'END {print NR}' $infile2`
 
-sed -n ''"$stln"',endp' $infile2 >> $outfile
+# copy everything between those lines to $outfile
+sed -n ''"$lstln"','"$ledln"'p' $infile2 >> $outfile
 
+# find the line number of the end time in the $outfile
+set tml = `awk '/TIME OF LAST OBS/ {print NR; exit}' $outfile`
+# delete that entire line
+sed -i ''"$tml"'d' $outfile
 
+# replace that deleted line with the correct end time from $infile2
+sed -i ''"$tml"' i \ \ '"$lyr"'    '"$lmo"'    '"$ldy"'    '"$lhr"'    '"$lmn"'   '"$lsc"'     GPS         TIME OF LAST OBS' $outfile
 
 #####################################################################
-label999;
+label999:
 echo ' '
 if ($warnin == 1) then
     echo "Script RNX2CAT stopped, $warnin warning message generated"
