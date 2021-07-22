@@ -15,7 +15,7 @@
 # A full installation of GipsyX, in particular, DATE2SEC
 #
 # Originally written by tschuh-at-princeton.edu, 06/17/2021
-# Last modified by tschuh-at-princeton.edu, 07/09/2021
+# Last modified by tschuh-at-princeton.edu, 07/22/2021
 
 set infile = $1
 
@@ -42,4 +42,5 @@ set sc2 = `printf "%02.0f" $line[6]`
 set first = `date2sec $yr1-$mo1-$dy1 ${hr1}:${mn1}:${sc1}`
 set last = `date2sec $yr2-$mo2-$dy2 ${hr2}:${mn2}:${sc2}`
 
-echo "$last-$first+1" | bc
+set epc = `echo "$last-$first+1" | bc`
+printf "%02.0f\n" $epc
