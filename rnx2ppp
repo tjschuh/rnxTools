@@ -18,7 +18,7 @@
 # A full installation of GipsyX, in particular, GD2E 
 #
 # Originally written by tschuh-at-princeton.edu, 07/07/2021
-# Last modified by tschuh-at-princeton.edu, 07/09/2021
+# Last modified by tschuh-at-princeton.edu, 07/22/2021
 
 # currently doesnt tell the difference between
 # prepos and postpos (done in post-script in MATLAB)
@@ -33,25 +33,37 @@ foreach file ($files[*])
 	set nrh = `rnx2hdr $file`
         set mark = `head -$nrh $file | awk '/MARKER NAME/ {print $1}'`
 
-        cd temp
-	 
-	# subdivide
-        set offsets   = (    0  1800 )
-        set durations = ( 1800  1800 )
+	# we want offsets of 0,1,2,...,n
+        # where n is the file length-duration
+        set epc = `rnx2epc $file`
+        set duration = 1201
+        set lim = `echo "$epc-$duration" | bc`
+        set offsets  = `seq 0 $lim`
 
-	set counter = 0
+        cd temp
+
+        # copy $file into temp
+        # do this outside loop to save time
+        /usr/bin/cp ../$file .
+
 	foreach offset ($offsets[*])
-	    @ counter++
-            /usr/bin/cp ../$file .
-	    rnx2rnx $file $offset $durations[$counter]
- 	    gd2e.py -rnxFile $file:r.rnx
-            set prepos = `rnx2pos $file:r.rnx`
-            set epc = `rnx2epc $file:r.rnx`
- 	    set postpos = `awk '/'"$mark"'/ {print $2,$3,$4}' Summary`
-            echo $prepos $epc $postpos $offset $durations[$counter] >>! ../data.ppp
-	    rm -rf *
-         end 
+            # run rnx2rnx to get desired segment of $file
+	    rnx2rnx $file $offset $duration
+            # run GipsyX on newly created .rnx file
+ 	    gd2e.py -rnxFile $file:r_{$offset}_{$duration}.rnx -treeSequenceDir ~/Trees/
+            # run rnx2pos to get preprocessed position
+            set prepos = `rnx2pos $file:r_{$offset}_{$duration}.rnx`
+            # save the XYZ and LLH solutions of the GipsyX run
+ 	    set x = `awk '/'"$mark"'/ {print $2}' Summary`
+ 	    set y = `awk '/'"$mark"'/ {print $3}' Summary`
+ 	    set z = `awk '/'"$mark"'/ {print $4}' Summary`
+            set llh = `xyz2llh.py -xyz $x $y $z`
+            # save everything to data.ppp
+            echo $prepos $x $y $z $llh $offset $duration >>! ../data.ppp
+	    # remove everything in temp, except $file
+            rm -rf ^*.obs
+        end 
     cd ..
 end
 
-rmdir temp
+rm -rf temp
