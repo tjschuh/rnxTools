@@ -1,0 +1,39 @@
+#!/bin/tcsh
+#
+# takes in a RINEX file, a year, month, day,
+# hour, minute, and second, and converts
+# the RINEX file end time to the given time
+#
+# INPUT:
+#
+# $1        RINEX file you want to modify
+# $2        4 digit year
+# $3        month [1-12]
+# $4        day [1-31]
+# $5        hour [0-23]
+# $6        minute [0-59]
+# $7        second [0-59]
+#
+# OUTPUT:
+#
+# modified RINEX file
+#
+# Originally written by tschuh-at-princeton.edu, 07/22/2021
+
+set infile = $1
+
+set yr = `printf "%4.4i" $2`
+set mo = `printf "%2.2i" $3`
+set dy = `printf "%2.2i" $4`
+set hr = `printf "%2.2i" $5`
+set mn = `printf "%2.2i" $6`
+set sc = `printf "%010.7f" $7`
+
+# find the line number of the end time in the $infile
+set tml = `awk '/TIME OF LAST OBS/ {print NR; exit}' $infile`
+
+# delete that entire line
+sed -i ''"$tml"'d' $infile
+
+# replace that deleted line with the user-defined time
+sed -i ''"$tml"' i \ \ '"$yr"'    '"$mo"'    '"$dy"'    '"$hr"'    '"$mn"'   '"$sc"'     GPS         TIME OF LAST OBS' $infile
