@@ -34,6 +34,19 @@ set infile = $1
 set offset = $2
 set duration = $3
 
+# fail-safe
+# if $offset +$duration > length of RINEX file (rnx2epc)
+# rnx2rnx won't work, it will request data beyond file's limits
+set epc = `rnx2epc $1`
+set offdur = `echo "$offset+$duration" | bc`
+if ($offdur > $epc) then
+    echo ' '
+    echo 'RNX2RNX: choose a smaller offset and/or duration'
+    @ warnin +=1
+    goto label999
+endif
+
+
 ################################################################################
 # Now the code starts
 
