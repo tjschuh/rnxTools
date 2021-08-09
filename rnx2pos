@@ -14,7 +14,7 @@
 # output to screen
 #
 # Originally written by tschuh-at-princeton.edu, 06/25/2021
-# Last modified by tschuh-at-princeton.edu, 07/15/2021
+# Last modified by tschuh-at-princeton.edu, 08/09/2021
 
 # need to comment!
 
@@ -30,7 +30,7 @@ set fmo = `printf "%2.2i" $line[2]`
 set fdy = `printf "%2.2i" $line[3]`
 set fhr = `printf "%2.2i" $line[4]`
 set fmn = `printf "%2.2i" $line[5]`
-set fsc = `printf "%9.7f" $line[6]`
+set fsc = `printf "%010.7f" $line[6]`
 
 set line = `head -$nrh $file | awk '/TIME OF LAST OBS/'`
 
@@ -39,7 +39,7 @@ set lmo = `printf "%2.2i" $line[2]`
 set ldy = `printf "%2.2i" $line[3]`
 set lhr = `printf "%2.2i" $line[4]`
 set lmn = `printf "%2.2i" $line[5]`
-set lsc = `printf "%9.7f" $line[6]`
+set lsc = `printf "%010.7f" $line[6]`
 
 set x = `head -$nrh $file | awk '/APPROX POSITION/ {print $1}'`
 set y = `head -$nrh $file | awk '/APPROX POSITION/ {print $2}'`
