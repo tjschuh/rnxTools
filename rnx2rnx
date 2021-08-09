@@ -15,7 +15,7 @@
 # *.rnx   RINEX file with new start and end times, newly named *.rnx
 #
 # Originally written by tschuh-at-princeton.edu, 06/11/2021 
-# Last modified by tschuh-at-princeton.edu, 07/15/2021
+# Last modified by tschuh-at-princeton.edu, 08/09/2021
 
 set warnin = 0
 if($#argv < 3)then
@@ -45,7 +45,6 @@ if ($offdur > $epc) then
     @ warnin +=1
     goto label999
 endif
-
 
 ################################################################################
 # Now the code starts
@@ -124,12 +123,12 @@ set mon1p = `printf "%1.0f" $mon1p`
 set day1p = `printf "%1.0f" $day1p`
 set hr1p = `printf "%1.0f" $hr1p`
 set min1p = `printf "%1.0f" $min1p`
-set sec1p = `printf "%1.0f" $sec1p`
+set sec1p = `printf "%1.7f" $sec1p`
 set mon2p = `printf "%1.0f" $mon2p`
 set day2p = `printf "%1.0f" $day2p`
 set hr2p = `printf "%1.0f" $hr2p`
 set min2p = `printf "%1.0f" $min2p`
-set sec2p = `printf "%1.0f" $sec2p`
+set sec2p = `printf "%1.7f" $sec2p`
 
 # text match the appropriate start time to 
 # obtain the line number so we know where
