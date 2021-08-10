@@ -59,7 +59,9 @@ foreach file ($files[*])
  	    set x = `awk '/'"$mark"'/ {print $2}' Summary`
  	    set y = `awk '/'"$mark"'/ {print $3}' Summary`
  	    set z = `awk '/'"$mark"'/ {print $4}' Summary`
-            set llh = `xyz2llh.py -xyz $x $y $z`
+            set llh = `xyz2llh.py -xyz $x $y $z -standard WGS84`
+            # add leading zeros to $offset
+            set offset = `printf "%4.4i" $offset`
             # save everything to data.ppp
             echo $prepos $x $y $z $llh $offset $duration >>! ../data.ppp
 	    # remove everything in temp, except $file
