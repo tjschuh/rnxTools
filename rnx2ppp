@@ -60,18 +60,17 @@ foreach file ($files[*])
  	    set x = `awk '/'"$mark"'/ {print $2}' Summary`
  	    set y = `awk '/'"$mark"'/ {print $3}' Summary`
  	    set z = `awk '/'"$mark"'/ {print $4}' Summary`
-            set llh = `xyz2llh.py -xyz $x $y $z -standard WGS84`
-            # if x = empty, then set x,y,z,llh to NaN b/c something went wrong 
-	    if ($x == ) then
-               set x = NaN
-               set y = NaN
-               set z = NaN
-               set llh = NaN NaN NaN
-            endif
+            set llh = `xyz2llh.py -xyz $x $y $z -standard WGS84`           
             # add leading zeros to $offset
             set offset = `printf "%5.5i" $offset`
             # save everything to data.ppp
-            echo $prepos $x $y $z $llh $offset $duration >>! ../data.ppp
+	    # if x is empty, then something went wrong so make x,y,z,llh NaNs
+	    # otherwise print everything as is
+	    if ($x == ) then
+	       echo $prepos NaN NaN NaN NaN NaN NaN $offset $duration >>! ../data.ppp
+            else
+	       echo $prepos $x $y $z $llh $offset $duration >>! ../data.ppp
+	    endif            
 	    # remove everything in temp, except $file
             rm -rf ^*.obs
         end 
