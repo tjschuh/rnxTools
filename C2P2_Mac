@@ -1,0 +1,20 @@
+#!/bin/tcsh
+#
+# Replace observation type C2 with P2
+# most post-processing software is not capable
+# of reading C2 despite it being equivalent to P2
+#
+# INPUT:
+#
+# $1     RINEX file
+#
+# OUTPUT:
+#
+# Modified RINEX file
+#
+# Originally written by tschuh-at-princeton.edu, 09/14/2021
+
+set l2c = `awk '/TYPES OF OBSERV/ && /C2/ {print NR}' $1`
+
+# on MacOS need to add '' in beginning for creation of output file
+sed -i '' ''"$l2c"' s/C2/P2/' $1
