@@ -1,0 +1,25 @@
+#!/bin/tcsh
+#
+# Count number of hour-long *.obs files in working directory,
+# create equal number of directories called hour001, hour002, ...
+# and move *.obs files into respective directories
+#
+# Originally written by tschuh-at-princeton.edu, 09/29/2021
+
+set numfiles = `/bin/ls *.obs | wc -l`
+
+set num = `seq 1 $numfiles`
+
+foreach time ($num[*])
+    set name = `printf "hour%3.3i" $time`
+    mkdir $name
+end
+
+set files = `/bin/ls *.obs`
+
+set index = 0
+foreach file ($files[*])
+    @ index +=1
+    set name = `printf "hour%3.3i" $index`
+    mv $file $name
+end
