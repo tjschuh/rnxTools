@@ -1,0 +1,46 @@
+#!/bin/tcsh
+#
+# automatically process rinex files with PRIDE-PPPAR
+#
+# INPUT:
+#
+#
+#
+# OUTPUT:
+#
+#
+#
+# Originally written by tschuh-at-princeton.edu, 10/12/2021
+
+# put all obs files into appropriate directories
+#change rnx2dir to make it files not hours
+rnx2dir
+
+# count number of directories named hour*
+set max = `find hour* -maxdepth 0 -type d -print | wc -l`
+set range = `seq 1 $max`
+
+foreach num ($range[*])
+set name = `printf "hour%3.3i" $num`
+cd $name
+
+# compute the day number of the current year
+# and the corresponding date string from obs file
+set fYYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.obs`
+set fYYYY = `printf "4.4i" $fYYYY`
+set fMM = `awk '/TIME OF FIRST OBS/ {print $2}' *.obs`
+set fMM = `printf "2.2i" $fMM`
+set fDD = `awk '/TIME OF FIRST OBS/ {print $3}' *.obs`
+set fDD = `printf "2.2i" $fDD`
+set fdate = `printf $fYYYY$fMM$fDD`
+set fjd = `date +%j --date=$fdate`
+
+#do the same thing for last time
+#compare fjd and ljd
+#if equal then we need 1 file
+#if not equal we need 2 files
+#change name of rnx file to correct name
+#copy and edit config for right rinex path
+#run pdp3
+cd ..
+end
