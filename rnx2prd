@@ -27,20 +27,38 @@ cd $name
 # compute the day number of the current year
 # and the corresponding date string from obs file
 set fYYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.obs`
-set fYYYY = `printf "4.4i" $fYYYY`
+set fYYYY = `printf "%4.4i" $fYYYY`
 set fMM = `awk '/TIME OF FIRST OBS/ {print $2}' *.obs`
-set fMM = `printf "2.2i" $fMM`
+set fMM = `printf "%2.2i" $fMM`
 set fDD = `awk '/TIME OF FIRST OBS/ {print $3}' *.obs`
-set fDD = `printf "2.2i" $fDD`
+set fDD = `printf "%2.2i" $fDD`
 set fdate = `printf $fYYYY$fMM$fDD`
-set fjd = `date +%j --date=$fdate`
+set fdoy = `date +%j --date=$fdate`
 
-#do the same thing for last time
-#compare fjd and ljd
+set lYYYY = `awk '/TIME OF LAST OBS/ {print $1}' *.obs`
+set lYYYY = `printf "%4.4i" $lYYYY`
+set lMM = `awk '/TIME OF LAST OBS/ {print $2}' *.obs`
+set lMM = `printf "%2.2i" $lMM`
+set lDD = `awk '/TIME OF LAST OBS/ {print $3}' *.obs`
+set lDD = `printf "%2.2i" $lDD`
+set ldate = `printf $lYYYY$lMM$lDD`
+set ldoy = `date +%j --date=$ldate`
+
+#compare fdoy and ldoy
 #if equal then we need 1 file
 #if not equal we need 2 files
+
 #change name of rnx file to correct name
-#copy and edit config for right rinex path
+mv *.obs bios{$fdoy}0.20o
+
+#copy and edit config file for right rinex path
+cp ~/Configs/config_template_mobile .
+set oldpath = `awk '/Rinex directory/ {print $4}' config_template_mobile`
+set newpath = `pwd`
+sed -i 's@'"$oldpath"'@'"$newpath"'@' config_template_mobile
+
 #run pdp3
+pdp3 config_template_mobile $fdate $ldate bios k 1 y
+
 cd ..
 end
