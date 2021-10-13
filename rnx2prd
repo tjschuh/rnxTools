@@ -21,44 +21,95 @@ set max = `find hour* -maxdepth 0 -type d -print | wc -l`
 set range = `seq 1 $max`
 
 foreach num ($range[*])
-set name = `printf "hour%3.3i" $num`
-cd $name
+    set name = `printf "hour%3.3i" $num`
+    cd $name
 
-# compute the day number of the current year
-# and the corresponding date string from obs file
-set fYYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.obs`
-set fYYYY = `printf "%4.4i" $fYYYY`
-set fMM = `awk '/TIME OF FIRST OBS/ {print $2}' *.obs`
-set fMM = `printf "%2.2i" $fMM`
-set fDD = `awk '/TIME OF FIRST OBS/ {print $3}' *.obs`
-set fDD = `printf "%2.2i" $fDD`
-set fdate = `printf $fYYYY$fMM$fDD`
-set fdoy = `date +%j --date=$fdate`
+    #copy and edit config file for right rinex path
+    cp ~/Configs/config_template_mobile .
+    set oldpath = `awk '/Rinex directory/ {print $4}' config_template_mobile`
+    set newpath = `pwd`
+    sed -i 's@'"$oldpath"'@'"$newpath"'@' config_template_mobile
 
-set lYYYY = `awk '/TIME OF LAST OBS/ {print $1}' *.obs`
-set lYYYY = `printf "%4.4i" $lYYYY`
-set lMM = `awk '/TIME OF LAST OBS/ {print $2}' *.obs`
-set lMM = `printf "%2.2i" $lMM`
-set lDD = `awk '/TIME OF LAST OBS/ {print $3}' *.obs`
-set lDD = `printf "%2.2i" $lDD`
-set ldate = `printf $lYYYY$lMM$lDD`
-set ldoy = `date +%j --date=$ldate`
+    # compute the day number of the current year
+    # and the corresponding date string from obs file
+    set fYYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.obs`
+    set fYYYY = `printf "%4.4i" $fYYYY`
+    set fMM = `awk '/TIME OF FIRST OBS/ {print $2}' *.obs`
+    set fMM = `printf "%2.2i" $fMM`
+    set fDD = `awk '/TIME OF FIRST OBS/ {print $3}' *.obs`
+    set fDD = `printf "%2.2i" $fDD`
+    set fdate = `printf $fYYYY$fMM$fDD`
+    set fdoy = `date +%j --date=$fdate`
 
-#compare fdoy and ldoy
-#if equal then we need 1 file
-#if not equal we need 2 files
+    set lYYYY = `awk '/TIME OF LAST OBS/ {print $1}' *.obs`
+    set lYYYY = `printf "%4.4i" $lYYYY`
+    set lMM = `awk '/TIME OF LAST OBS/ {print $2}' *.obs`
+    set lMM = `printf "%2.2i" $lMM`
+    set lDD = `awk '/TIME OF LAST OBS/ {print $3}' *.obs`
+    set lDD = `printf "%2.2i" $lDD`
+    set ldate = `printf $lYYYY$lMM$lDD`
+    set ldoy = `date +%j --date=$ldate`
 
-#change name of rnx file to correct name
-mv *.obs bios{$fdoy}0.20o
+    #compare fdoy and ldoy
+    #if equal then we need 1 file
+    if ($fdate == $ldate) then
+	#change name of rnx file to correct name
+	mv *.obs bios{$fdoy}0.20o
+    #if not equal we need 2 files
+    else
+	cp *.obs bios{$fdoy}0.20o
+	mv *.obs bios{$ldoy}0.20o
 
-#copy and edit config file for right rinex path
-cp ~/Configs/config_template_mobile .
-set oldpath = `awk '/Rinex directory/ {print $4}' config_template_mobile`
-set newpath = `pwd`
-sed -i 's@'"$oldpath"'@'"$newpath"'@' config_template_mobile
+	#need to edit both files
+	#this should become its own function
+	#modify the headers so both files have correct epoch info
+	#first file
+	set endyrp = `awk '/TIME OF FIRST OBS/ {print $1}' bios{$fdoy}0.20o`
+	set endyr = `printf "%4.4i" $endyrp`
+	set endmnp = `awk '/TIME OF FIRST OBS/ {print $2}' bios{$fdoy}0.20o`
+	set endmn = `printf "%2.2i" $endmnp`
+	set enddyp = `awk '/TIME OF FIRST OBS/ {print $3}' bios{$fdoy}0.20o`
+	set enddy = `printf "%2.2i" $enddyp`
+	set endhrp = `awk '/TIME OF FIRST OBS/ {print $4}' bios{$fdoy}0.20o`
+	set endhr = `printf "%2.2i" $endhrp`
 
-#run pdp3
-pdp3 config_template_mobile $fdate $ldate bios k 1 y
+	set etline = `awk '/TIME OF LAST OBS/ {print NR}' bios{$fdoy}0.20o`
+	sed -i ''"$etline"'d' bios{$fdoy}0.20o
+	sed -i ''"$etline"' i \ \ '"$endyr"'    '"$endmn"'    '"$enddy"'    '"$endhr"'    59   59.0000000     GPS         TIME OF LAST OBS' bios{$fdoy}0.20o
 
-cd ..
+	#last files
+	set styrp = `awk '/TIME OF LAST OBS/ {print $1}' bios{$ldoy}0.20o`
+	set styr = `printf "%4.4i" $styrp`
+	set stmnp = `awk '/TIME OF LAST OBS/ {print $2}' bios{$ldoy}0.20o`
+	set stmn = `printf "%2.2i" $stmnp`
+	set stdyp = `awk '/TIME OF LAST OBS/ {print $3}' bios{$ldoy}0.20o`
+	set stdy = `printf "%2.2i" $stdyp`
+	set sthrp = `awk '/TIME OF LAST OBS/ {print $4}' bios{$ldoy}0.20o`
+	set sthr = `printf "%2.2i" $sthrp`
+
+	set stline = `awk '/TIME OF FIRST OBS/ {print NR}' bios{$ldoy}0.20o`
+	sed -i ''"$stline"'d' bios{$ldoy}0.20o
+	sed -i ''"$stline"' i \ \ '"$styr"'    '"$stmn"'    '"$stdy"'    '"$sthr"'    00   00.0000000     GPS         TIME OF FIRST OBS' bios{$ldoy}0.20o
+
+	#need to cut out blocks of each file so each file only has data from specific days
+	#use the line ending in 0 0 as the threshold line
+	#for the last file, delete all lines from header down until threshold
+	set shortstyr = `echo $styr-2000 | bc`
+	set endline = `awk '/'"$shortstyr"'\s+'"$stmnp"'\s+'"$stdyp"'\s+'"$sthrp"'\s+0\s+0/ {print NR}' bios{$ldoy}0.20o`
+	set hline = `rnx2hdr bios{$ldoy}0.20o`
+	set hline = `echo $hline+1 | bc`
+	set endline = `echo $endline-1 | bc`
+	sed -i ''"$hline"','"$endline"'d' bios{$ldoy}0.20o
+
+	#for first file, delete all lines from threshold until end
+	set shortendyr = `echo $endyr-2000 | bc`
+	set startline = `awk '/'"$shortendyr"'\s+'"$stmnp"'\s+'"$stdyp"'\s+'"$sthrp"'\s+0\s+0/ {print NR}' bios{$fdoy}0.20o`
+	sed -i ''"$startline"',$d' bios{$fdoy}0.20o
+
+    endif
+
+    #run pdp3
+    pdp3 config_template_mobile $fdate $ldate bios k 1 y
+
+    cd ..
 end
