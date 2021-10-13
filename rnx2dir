@@ -11,7 +11,7 @@ set numfiles = `/bin/ls *.obs | wc -l`
 set num = `seq 1 $numfiles`
 
 foreach time ($num[*])
-    set name = `printf "hour%3.3i" $time`
+    set name = `printf "file%3.3i" $time`
     mkdir $name
 end
 
@@ -20,6 +20,6 @@ set files = `/bin/ls *.obs`
 set index = 0
 foreach file ($files[*])
     @ index +=1
-    set name = `printf "hour%3.3i" $index`
+    set name = `printf "file%3.3i" $index`
     mv $file $name
 end
