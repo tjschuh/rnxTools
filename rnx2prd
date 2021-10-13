@@ -11,17 +11,18 @@
 #
 #
 # Originally written by tschuh-at-princeton.edu, 10/12/2021
+# Last modified by tschuh-at-princeton.edu, 10/13/2021
 
 # put all obs files into appropriate directories
 #change rnx2dir to make it files not hours
 rnx2dir
 
 # count number of directories named hour*
-set max = `find hour* -maxdepth 0 -type d -print | wc -l`
+set max = `find file* -maxdepth 0 -type d -print | wc -l`
 set range = `seq 1 $max`
 
 foreach num ($range[*])
-    set name = `printf "hour%3.3i" $num`
+    set name = `printf "file%3.3i" $num`
     cd $name
 
     #copy and edit config file for right rinex path
