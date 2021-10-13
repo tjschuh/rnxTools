@@ -14,13 +14,14 @@
 # solutions.prd        file only containing solution information from input kin file
 #
 # Originally written by tschuh-at-princeton.edu, 10/06/2021
+# Last modified by tschuh-at-princeton.edu, 10/13/2021
 
 set infile = $1
 
 set hdrend = `rnx2hdr $infile`
 set hdrend = `echo "$hdrend+1" | bc`
 
-awk 'NR<'"$hdrend"' {print}' $infile >! solutions.hdr
-awk 'NR>'"$hdrend"' {print}' $infile >! solutions.prd
+awk 'NR<='"$hdrend"' {print}' $infile >! $infile.hdr
+awk 'NR>'"$hdrend"' {print}' $infile >! $infile.prd
 
 
