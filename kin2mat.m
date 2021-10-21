@@ -24,31 +24,22 @@ function varargout=kin2mat(prdfile)%,prhfile)
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
 % Last modified by tschuh-at-princeton.edu, 10/20/2021
 
-%defval('prdfile','/i/iu/iu/u/*.prd')
+% prepare the outfile
+% extract just the filename from prdfile with no extension    
+[~,fname,~] = fileparts(prdfile);
+% build the *.mat outfile from fname
+outfile = sprintf('%s.mat',fname);
 
-%defval('prhfile','/hj.d.d/d.d./hdr')
-
-
-% Construct the outputfile
-% prdfile doesnt have any header
-%matfile=strip prdfile of its extension 
-
-% if *.mat doesnt exist, make it and save it
+% if outfile doesnt exist, make it and save it
 % otherwise load it
-%if exist(prdfile,'file') == 0
+if exist(outfile,'file') == 0
     
     % Load the data
     % file comes in: Mjd, SoD, X, Y, Z, Lat, Lon, Ht, Nsat, PDOP
     dm = load(prdfile);
-    [filepath,name,ext] = fileparts(prdfile);
     
     % Load the header
-    %try
-    %h= ;
-    %catch
-    % Be explicit - and be careful
     h = {'t','xyz','lat','lon','height','nsat','pdop'};
-    %end
     
     % Make the datetime array from the kinfile column data
     ymd = datestr(dm(:,1)+678942); % convert Mjd to ymd
@@ -72,17 +63,16 @@ function varargout=kin2mat(prdfile)%,prhfile)
         end
     end
     
-    %save(matfile,d,h,t)
     d.ellipsoid = 'WGS84';
     d.xyzunit = 'm';
     d.lonlatunit = 'deg';
     % check how mnay satellites of each type, if all zero after GLONASS then save sats
     d.sats = {'Total','GPS','GLONASS'};
-    save(name,'d')
 
-    %else
-    %load(prdfile)
-    %end
+    save(outfile,'d')
+else
+    load(outfile)
+end
 
     %do plotting in here as well
     %only make the plot if it doesnt exist
