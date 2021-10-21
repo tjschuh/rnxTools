@@ -10,18 +10,21 @@
 #
 # OUTPUT:
 #
-# solutions.hdr        file only containing header information from input kin file
-# solutions.prd        file only containing solution information from input kin file
+# kinfile.hdr          file only containing header information from input kin file
+# kinfile.prd          file only containing solution information from input kin file
 #
 # Originally written by tschuh-at-princeton.edu, 10/06/2021
-# Last modified by tschuh-at-princeton.edu, 10/13/2021
+# Last modified by tschuh-at-princeton.edu, 10/21/2021
 
 set infile = $1
 
 set hdrend = `rnx2hdr $infile`
 set hdrend = `echo "$hdrend+1" | bc`
 
+# create hdr and prd files from original file
 awk 'NR<='"$hdrend"' {print}' $infile >! $infile.hdr
 awk 'NR>'"$hdrend"' {print}' $infile >! $infile.prd
 
-
+# remove any stray asterisks (*) in the prd file
+# otherwise matlab wont be able to load data
+sed -i 's/\*/ /g' $infile.prd
