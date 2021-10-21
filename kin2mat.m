@@ -1,28 +1,26 @@
-function varargout=kin2mat(prdfile)%,prhfile)
-% [t,d,h]=KIN2MAT(prdfile,prhfile)
+function varargout=kin2mat(prdfile)
+% [t,d,h]=KIN2MAT(prdfile)
 %
 % take a PRIDE-PPPAR kin_* solution file
 % and create a structured MATLAB .mat file 
 %
 % INPUT:
 %
-% kinfile             output file created by PRIDE-PPPAR containing PPP solutions
+% kinfile      output file created by PRIDE-PPPAR containing PPP solutions
 %
 % OUTPUT:
 %
-% t
-% d
-% h  
-%
+% t            time variable
+% d            actual data struct
+% h            data header line(s)
+% .mat file    output file saved as mat file to working directory
 %
 % EXAMPLE
 %
-% [t,d]=kin2mat('kinfile'); plot(t,d.x,t.dy)
-% 
-% and a mat file is produced
+% [t,d]=kin2mat('kinfile'); plot(t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 10/20/2021
+% Last modified by tschuh-at-princeton.edu, 10/21/2021
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
@@ -34,45 +32,65 @@ outfile = sprintf('%s.mat',fname);
 % otherwise load it
 if exist(outfile,'file') == 0
     
-    % Load the data
+    % load data
     % file comes in: Mjd, SoD, X, Y, Z, Lat, Lon, Ht, Nsat, PDOP
     dm = load(prdfile);
+
+    % explicitly define header from kinfile
+    h = {'t','xyz','lat','lon','height','nsats','pdop'};
     
-    % Load the header
-    h = {'t','xyz','lat','lon','height','nsat','pdop'};
-    
-    % Make the datetime array from the kinfile column data
-    ymd = datestr(dm(:,1)+678942); % convert Mjd to ymd
-    hms = datestr(seconds(dm(:,2)),'HH:MM:SS'); % convert sod to hms
-    for i = 1:length(dm) % need to use for loop here bc dealing with char arrays
-        tstr(i,:) = append(ymd(i,:),' ',hms(i,:)); % combine ymd and hms into one str
+    % make datetime array from kinfile columns 1 and 2
+    % convert Mjd to ymd
+    ymd = datestr(dm(:,1)+678942);
+    % convert SoD to hms
+    hms = datestr(seconds(dm(:,2)),'HH:MM:SS');
+    % need to use for loop here bc dealing with char arrays
+    for i = 1:length(dm)
+        % combine ymd and hms into one str
+        tstr(i,:) = append(ymd(i,:),' ',hms(i,:));
     end
-    t = datetime(tstr,'InputFormat','dd-MMM-yyyy HH:mm:ss'); % convert tstr to datetime
-    
-    % Now you make the struct and save for the remainder of the columns
-    % maybe want to rethink how this is done i.e. not in a for loop
-    for index=1:length(h)
-        if index == 1
-            d.(h{index}) = t;
-        elseif index == 2
-            d.(h{index}) = dm(:,index+1:index+3);
-        elseif index == length(h)
-            d.(h{index}) = dm(:,end);
-        else
-            d.(h{index}) = dm(:,index+3);
+    % convert tstr to datetime
+    t = datetime(tstr,'InputFormat','dd-MMM-yyyy HH:mm:ss');
+
+    % get rid of sat cols that are all zeros
+    % all possible satellite types
+    sattypes = {'Total','GPS','GLONASS','Galileo','BDS-2','BDS-3','QZSS'};
+    % cols 9:15 are sat info
+    counter = 1;
+    for i = 9:15
+        % if any rows of col i are nonzero, we keep entire col
+        if sum(dm(:,i)) ~= 0
+            % copy entire col to sats
+            sats(:,counter) = dm(:,i);
+            % copy col's header info to hsat
+            hsat{counter} = sattypes{i-8};
+            counter = counter + 1;
         end
     end
     
-    d.ellipsoid = 'WGS84';
+    % make data struct explicitly
+    d.(h{1}) = t;
+    d.(h{2}) = dm(:,3:5);
     d.xyzunit = 'm';
+    d.(h{3}) = dm(:,6);
+    d.(h{4}) = dm(:,7);
     d.lonlatunit = 'deg';
-    % check how mnay satellites of each type, if all zero after GLONASS then save sats
-    d.sats = {'Total','GPS','GLONASS'};
-
+    d.(h{5}) = dm(:,8);
+    d.heightunit = 'm (rel to WGS84)';
+    d.satlabels = hsat;
+    d.(h{6}) = sats;
+    d.(h{7}) = dm(:,end);
+    
+    % include utm coodinates
+    
     save(outfile,'d')
 else
     load(outfile)
 end
 
-    %do plotting in here as well
-    %only make the plot if it doesnt exist
+    % do plotting in here as well
+    % only make the plot if it doesnt exist
+
+% optional output
+varns={t,d,h};
+varargout=varns(1:nargout);
