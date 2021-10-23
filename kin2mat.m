@@ -1,5 +1,5 @@
 function varargout=kin2mat(prdfile)
-% [t,d,h]=KIN2MAT(prdfile)
+% d=KIN2MAT(prdfile)
 %
 % take a PRIDE-PPPAR kin_* solution file
 % and create a structured MATLAB .mat file 
@@ -10,17 +10,15 @@ function varargout=kin2mat(prdfile)
 %
 % OUTPUT:
 %
-% t            time variable
 % d            actual data struct
-% h            data header line(s)
 % .mat file    output file saved as mat file to working directory
 %
 % EXAMPLE
 %
-% [t,d]=kin2mat('kinfile'); plot(t,d.height)
+% d=kin2mat('prdfile'); plot(d.t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 10/21/2021
+% Last modified by tschuh-at-princeton.edu, 10/23/2021
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
@@ -52,6 +50,17 @@ if exist(outfile,'file') == 0
     % convert tstr to datetime
     t = datetime(tstr,'InputFormat','dd-MMM-yyyy HH:mm:ss');
 
+    % convert lat,lon to utm easting,northing in meters
+    % create cell array with length(dm)
+    zones = cell(length(dm),1);
+    % lat lon cols are 6 and 7
+    for i = 1:length(dm)
+        % need to use rem to convert lon from (0,360) to (-180,180) to get utm zone correct
+        [x(i,1),y(i,1),zone] = deg2utm(dm(i,6),rem((dm(i,7)+180),360)-180);
+        % save utmzone to cell array
+        zones{i} = zone;
+    end
+    
     % get rid of sat cols that are all zeros
     % all possible satellite types
     sattypes = {'Total','GPS','GLONASS','Galileo','BDS-2','BDS-3','QZSS'};
@@ -75,22 +84,24 @@ if exist(outfile,'file') == 0
     d.(h{3}) = dm(:,6);
     d.(h{4}) = dm(:,7);
     d.lonlatunit = 'deg';
+    d.utmeasting = x;
+    d.utmnorthing = y;
+    d.utmunit = 'm';
+    d.utmzone = zones;
     d.(h{5}) = dm(:,8);
     d.heightunit = 'm (rel to WGS84)';
     d.satlabels = hsat;
     d.(h{6}) = sats;
     d.(h{7}) = dm(:,end);
     
-    % include utm coodinates
-    
     save(outfile,'d')
 else
-    load(outfile)
+    load(outfile);
 end
 
     % do plotting in here as well
     % only make the plot if it doesnt exist
 
 % optional output
-varns={t,d,h};
-varargout=varns(1:nargout);
+varns={d};
+varargout=varns(1:nargout);    
