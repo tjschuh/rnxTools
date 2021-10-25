@@ -99,9 +99,33 @@ else
     load(outfile);
 end
 
-    % do plotting in here as well
-    % only make the plot if it doesnt exist
+% do plotting in here as well
+% only make the plot if it doesnt exist
+
+% plot nsats and pdop on same plot
+yyaxis left
+plot(d.t,d.nsats(:,1),'b','LineWidth',1)
+yticks([min(d.nsats(:,1))-1:max(d.nsats(:,1))+1])
+ylim([min(d.nsats(:,1))-0.5 max(d.nsats(:,1))+0.5])
+ylabel('Total Number of Observed Satellites') 
+yyaxis right
+plot(d.t,d.pdop,'r','LineWidth',1)
+ylim([min(d.pdop)-0.25 max(d.pdop)+0.25])
+xlim([d.t(1) d.t(end)])
+ylabel('Position Dilution Of Precision (PDOP)')
+% can only turn grid on for left axis
+grid on
+longticks
+
+% plot heights relative to WGS84
+plot(d.t,d.height,'k')
+xlim([d.t(1) d.t(end)])
+% need to make 0.005 multiplier more general!
+ylim([min(d.height)-0.005*abs(min(d.height)) max(d.height)+0.005*abs(max(d.height))])
+grid on
+
+% plot utm coordinates
 
 % optional output
 varns={d};
-varargout=varns(1:nargout);    
+varargout=varns(1:nargout);
