@@ -55,6 +55,7 @@ if exist(outfile,'file') == 0
     % create cell array with length(dm)
     zones = cell(length(dm),1);
     % lat lon cols are 6 and 7
+    % To do: without a loop?
     for i = 1:length(dm)
         % need to use rem to convert lon from (0,360) to (-180,180) to get utm zone correct
         [x(i,1),y(i,1),zone] = deg2utm(dm(i,6),rem((dm(i,7)+180),360)-180);
@@ -67,17 +68,24 @@ if exist(outfile,'file') == 0
     sattypes = {'Total','GPS','GLONASS','Galileo','BDS-2','BDS-3','QZSS'};
     % cols 9:15 are sat info
     counter = 1;
-    for i = 9:15
-        % if any rows of col i are nonzero, we keep entire col
-        if sum(dm(:,i)) ~= 0
-            % copy entire col to sats
-            sats(:,counter) = dm(:,i);
-            % copy col's header info to hsat
-            hsat{counter} = sattypes{i-8};
-            counter = counter + 1;
-        end
-    end
     
+    defval('meth',1)
+    switch meth
+      case 1
+       for i = 9:15
+	 % if any rows of col i are nonzero, we keep entire col
+	 if sum(dm(:,i)) ~= 0
+	   % copy entire col to sats
+	   sats(:,counter) = dm(:,i);
+	   % copy col's header info to hsat
+	   hsat{counter} = sattypes{i-8};
+	   counter = counter + 1;
+	 end
+       end
+     case 2
+      % To do: Do without a loop
+    end
+
     % make data struct explicitly
     d.(h{1}) = t;
     d.(h{2}) = dm(:,3:5);
@@ -89,6 +97,7 @@ if exist(outfile,'file') == 0
     d.utmnorthing = y;
     d.utmunit = 'm';
     d.utmzone = zones;
+    % if all zones are equal, collapes to a single zone
     d.(h{5}) = dm(:,8);
     d.heightunit = 'm (rel to WGS84)';
     d.satlabels = hsat;
@@ -97,7 +106,7 @@ if exist(outfile,'file') == 0
     
     save(outfile,'d')
 else
-    load(outfile);
+    load(outfile)
 end
 
 % do plotting in here as well
@@ -133,8 +142,8 @@ if plt == 1
     scatter(badx(1:10:end)',bady(1:10:end)',[],[0.7 0.7 0.7],'filled')
     grid on
     longticks
-    xlabel('X [m]')
-    ylabel('Y [m]')
+    xlabel(sprintf('easting [m] (UTM Zone %s)'),zone{1})
+    ylabel(sprintf('northing [m] (UTM Zone) %s'),zone{1})
     title('Location of Ship in UTM coordinates')
 
     % plot heights relative to WGS84
