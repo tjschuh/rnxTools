@@ -1,12 +1,13 @@
-function varargout=kin2mat(prdfile)
-% d=KIN2MAT(prdfile)
+function varargout=kin2mat(prdfile,plt)
+% d=KIN2MAT(prdfile,plt)
 %
 % take a PRIDE-PPPAR kin_* solution file
 % and create a structured MATLAB .mat file 
 %
 % INPUT:
 %
-% kinfile      output file created by PRIDE-PPPAR containing PPP solutions
+% .prd file    kinematic solution output file created by kin2prd
+% plt         0 for no plot, 1 for plot (default: 1)
 %
 % OUTPUT:
 %
@@ -18,7 +19,7 @@ function varargout=kin2mat(prdfile)
 % d=kin2mat('prdfile'); plot(d.t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 10/23/2021
+% Last modified by tschuh-at-princeton.edu, 10/26/2021
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
@@ -101,30 +102,80 @@ end
 
 % do plotting in here as well
 % only make the plot if it doesnt exist
+defval('plt',1)
+if plt == 1
+    f=figure;
+    % position = [left bottom width height]
+    f.Position = [500 250 850 550];
 
-% plot nsats and pdop on same plot
-yyaxis left
-plot(d.t,d.nsats(:,1),'b','LineWidth',1)
-yticks([min(d.nsats(:,1))-1:max(d.nsats(:,1))+1])
-ylim([min(d.nsats(:,1))-0.5 max(d.nsats(:,1))+0.5])
-ylabel('Total Number of Observed Satellites') 
-yyaxis right
-plot(d.t,d.pdop,'r','LineWidth',1)
-ylim([min(d.pdop)-0.25 max(d.pdop)+0.25])
-xlim([d.t(1) d.t(end)])
-ylabel('Position Dilution Of Precision (PDOP)')
-% can only turn grid on for left axis
-grid on
-longticks
+    % find rows where nsats <= 7
+    thresh = 7;
+    rows=find(d.nsats(:,1)<=thresh);
+    
+    % plot utm coordinates
+    % set the zero for the UTM coordinates based on the min and max of data
+    x = d.utmeasting-(min(d.utmeasting)-.05*(max(d.utmeasting)-min(d.utmeasting)));
+    y = d.utmnorthing-(min(d.utmnorthing)-.05*(max(d.utmnorthing)-min(d.utmnorthing)));
+    tc = datetime(d.t,'Format','HH:mm:ss'); 
+    z=zeros(size(x));
+    ah(1)=subplot(2,2,[1 3]);
+    c = linspace(1,10,length(x(1:10:end)));
+    scatter(x(1:10:end)',y(1:10:end)',[],c,'filled')
+    %plot(x(1:10:end)',y(1:10:end)','k','LineWidth',0.5)
+    colormap(jet)
+    colorbar('southoutside','Ticks',[1:3:10],'TickLabels',...
+             {datestr(tc(1),'HH:MM:SS'),datestr(tc(floor(end/3)),'HH:MM:SS'),...
+              datestr(tc(ceil(2*end/3)),'HH:MM:SS'),datestr(tc(end),'HH:MM:SS')})
+    hold on
+    % grey out "bad" data where nsats is low
+    badx = x(rows);
+    bady = y(rows);
+    scatter(badx(1:10:end)',bady(1:10:end)',[],[0.7 0.7 0.7],'filled')
+    grid on
+    longticks
+    xlabel('X [m]')
+    ylabel('Y [m]')
+    title('Location of Ship in UTM coordinates')
 
-% plot heights relative to WGS84
-plot(d.t,d.height,'k')
-xlim([d.t(1) d.t(end)])
-% need to make 0.005 multiplier more general!
-ylim([min(d.height)-0.005*abs(min(d.height)) max(d.height)+0.005*abs(max(d.height))])
-grid on
+    % plot heights relative to WGS84
+    ah(2)=subplot(2,2,2);
+    plot(d.t,d.height,'color',[0.4660 0.6740 0.1880])
+    hold on
+    % grey out "bad" data where nsats is low
+    badt = d.t(rows); 
+    badht = d.height(rows);
+    plot(badt,badht,'color',[0.7 0.7 0.7])
+    xlim([d.t(1) d.t(end)])
+    xticklabels([])
+    % need to make 0.005 multiplier more general!
+    ylim([min(d.height)-0.005*abs(min(d.height)) max(d.height)+0.005*abs(max(d.height))])
+    grid on
+    longticks
+    ylabel('Height relative to WGS84 [m]')
+    title('Height of Ship relative to WGS84')
+    
+    % plot nsats and pdop on same plot
+    ah(3)=subplot(2,2,4);
+    yyaxis left
+    plot(d.t,d.nsats(:,1),'b','LineWidth',1)
+    yticks([min(d.nsats(:,1))-1:max(d.nsats(:,1))+1])
+    ylim([min(d.nsats(:,1))-0.5 max(d.nsats(:,1))+0.5])
+    ylabel('Number of Observed Satellites') 
+    yyaxis right
+    plot(d.t,d.pdop,'r','LineWidth',1)
+    ylim([min(d.pdop)-0.25 max(d.pdop)+0.25])
+    xlim([d.t(1) d.t(end)])
+    ylabel('Position Dilution Of Precision')
+    % can only turn grid on for left axis
+    grid on
+    longticks
+    title('Total Number of Satellites and PDOP')
 
-% plot utm coordinates
+    tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d.t(1))));
+    movev(tt,0.3)
+    
+    figdisp(fname,[],'',2,[],'epstopdf')
+end
 
 % optional output
 varns={d};
