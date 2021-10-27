@@ -108,8 +108,8 @@ if plt == 1
     % position = [left bottom width height]
     f.Position = [500 250 850 550];
 
-    % find rows where nsats <= 7
-    thresh = 7;
+    % find rows where nsats <= 4
+    thresh = 4;
     rows=find(d.nsats(:,1)<=thresh);
     
     % plot utm coordinates
