@@ -14,17 +14,20 @@
 # kinfile.prd          file only containing solution information from input kin file
 #
 # Originally written by tschuh-at-princeton.edu, 10/06/2021
-# Last modified by tschuh-at-princeton.edu, 10/21/2021
+# Last modified by tschuh-at-princeton.edu, 10/26/2021
 
 set infile = $1
+# set outfile to be og filename which is 2 directories back
+# need to pipe to xargs to avoid displaying full path
+set outfile = `/bin/ls -1 ../../*.obs | xargs -n1 basename`
 
 set hdrend = `rnx2hdr $infile`
 set hdrend = `echo "$hdrend+1" | bc`
 
 # create hdr and prd files from original file
-awk 'NR<='"$hdrend"' {print}' $infile >! $infile.hdr
-awk 'NR>'"$hdrend"' {print}' $infile >! $infile.prd
+awk 'NR<='"$hdrend"' {print}' $infile >! $outfile:r.hdr
+awk 'NR>'"$hdrend"' {print}' $infile >! $outfile:r.prd
 
 # remove any stray asterisks (*) in the prd file
 # otherwise matlab wont be able to load data
-sed -i '' 's/\*/ /g' $infile.prd
+sed -i '' 's/\*/ /g' $outfile:r.prd
