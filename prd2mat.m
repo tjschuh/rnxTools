@@ -19,7 +19,7 @@ function varargout=prd2mat(prdfile,plt)
 % d=kin2mat('prdfile'); plot(d.t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 10/27/2021
+% Last modified by tschuh-at-princeton.edu, 11/07/2021
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
@@ -103,6 +103,23 @@ if exist(outfile,'file') == 0
     d.satlabels = hsat;
     d.(h{6}) = sats;
     d.(h{7}) = dm(:,end);
+
+    % need to fill timeskips with NaNs
+    % use timetable and retime functions (very useful!)
+    tt = timetable(d.t,d.xyz,d.lat,d.lon,d.utmeasting,d.utmnorthing,d.utmzone,d.height,d.nsats,d.pdop);
+    rett = retime(tt,'secondly','fillwithmissing');
+
+    % redefine struct fields with NaN rows included
+    d.t = rett.Time;
+    d.xyz = rett.Var1;
+    d.lat = rett.Var2;
+    d.lon = rett.Var3;
+    d.utmeasting = rett.Var4;
+    d.utmnorthing = rett.Var5;
+    d.utmzone = rett.Var6;
+    d.height = rett.Var7;
+    d.nsats = rett.Var8;
+    d.pdop = rett.Var9;
     
     save(outfile,'d')
 else
