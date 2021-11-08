@@ -19,7 +19,7 @@ function varargout=prd2mat(prdfile,plt)
 % d=kin2mat('prdfile'); plot(d.t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 11/07/2021
+% Last modified by tschuh-at-princeton.edu, 11/08/2021
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
@@ -138,6 +138,9 @@ if plt == 1
     thresh = 4;
     rows=find(d.nsats(:,1)<=thresh);
 
+    % also should find rows where pdop is too high
+    % this doesnt always coincide with low nsats
+
     int = 10;
     
     % plot utm coordinates
@@ -202,7 +205,11 @@ if plt == 1
 
     tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d.t(1))));
     movev(tt,0.3)
+
+    a = annotation('textbox',[0.23 0.1 0 0],'String',['Unit 4: leg 2'],'FitBoxToText','on');
+    a.FontSize = 12;
     
+    % how do I save .pdf to working directory
     figdisp(fname,[],'',2,[],'epstopdf')
 end
 
