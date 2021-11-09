@@ -19,7 +19,7 @@ function varargout=prd2mat(prdfile,plt)
 % d=kin2mat('prdfile'); plot(d.t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 11/08/2021
+% Last modified by tschuh-at-princeton.edu, 11/09/2021
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
@@ -126,7 +126,7 @@ else
     load(outfile)
 end
 
-% do plotting in here as well
+% plotting
 % only make the plot if it doesnt exist
 defval('plt',1)
 if plt == 1
@@ -135,12 +135,15 @@ if plt == 1
     f.Position = [500 250 850 550];
 
     % find rows where nsats <= 4
-    thresh = 4;
-    rows=find(d.nsats(:,1)<=thresh);
+    nthresh = 4;
+    nrows=find(d.nsats(:,1)<=nthresh);
 
-    % also should find rows where pdop is too high
+    % also should find rows where pdop is >= 10 or = 0
     % this doesnt always coincide with low nsats
+    pthresh = 15;
+    prows = find(d.pdop(:,1)>=pthresh | d.pdop(:,1)==0);
 
+    % plotting interval
     int = 10;
     
     % plot utm coordinates
@@ -157,10 +160,14 @@ if plt == 1
              {datestr(tc(1),'HH:MM:SS'),datestr(tc(floor(end/3)),'HH:MM:SS'),...
               datestr(tc(ceil(2*end/3)),'HH:MM:SS'),datestr(tc(end),'HH:MM:SS')})
     hold on
-    % grey out "bad" data where nsats is low
-    badx = x(rows);
-    bady = y(rows);
-    scatter(badx(1:int:end)',bady(1:int:end)',[],[0.7 0.7 0.7],'filled')
+    % grey out "bad" data where nsats is too low or pdop is too high or 0
+    nbadx = x(nrows);
+    nbady = y(nrows);
+    pbadx = x(prows);
+    pbady = y(prows);
+    scatter(nbadx(1:int:end)',nbady(1:int:end)',[],[0.7 0.7 0.7],'filled')
+    hold on
+    scatter(pbadx(1:int:end)',pbady(1:int:end)',[],[0.7 0.7 0.7],'filled')
     grid on
     longticks
     %xlabel(sprintf('easting [m] (UTM Zone %s)'),zones{1})
@@ -173,12 +180,18 @@ if plt == 1
     ah(2)=subplot(2,2,2);
     plot(d.t,d.height,'color',[0.4660 0.6740 0.1880])
     hold on
-    % grey out "bad" data where nsats is low
-    badt = d.t(rows); 
-    badht = d.height(rows);
-    plot(badt,badht,'color',[0.7 0.7 0.7])
+    % grey out "bad" data where nsats is too low or pdop is too high or 0
+    nbadt = d.t(nrows); 
+    nbadht = d.height(nrows);
+    pbadt = d.t(prows);
+    pbadht = d.height(prows);
+    plot(nbadt,nbadht,'color',[0.7 0.7 0.7])
+    hold on
+    plot(pbadt,pbadht,'color',[0.7 0.7 0.7])
     xlim([d.t(1) d.t(end)])
     xticklabels([])
+    % remove outliers so plotting looks better
+    d.height = rmoutliers(d.height,'mean');
     % need to make 0.005 multiplier more general!
     ylim([min(d.height)-0.005*abs(min(d.height)) max(d.height)+0.005*abs(max(d.height))])
     grid on
@@ -209,8 +222,11 @@ if plt == 1
     a = annotation('textbox',[0.23 0.1 0 0],'String',['Unit 4: leg 2'],'FitBoxToText','on');
     a.FontSize = 12;
     
-    % how do I save .pdf to working directory
+    % how do I save .pdf to working directory?
     figdisp(fname,[],'',2,[],'epstopdf')
+
+    % close figure
+    close
 end
 
 % optional output
