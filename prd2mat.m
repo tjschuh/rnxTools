@@ -103,8 +103,23 @@ if exist(outfile,'file') == 0
     d.satlabels = hsat;
     d.(h{6}) = sats;
     d.(h{7}) = dm(:,end);
+    
+    save(outfile,'d')
+else
+    load(outfile)
+end
 
-    % need to fill timeskips with NaNs
+% plotting
+% only make the plot if it doesnt exist
+defval('plt',1)
+if plt == 1
+
+    % before anything else, need to fill timeskips with NaNs
+    % we dont do this during the creation of the mat file
+    % bc we want the mat file to be consistent with the prd file
+    % we also want to be able to combine prd/mat files and
+    % this method will still work here
+
     % use timetable and retime functions (very useful!)
     tt = timetable(d.t,d.xyz,d.lat,d.lon,d.utmeasting,d.utmnorthing,d.utmzone,d.height,d.nsats,d.pdop);
     rett = retime(tt,'secondly','fillwithmissing');
@@ -120,16 +135,8 @@ if exist(outfile,'file') == 0
     d.height = rett.Var7;
     d.nsats = rett.Var8;
     d.pdop = rett.Var9;
-    
-    save(outfile,'d')
-else
-    load(outfile)
-end
 
-% plotting
-% only make the plot if it doesnt exist
-defval('plt',1)
-if plt == 1
+    % now we can actually begin plotting
     f=figure;
     % position = [left bottom width height]
     f.Position = [500 250 850 550];
