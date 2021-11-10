@@ -1,17 +1,14 @@
 #!/bin/tcsh
 #
 # automatically process rinex files with PRIDE-PPPAR
-#
-# INPUT:
-#
-#
+# no inputs, just run function in a directory full of .obs files
 #
 # OUTPUT:
 #
-#
+# sorted directories with processed data in each
 #
 # Originally written by tschuh-at-princeton.edu, 10/12/2021
-# Last modified by tschuh-at-princeton.edu, 11/07/2021
+# Last modified by tschuh-at-princeton.edu, 11/09/2021
 
 # put all obs files into appropriate directories called "file####"
 rnx2dir
@@ -151,27 +148,26 @@ foreach num ($range[*])
 	touch $combo
 	# find end of header for both files
 	set hdrend1 = `rnx2hdr $ogkin1`
-	set hdrend1 = `echo "$hdrend1+1" | bc`
 	set hdrend2 = `rnx2hdr $ogkin2`
+	# add 1 to this one to get the lien that comes after
 	set hdrend2 = `echo "$hdrend2+1" | bc`
-
-	# copy header lines to combo
-	# copy data from ogkin1 and ogkin2 to combo
-	awk 'NR<='"$hdrend1"' {print}' $ogkin1 >> $combo
+	
+	# copy header lines from both ogkin files to combo
+	# ignore end of header line from ogkin1
+	awk 'NR<'"$hdrend1"' {print}' $ogkin1 >> $combo
+	awk 'NR<='"$hdrend2"' {print}' $ogkin2 >> $combo
+	
+	# copy data lines from both ogkin files to combo
+	set hdrend1 = `echo "$hdrend1+1" | bc`
+	# set hdrend2 = `echo "$hdrend2+1" | bc`
 	awk 'NR>'"$hdrend1"' {print}' $ogkin1 >> $combo
 	awk 'NR>'"$hdrend2"' {print}' $ogkin2 >> $combo
 
-	# change dates in hdr of combo file
-	set firstepc = `awk 'NR==4 {print $0}' $ogkin1`
-	set lastepc = `awk 'NR==5 {print $0}' $ogkin2`
-	sed -i '4s/.*/'"$firstepc"'/' $combo
-	sed -i '5s/.*/'"$lastepc"'/' $combo
-
-	# delete $ogkin1 and $ogkin2
-	rm -f $ogkin1 $ogkin2
+	# instead of using awk and sed to change the dates
+	# in the hdr, just keep bot hdrs with dates unchanged
 
 	# run kin2prd to get .prd and .hdr files
-	kin2prd $fYYYY-$lYYYY/$fdoy-$ldoy/kin_*
+	kin2prd $fYYYY-$lYYYY/$fdoy-$ldoy/kin_*_*_bios
 
 	cd ..
 
