@@ -37,23 +37,6 @@ function all4plt(unit1file,unit2file,unit3file,unit4file)
 %end
 %movie(M);
 
-% plot heights of all 4 units in subplot
-%figure
-%for i=1:nargin
-%    subplot(4,1,i)
-%    plot(dmat(i).t,dmat(i).height,'color',[0.4660 0.6740 0.1880])
-%    xlim([d.t(1) d.t(end)])
-%    dmat(i).height = rmoutliers(dmat(i).height,'mean');
-%    % need to make 0.005 multiplier more general!
-%    ylim([min(dmat(i).height)-0.005*abs(min(dmat(i).height)) max(dmat(i).height)+0.005*abs(max(dmat(i).height))])
-%    grid on
-%    longticks
-%    %ylabel('Height relative to WGS84 [m]')
-%    if i < nargin
-%        xticklabels([])
-%    end
-%end
-
 % combine the fields of all 4 datasets into 1 
 alldt = [d1.t d2.t d3.t d4.t];
 alldxyz = [d1.xyz d2.xyz d3.xyz d4.xyz];
@@ -120,69 +103,98 @@ plot(pbadt3(1:int:end),pbadht3(1:int:end),'color',[0.7 0.7 0.7])
 plot(nbadt4(1:int:end),nbadht4(1:int:end),'color',[0.7 0.7 0.7])
 plot(pbadt4(1:int:end),pbadht4(1:int:end),'color',[0.7 0.7 0.7])
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % plot distances between all 4 GPS units
+% compute all 6 distances between 4 GPS receivers
 dist12 = sqrt((d1.xyz(:,1)-d2.xyz(:,1)).^2 + (d1.xyz(:,2)-d2.xyz(:,2)).^2 + (d1.xyz(:,3)-d2.xyz(:,3)).^2);
+normdist12 = dist12 - nanmean(dist12) + 1;
+dist12 = rmNaNrows(dist12); p = polyfit([1:length(dist12)]',dist12,1);
+a12 = p(1); b12 = p(2); rms12 = rms(dist12); std12 = std(dist12);
 dist13 = sqrt((d1.xyz(:,1)-d3.xyz(:,1)).^2 + (d1.xyz(:,2)-d3.xyz(:,2)).^2 + (d1.xyz(:,3)-d3.xyz(:,3)).^2);
+normdist13 = dist13 - nanmean(dist13) + 2;
+dist13 = rmNaNrows(dist13); p = polyfit([1:length(dist13)]',dist13,1);
+a13 = p(1); b13 = p(2); rms13 = rms(dist13); std13 = std(dist13);
 dist14 = sqrt((d1.xyz(:,1)-d4.xyz(:,1)).^2 + (d1.xyz(:,2)-d4.xyz(:,2)).^2 + (d1.xyz(:,3)-d4.xyz(:,3)).^2);
+normdist14 = dist14 - nanmean(dist14) + 3;
+dist14 = rmNaNrows(dist14); p = polyfit([1:length(dist14)]',dist14,1);
+a14 = p(1); b14 = p(2); rms14 = rms(dist14); std14 = std(dist14);
 dist23 = sqrt((d2.xyz(:,1)-d3.xyz(:,1)).^2 + (d2.xyz(:,2)-d3.xyz(:,2)).^2 + (d2.xyz(:,3)-d3.xyz(:,3)).^2);
+normdist23 = dist23 - nanmean(dist23) + 4;
+dist23 = rmNaNrows(dist23); p = polyfit([1:length(dist23)]',dist23,1);
+a23 = p(1); b23 = p(2); rms23 = rms(dist23); std23 = std(dist23);
 dist24 = sqrt((d2.xyz(:,1)-d4.xyz(:,1)).^2 + (d2.xyz(:,2)-d4.xyz(:,2)).^2 + (d2.xyz(:,3)-d4.xyz(:,3)).^2);
+normdist24 = dist24 - nanmean(dist24) + 5;
+dist24 = rmNaNrows(dist24); p = polyfit([1:length(dist24)]',dist24,1);
+a24 = p(1); b24 = p(2); rms24 = rms(dist24); std24 = std(dist24);
 dist34 = sqrt((d3.xyz(:,1)-d4.xyz(:,1)).^2 + (d3.xyz(:,2)-d4.xyz(:,2)).^2 + (d3.xyz(:,3)-d4.xyz(:,3)).^2);
+normdist34 = dist34 - nanmean(dist34) + 6;
+dist34 = rmNaNrows(dist34); p = polyfit([1:length(dist34)]',dist34,1);
+a34 = p(1); b34 = p(2); rms34 = rms(dist34); std34 = std(dist34);
 
 % bad data
 % explain how/why I do this!
-nbaddist121 = dist12(nrows1); pbaddist121 = dist12(prows1);
-nbaddist122 = dist12(nrows2); pbaddist122 = dist12(prows2);
-nbaddist131 = dist13(nrows1); pbaddist131 = dist13(prows1);
-nbaddist133 = dist13(nrows3); pbaddist133 = dist13(prows3);
-nbaddist141 = dist14(nrows1); pbaddist141 = dist14(prows1);
-nbaddist144 = dist14(nrows4); pbaddist144 = dist14(prows4);
-nbaddist232 = dist23(nrows2); pbaddist232 = dist23(prows2);
-nbaddist233 = dist23(nrows3); pbaddist233 = dist23(prows3);
-nbaddist242 = dist24(nrows2); pbaddist242 = dist24(prows2);
-nbaddist244 = dist24(nrows4); pbaddist244 = dist24(prows4);
-nbaddist343 = dist34(nrows3); pbaddist343 = dist34(prows3);
-nbaddist344 = dist34(nrows4); pbaddist344 = dist34(prows4);
-multi = 0.025;
-drows12 = find(dist12(:,1)<=nanmean(dist12)-multi*nanmean(dist12) | dist12(:,1)>=nanmean(dist12)+multi*nanmean(dist12));
-drows13 = find(dist13(:,1)<=nanmean(dist13)-multi*nanmean(dist13) | dist13(:,1)>=nanmean(dist13)+multi*nanmean(dist13));
-drows14 = find(dist14(:,1)<=nanmean(dist14)-multi*nanmean(dist14) | dist14(:,1)>=nanmean(dist14)+multi*nanmean(dist14));
-drows23 = find(dist23(:,1)<=nanmean(dist23)-multi*nanmean(dist23) | dist23(:,1)>=nanmean(dist23)+multi*nanmean(dist23));
-drows24 = find(dist24(:,1)<=nanmean(dist24)-multi*nanmean(dist24) | dist24(:,1)>=nanmean(dist24)+multi*nanmean(dist24));
-drows34 = find(dist34(:,1)<=nanmean(dist34)-multi*nanmean(dist34) | dist34(:,1)>=nanmean(dist34)+multi*nanmean(dist34));
-baddist12 = dist12(drows12); badt12 = d1.t(drows12);
-baddist13 = dist13(drows13); badt13 = d1.t(drows13);
-baddist14 = dist14(drows14); badt14 = d1.t(drows14);
-baddist23 = dist23(drows23); badt23 = d1.t(drows23);
-baddist24 = dist24(drows24); badt24 = d1.t(drows24);
-baddist34 = dist34(drows34); badt34 = d1.t(drows34);
+% nbaddist121 = dist12(nrows1); pbaddist121 = dist12(prows1);
+% nbaddist122 = dist12(nrows2); pbaddist122 = dist12(prows2);
+% nbaddist131 = dist13(nrows1); pbaddist131 = dist13(prows1);
+% nbaddist133 = dist13(nrows3); pbaddist133 = dist13(prows3);
+% nbaddist141 = dist14(nrows1); pbaddist141 = dist14(prows1);
+% nbaddist144 = dist14(nrows4); pbaddist144 = dist14(prows4);
+% nbaddist232 = dist23(nrows2); pbaddist232 = dist23(prows2);
+% nbaddist233 = dist23(nrows3); pbaddist233 = dist23(prows3);
+% nbaddist242 = dist24(nrows2); pbaddist242 = dist24(prows2);
+% nbaddist244 = dist24(nrows4); pbaddist244 = dist24(prows4);
+% nbaddist343 = dist34(nrows3); pbaddist343 = dist34(prows3);
+% nbaddist344 = dist34(nrows4); pbaddist344 = dist34(prows4);
+% multi = 0.025;
+% drows12 = find(dist12(:,1)<=nanmean(dist12)-multi*nanmean(dist12) | dist12(:,1)>=nanmean(dist12)+multi*nanmean(dist12));
+% drows13 = find(dist13(:,1)<=nanmean(dist13)-multi*nanmean(dist13) | dist13(:,1)>=nanmean(dist13)+multi*nanmean(dist13));
+% drows14 = find(dist14(:,1)<=nanmean(dist14)-multi*nanmean(dist14) | dist14(:,1)>=nanmean(dist14)+multi*nanmean(dist14));
+% drows23 = find(dist23(:,1)<=nanmean(dist23)-multi*nanmean(dist23) | dist23(:,1)>=nanmean(dist23)+multi*nanmean(dist23));
+% drows24 = find(dist24(:,1)<=nanmean(dist24)-multi*nanmean(dist24) | dist24(:,1)>=nanmean(dist24)+multi*nanmean(dist24));
+% drows34 = find(dist34(:,1)<=nanmean(dist34)-multi*nanmean(dist34) | dist34(:,1)>=nanmean(dist34)+multi*nanmean(dist34));
+% baddist12 = dist12(drows12); badt12 = d1.t(drows12);
+% baddist13 = dist13(drows13); badt13 = d1.t(drows13);
+% baddist14 = dist14(drows14); badt14 = d1.t(drows14);
+% baddist23 = dist23(drows23); badt23 = d1.t(drows23);
+% baddist24 = dist24(drows24); badt24 = d1.t(drows24);
+% baddist34 = dist34(drows34); badt34 = d1.t(drows34);
 
 ah(2)=subplot(5,2,[2 4]);
-plot(d1.t,dist12,'LineWidth',2)
+plot(d1.t,normdist12,'LineWidth',2)
 hold on
-plot(d1.t,dist13,'LineWidth',2)
-plot(d1.t,dist14,'LineWidth',2)
-plot(d1.t,dist23,'LineWidth',2)
-plot(d1.t,dist24,'LineWidth',2)
-plot(d1.t,dist34,'LineWidth',2)
-plot(nbadt1,nbaddist121,nbadt1,nbaddist131,nbadt1,nbaddist141,'color',[0.7 0.7 0.7],'LineWidth',2)
-plot(nbadt2,nbaddist122,nbadt2,nbaddist232,nbadt2,nbaddist242,'color',[0.7 0.7 0.7],'LineWidth',2)
-plot(nbadt3,nbaddist133,nbadt3,nbaddist233,nbadt3,nbaddist343,'color',[0.7 0.7 0.7],'LineWidth',2)
-plot(nbadt4,nbaddist144,nbadt4,nbaddist244,nbadt4,nbaddist344,'color',[0.7 0.7 0.7],'LineWidth',2)
-plot(pbadt1,pbaddist121,pbadt1,pbaddist131,pbadt1,pbaddist141,'color',[0.7 0.7 0.7],'LineWidth',2)
-plot(pbadt2,pbaddist122,pbadt2,pbaddist232,pbadt2,pbaddist242,'color',[0.7 0.7 0.7],'LineWidth',2)
-plot(pbadt3,pbaddist133,pbadt3,pbaddist233,pbadt3,pbaddist343,'color',[0.7 0.7 0.7],'LineWidth',2)
-plot(pbadt4,pbaddist144,pbadt4,pbaddist244,pbadt4,pbaddist344,'color',[0.7 0.7 0.7],'LineWidth',2)
-plot(badt12,baddist12,badt13,baddist13,badt14,baddist14,'color',[0.7 0.7 0.7],'LineWidth',2)
-plot(badt23,baddist23,badt24,baddist24,badt34,baddist34,'color',[0.7 0.7 0.7],'LineWidth',2)
-legend({'1-2','1-3','1-4','2-3','2-4','3-4'},'Location','east','NumColumns',2)
+plot(d1.t,normdist13,'LineWidth',2)
+plot(d1.t,normdist14,'LineWidth',2)
+plot(d1.t,normdist23,'LineWidth',2)
+plot(d1.t,normdist24,'LineWidth',2)
+plot(d1.t,normdist34,'LineWidth',2)
+% plot(nbadt1,nbaddist121,nbadt1,nbaddist131,nbadt1,nbaddist141,'color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(nbadt2,nbaddist122,nbadt2,nbaddist232,nbadt2,nbaddist242,'color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(nbadt3,nbaddist133,nbadt3,nbaddist233,nbadt3,nbaddist343,'color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(nbadt4,nbaddist144,nbadt4,nbaddist244,nbadt4,nbaddist344,'color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(pbadt1,pbaddist121,pbadt1,pbaddist131,pbadt1,pbaddist141,'color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(pbadt2,pbaddist122,pbadt2,pbaddist232,pbadt2,pbaddist242,'color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(pbadt3,pbaddist133,pbadt3,pbaddist233,pbadt3,pbaddist343,'color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(pbadt4,pbaddist144,pbadt4,pbaddist244,pbadt4,pbaddist344,'color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(badt12,baddist12,badt13,baddist13,badt14,baddist14,'color',[0.7 0.7 0.7],'LineWidth',2)
+% plot(badt23,baddist23,badt24,baddist24,badt34,baddist34,'color',[0.7 0.7 0.7],'LineWidth',2)
 xlim([d1.t(1) d1.t(end)])
 xticklabels([])
-ylim([min(dist12,[],'all')-0.1*abs(min(dist12,[],'all')) max(dist13,[],'all')+0.05*abs(max(dist13,[],'all'))])
-ylabel('Distance [m]')
+ylim([0.25 6.75])
+yticklabels({'1-2','1-3','1-4','2-3','2-4','3-4'})
+ylabel('GPS Pair')
 title('Distances between GPS Receivers')
+% add a leading zero!
+text(d1.t(900),6.4,sprintf('%.2e, %.2f, %.2f, %.2f',a34,b34,rms34,std34))
+text(d1.t(900),5.4,sprintf('%.2e, %.2f, %.2f, %.2f',a24,b24,rms24,std24))
+text(d1.t(900),4.4,sprintf('%.2e, %.2f, %.2f, %.2f',a23,b23,rms23,std23))
+text(d1.t(900),3.4,sprintf('%.2e, %.2f, %.2f, %.2f',a14,b14,rms14,std14))
+text(d1.t(900),2.4,sprintf('%.2e, %.2f, %.2f, %.2f',a13,b13,rms13,std13))
+text(d1.t(900),1.4,sprintf('%.2e, %.2f, %.2f, %.2f',a12,b12,rms12,std12))
+text(d1.t(650),0.5,sprintf('a [m/s], b [m], rms [m], std [m]'))
 grid on
 longticks
-
+keyboard
 % plot accelerations ax, ay, az
 % first compute velocity components vx, vy, vz in m/s
 vx1 = diff(d1.xyz(:,1))./seconds(diff(d1.t));
@@ -337,6 +349,6 @@ movev(tt,0.3)
 %a = annotation('textbox',[0.45 0.075 0 0],'String',['jaxs'],'FitBoxToText','on');
 %a.FontSize = 12;
 
-figdisp(fname,[],'',2,[],'epstopdf')
+%figdisp(fname,[],'',2,[],'epstopdf')
 
-close
+%close
