@@ -77,7 +77,8 @@ plot(d4.t(1:int:end),d4.height(1:int:end),'m')
 xlim([d1.t(1) d1.t(end)])
 xticklabels([])
 ylabel('Height relative to WGS84 [m]')
-title('Height relative to WGS84')
+sht=title(sprintf('Ship Height (Every %dth Point)',int));
+movev(sht,0.1)
 grid on
 longticks
 % to set best ylim, remove outliers from alldht
@@ -110,27 +111,27 @@ plot(pbadt4(1:int:end),pbadht4(1:int:end),'color',[0.7 0.7 0.7])
 dist12 = sqrt((d1.xyz(:,1)-d2.xyz(:,1)).^2 + (d1.xyz(:,2)-d2.xyz(:,2)).^2 + (d1.xyz(:,3)-d2.xyz(:,3)).^2);
 normdist12 = dist12 - nanmean(dist12) + 1;
 dist12 = rmNaNrows(dist12); p = polyfit([1:length(dist12)]',dist12,1);
-a12 = p(1); b12 = p(2); rms12 = rms(dist12); std12 = std(dist12);
+a12 = 1000*p(1); b12 = p(2); rms12 = rms(dist12); std12 = std(dist12);
 dist13 = sqrt((d1.xyz(:,1)-d3.xyz(:,1)).^2 + (d1.xyz(:,2)-d3.xyz(:,2)).^2 + (d1.xyz(:,3)-d3.xyz(:,3)).^2);
 normdist13 = dist13 - nanmean(dist13) + 2;
 dist13 = rmNaNrows(dist13); p = polyfit([1:length(dist13)]',dist13,1);
-a13 = p(1); b13 = p(2); rms13 = rms(dist13); std13 = std(dist13);
+a13 = 1000*p(1); b13 = p(2); rms13 = rms(dist13); std13 = std(dist13);
 dist14 = sqrt((d1.xyz(:,1)-d4.xyz(:,1)).^2 + (d1.xyz(:,2)-d4.xyz(:,2)).^2 + (d1.xyz(:,3)-d4.xyz(:,3)).^2);
 normdist14 = dist14 - nanmean(dist14) + 3;
 dist14 = rmNaNrows(dist14); p = polyfit([1:length(dist14)]',dist14,1);
-a14 = p(1); b14 = p(2); rms14 = rms(dist14); std14 = std(dist14);
+a14 = 1000*p(1); b14 = p(2); rms14 = rms(dist14); std14 = std(dist14);
 dist23 = sqrt((d2.xyz(:,1)-d3.xyz(:,1)).^2 + (d2.xyz(:,2)-d3.xyz(:,2)).^2 + (d2.xyz(:,3)-d3.xyz(:,3)).^2);
 normdist23 = dist23 - nanmean(dist23) + 4;
 dist23 = rmNaNrows(dist23); p = polyfit([1:length(dist23)]',dist23,1);
-a23 = p(1); b23 = p(2); rms23 = rms(dist23); std23 = std(dist23);
+a23 = 1000*p(1); b23 = p(2); rms23 = rms(dist23); std23 = std(dist23);
 dist24 = sqrt((d2.xyz(:,1)-d4.xyz(:,1)).^2 + (d2.xyz(:,2)-d4.xyz(:,2)).^2 + (d2.xyz(:,3)-d4.xyz(:,3)).^2);
 normdist24 = dist24 - nanmean(dist24) + 5;
 dist24 = rmNaNrows(dist24); p = polyfit([1:length(dist24)]',dist24,1);
-a24 = p(1); b24 = p(2); rms24 = rms(dist24); std24 = std(dist24);
+a24 = 1000*p(1); b24 = p(2); rms24 = rms(dist24); std24 = std(dist24);
 dist34 = sqrt((d3.xyz(:,1)-d4.xyz(:,1)).^2 + (d3.xyz(:,2)-d4.xyz(:,2)).^2 + (d3.xyz(:,3)-d4.xyz(:,3)).^2);
 normdist34 = dist34 - nanmean(dist34) + 6;
 dist34 = rmNaNrows(dist34); p = polyfit([1:length(dist34)]',dist34,1);
-a34 = p(1); b34 = p(2); rms34 = rms(dist34); std34 = std(dist34);
+a34 = 1000*p(1); b34 = p(2); rms34 = rms(dist34); std34 = std(dist34);
 
 % bad data
 % explain how/why I do this!
@@ -183,44 +184,47 @@ xticklabels([])
 ylim([0.25 6.75])
 yticklabels({'1-2','1-3','1-4','2-3','2-4','3-4'})
 ylabel('GPS Pair')
-title('Distances between GPS Receivers')
-% add a leading zero!
-text(d1.t(900),6.4,sprintf('%.2e, %.2f, %.2f, %.2f',a34,b34,rms34,std34))
-text(d1.t(900),5.4,sprintf('%.2e, %.2f, %.2f, %.2f',a24,b24,rms24,std24))
-text(d1.t(900),4.4,sprintf('%.2e, %.2f, %.2f, %.2f',a23,b23,rms23,std23))
-text(d1.t(900),3.4,sprintf('%.2e, %.2f, %.2f, %.2f',a14,b14,rms14,std14))
-text(d1.t(900),2.4,sprintf('%.2e, %.2f, %.2f, %.2f',a13,b13,rms13,std13))
-text(d1.t(900),1.4,sprintf('%.2e, %.2f, %.2f, %.2f',a12,b12,rms12,std12))
-text(d1.t(650),0.5,sprintf('a [m/s], b [m], rms [m], std [m]'))
+gpst=title(sprintf('Distances between GPS Receivers'));
+movev(gpst,0.1)
+text(d1.t(850),6.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a34,b34,rms34,std34))
+text(d1.t(850),5.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a24,b24,rms24,std24))
+text(d1.t(850),4.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a23,b23,rms23,std23))
+text(d1.t(850),3.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a14,b14,rms14,std14))
+text(d1.t(850),2.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a13,b13,rms13,std13))
+text(d1.t(850),1.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a12,b12,rms12,std12))
+text(d1.t(520),0.5,sprintf('a [mm/s], b [m], rms [m], std [m]'))
 grid on
 longticks
-keyboard
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % plot accelerations ax, ay, az
-% first compute velocity components vx, vy, vz in m/s
-vx1 = diff(d1.xyz(:,1))./seconds(diff(d1.t));
-vy1 = diff(d1.xyz(:,2))./seconds(diff(d1.t));
-vz1 = diff(d1.xyz(:,3))./seconds(diff(d1.t));
-vx2 = diff(d2.xyz(:,1))./seconds(diff(d2.t));
-vy2 = diff(d2.xyz(:,2))./seconds(diff(d2.t));
-vz2 = diff(d2.xyz(:,3))./seconds(diff(d2.t));
-vx3 = diff(d3.xyz(:,1))./seconds(diff(d3.t));
-vy3 = diff(d3.xyz(:,2))./seconds(diff(d3.t));
-vz3 = diff(d3.xyz(:,3))./seconds(diff(d3.t));
-vx4 = diff(d4.xyz(:,1))./seconds(diff(d4.t));
-vy4 = diff(d4.xyz(:,2))./seconds(diff(d4.t));
-vz4 = diff(d4.xyz(:,3))./seconds(diff(d4.t));
+% first compute velocity components vx, vy, vz in cm/s
+vx1 = 100*diff(d1.xyz(:,1))./seconds(diff(d1.t));
+vy1 = 100*diff(d1.xyz(:,2))./seconds(diff(d1.t));
+vz1 = 100*diff(d1.xyz(:,3))./seconds(diff(d1.t));
+vx2 = 100*diff(d2.xyz(:,1))./seconds(diff(d2.t));
+vy2 = 100*diff(d2.xyz(:,2))./seconds(diff(d2.t));
+vz2 = 100*diff(d2.xyz(:,3))./seconds(diff(d2.t));
+vx3 = 100*diff(d3.xyz(:,1))./seconds(diff(d3.t));
+vy3 = 100*diff(d3.xyz(:,2))./seconds(diff(d3.t));
+vz3 = 100*diff(d3.xyz(:,3))./seconds(diff(d3.t));
+vx4 = 100*diff(d4.xyz(:,1))./seconds(diff(d4.t));
+vy4 = 100*diff(d4.xyz(:,2))./seconds(diff(d4.t));
+vz4 = 100*diff(d4.xyz(:,3))./seconds(diff(d4.t));
+
+% time and spatial velocity average doesnt seem to work right
+% vxavg = (vx1+vx2+vx3+vx4)./4;
+% vyavg = (vy1+vy2+vy3+vy4)./4;
+% vxyavg = sqrt(vxavg.^2 + vyavg.^2);
+% vxytavg = nanmean(vxyavg);
 
 v1 = sqrt(vx1.^2 + vy1.^2 + vz1.^2);
 v2 = sqrt(vx2.^2 + vy2.^2 + vz2.^2);
 v3 = sqrt(vx3.^2 + vy3.^2 + vz3.^2);
 v4 = sqrt(vx4.^2 + vy4.^2 + vz4.^2);
-% 1 knot = 1852 m/hr
-v1knot = 3600*v1/1852;
-v2knot = 3600*v2/1852;
-v3knot = 3600*v3/1852;
-v4knot = 3600*v4/1852;
 
-% then compute acceleration components ax, ay, az in m/s^2
+% then compute acceleration components ax, ay, az in cm/s^2
 ax1 = diff(vx1)./(2*seconds(diff(d1.t(1:end-1))));
 ay1 = diff(vy1)./(2*seconds(diff(d1.t(1:end-1))));
 az1 = diff(vz1)./(2*seconds(diff(d1.t(1:end-1))));
@@ -239,6 +243,12 @@ a2 = sqrt(ax2.^2 + ay2.^2 + az2.^2);
 a3 = sqrt(ax3.^2 + ay3.^2 + az3.^2); 
 a4 = sqrt(ax4.^2 + ay4.^2 + az4.^2); 
 
+% compute correlation coefficients
+% need to display on plot!
+axcorr = corr([ax1 ax2 ax3 ax4],'rows','complete');
+aycorr = corr([ay1 ay2 ay3 ay4],'rows','complete');
+azcorr = corr([az1 az2 az3 az4],'rows','complete');
+
 % bad data
 % explain this!
 %nbadax1 = ax1(nrows1); pbadax1 = ax1(prows1);
@@ -254,32 +264,32 @@ a4 = sqrt(ax4.^2 + ay4.^2 + az4.^2);
 %nbaday4 = ay4(nrows4); pbaday4 = ay4(prows4);
 %nbadaz4 = az4(nrows4); pbadaz4 = az4(prows4);
 
-multi=5;
-ax1rows = find(ax1(:,1)<=nanmean(abs(ax1))-multi*nanmean(abs(ax1)) | ax1(:,1)>=nanmean(abs(ax1))+multi*nanmean(abs(ax1)));
-ay1rows = find(ay1(:,1)<=nanmean(abs(ay1))-multi*nanmean(abs(ay1)) | ay1(:,1)>=nanmean(abs(ay1))+multi*nanmean(abs(ay1)));
-az1rows = find(az1(:,1)<=nanmean(abs(az1))-multi*nanmean(abs(az1)) | az1(:,1)>=nanmean(abs(az1))+multi*nanmean(abs(az1)));
-ax2rows = find(ax2(:,1)<=nanmean(abs(ax2))-multi*nanmean(abs(ax2)) | ax2(:,1)>=nanmean(abs(ax2))+multi*nanmean(abs(ax2)));
-ay2rows = find(ay2(:,1)<=nanmean(abs(ay2))-multi*nanmean(abs(ay2)) | ay2(:,1)>=nanmean(abs(ay2))+multi*nanmean(abs(ay2)));
-az2rows = find(az2(:,1)<=nanmean(abs(az2))-multi*nanmean(abs(az2)) | az2(:,1)>=nanmean(abs(az2))+multi*nanmean(abs(az2)));
-ax3rows = find(ax3(:,1)<=nanmean(abs(ax3))-multi*nanmean(abs(ax3)) | ax3(:,1)>=nanmean(abs(ax3))+multi*nanmean(abs(ax3)));
-ay3rows = find(ay3(:,1)<=nanmean(abs(ay3))-multi*nanmean(abs(ay3)) | ay3(:,1)>=nanmean(abs(ay3))+multi*nanmean(abs(ay3)));
-az3rows = find(az3(:,1)<=nanmean(abs(az3))-multi*nanmean(abs(az3)) | az3(:,1)>=nanmean(abs(az3))+multi*nanmean(abs(az3)));
-ax4rows = find(ax4(:,1)<=nanmean(abs(ax4))-multi*nanmean(abs(ax4)) | ax4(:,1)>=nanmean(abs(ax4))+multi*nanmean(abs(ax4)));
-ay4rows = find(ay4(:,1)<=nanmean(abs(ay4))-multi*nanmean(abs(ay4)) | ay4(:,1)>=nanmean(abs(ay4))+multi*nanmean(abs(ay4)));
-az4rows = find(az4(:,1)<=nanmean(abs(az4))-multi*nanmean(abs(az4)) | az4(:,1)>=nanmean(abs(az4))+multi*nanmean(abs(az4)));
+% multi=5;
+% ax1rows = find(ax1(:,1)<=nanmean(abs(ax1))-multi*nanmean(abs(ax1)) | ax1(:,1)>=nanmean(abs(ax1))+multi*nanmean(abs(ax1)));
+% ay1rows = find(ay1(:,1)<=nanmean(abs(ay1))-multi*nanmean(abs(ay1)) | ay1(:,1)>=nanmean(abs(ay1))+multi*nanmean(abs(ay1)));
+% az1rows = find(az1(:,1)<=nanmean(abs(az1))-multi*nanmean(abs(az1)) | az1(:,1)>=nanmean(abs(az1))+multi*nanmean(abs(az1)));
+% ax2rows = find(ax2(:,1)<=nanmean(abs(ax2))-multi*nanmean(abs(ax2)) | ax2(:,1)>=nanmean(abs(ax2))+multi*nanmean(abs(ax2)));
+% ay2rows = find(ay2(:,1)<=nanmean(abs(ay2))-multi*nanmean(abs(ay2)) | ay2(:,1)>=nanmean(abs(ay2))+multi*nanmean(abs(ay2)));
+% az2rows = find(az2(:,1)<=nanmean(abs(az2))-multi*nanmean(abs(az2)) | az2(:,1)>=nanmean(abs(az2))+multi*nanmean(abs(az2)));
+% ax3rows = find(ax3(:,1)<=nanmean(abs(ax3))-multi*nanmean(abs(ax3)) | ax3(:,1)>=nanmean(abs(ax3))+multi*nanmean(abs(ax3)));
+% ay3rows = find(ay3(:,1)<=nanmean(abs(ay3))-multi*nanmean(abs(ay3)) | ay3(:,1)>=nanmean(abs(ay3))+multi*nanmean(abs(ay3)));
+% az3rows = find(az3(:,1)<=nanmean(abs(az3))-multi*nanmean(abs(az3)) | az3(:,1)>=nanmean(abs(az3))+multi*nanmean(abs(az3)));
+% ax4rows = find(ax4(:,1)<=nanmean(abs(ax4))-multi*nanmean(abs(ax4)) | ax4(:,1)>=nanmean(abs(ax4))+multi*nanmean(abs(ax4)));
+% ay4rows = find(ay4(:,1)<=nanmean(abs(ay4))-multi*nanmean(abs(ay4)) | ay4(:,1)>=nanmean(abs(ay4))+multi*nanmean(abs(ay4)));
+% az4rows = find(az4(:,1)<=nanmean(abs(az4))-multi*nanmean(abs(az4)) | az4(:,1)>=nanmean(abs(az4))+multi*nanmean(abs(az4)));
 
-badax1 = ax1(ax1rows); badtx1 = d1.t(ax1rows);
-baday1 = ay1(ay1rows); badty1 = d1.t(ay1rows);
-badaz1 = az1(az1rows); badtz1 = d1.t(az1rows);
-badax2 = ax2(ax2rows); badtx2 = d2.t(ax2rows);
-baday2 = ay2(ay2rows); badty2 = d2.t(ay2rows);
-badaz2 = az2(az2rows); badtz2 = d2.t(az2rows);
-badax3 = ax3(ax3rows); badtx3 = d3.t(ax3rows);
-baday3 = ay3(ay3rows); badty3 = d3.t(ay3rows);
-badaz3 = az3(az3rows); badtz3 = d3.t(az3rows);
-badax4 = ax4(ax4rows); badtx4 = d4.t(ax4rows);
-baday4 = ay4(ay4rows); badty4 = d4.t(ay4rows);
-badaz4 = az4(az4rows); badtz4 = d4.t(az4rows);
+% badax1 = ax1(ax1rows); badtx1 = d1.t(ax1rows);
+% baday1 = ay1(ay1rows); badty1 = d1.t(ay1rows);
+% badaz1 = az1(az1rows); badtz1 = d1.t(az1rows);
+% badax2 = ax2(ax2rows); badtx2 = d2.t(ax2rows);
+% baday2 = ay2(ay2rows); badty2 = d2.t(ay2rows);
+% badaz2 = az2(az2rows); badtz2 = d2.t(az2rows);
+% badax3 = ax3(ax3rows); badtx3 = d3.t(ax3rows);
+% baday3 = ay3(ay3rows); badty3 = d3.t(ay3rows);
+% badaz3 = az3(az3rows); badtz3 = d3.t(az3rows);
+% badax4 = ax4(ax4rows); badtx4 = d4.t(ax4rows);
+% baday4 = ay4(ay4rows); badty4 = d4.t(ay4rows);
+% badaz4 = az4(az4rows); badtz4 = d4.t(az4rows);
 
 % how does Frederik want me to plot this exactly?
 % grey out bad data?
@@ -289,19 +299,23 @@ hold on
 plot(d2.t(1:int:end-2),ax2(1:int:end),'g')
 plot(d3.t(1:int:end-2),ax3(1:int:end),'b')
 plot(d4.t(1:int:end-2),ax4(1:int:end),'m')
-plot(badtx1(1:int:end),badax1(1:int:end),'color',[0.7 0.7 0.7])
-plot(badtx2(1:int:end),badax2(1:int:end),'color',[0.7 0.7 0.7])
-plot(badtx3(1:int:end),badax3(1:int:end),'color',[0.7 0.7 0.7])
-plot(badtx4(1:int:end),badax4(1:int:end),'color',[0.7 0.7 0.7])
-legend({'GPS 1','GPS 2','GPS 3','GPS 4'},'Location','north','NumColumns',4)
+% plot(badtx1(1:int:end),badax1(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badtx2(1:int:end),badax2(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badtx3(1:int:end),badax3(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badtx4(1:int:end),badax4(1:int:end),'color',[0.7 0.7 0.7])
+%legend({'GPS 1','GPS 2','GPS 3','GPS 4'},'Location','north','NumColumns',4)
 grid on
-longticks
+longticks([],3)
 xlim([d1.t(1) d1.t(end-2)])
 ax = abs([ax1 ax2 ax3 ax4]);
-ax = rmoutliers(ax,'mean');
-ylim([-max(ax,[],'all')-0.005*abs(max(ax,[],'all')) max(ax,[],'all')+0.005*abs(max(ax,[],'all'))])
-ylabel('a_x [m/s^2]')
-title('Ship Acceleration Components')
+axout = rmoutliers(ax,'mean');
+outpct = (length(ax)-length(axout))*100/length(ax);
+ylim([-max(axout,[],'all')-0.005*abs(max(axout,[],'all')) max(axout,[],'all')+0.005*abs(max(axout,[],'all'))])
+a=annotation('textbox',[0.75 0.61 0 0],'String',[sprintf('%05.2f%% Not Shown',outpct)],'FitBoxToText','on');
+a.FontSize = 8;
+ylabel('a_x [cm/s^2]')
+sat=title(sprintf('Ship Acceleration Components (Every %dth Point)',int));
+movev(sat,2.5)
 xticklabels([])
 
 ah(4)=subplot(5,2,[7 8]);
@@ -310,17 +324,20 @@ hold on
 plot(d2.t(1:int:end-2),ay2(1:int:end),'g')
 plot(d3.t(1:int:end-2),ay3(1:int:end),'b')
 plot(d4.t(1:int:end-2),ay4(1:int:end),'m')
-plot(badty1(1:int:end),baday1(1:int:end),'color',[0.7 0.7 0.7])
-plot(badty2(1:int:end),baday2(1:int:end),'color',[0.7 0.7 0.7])
-plot(badty3(1:int:end),baday3(1:int:end),'color',[0.7 0.7 0.7])
-plot(badty4(1:int:end),baday4(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badty1(1:int:end),baday1(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badty2(1:int:end),baday2(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badty3(1:int:end),baday3(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badty4(1:int:end),baday4(1:int:end),'color',[0.7 0.7 0.7])
 grid on
-longticks
+longticks([],3)
 xlim([d1.t(1) d1.t(end-2)])
 ay = abs([ay1 ay2 ay3 ay4]);
-ay = rmoutliers(ay,'mean');
-ylim([-max(ay,[],'all')-0.005*abs(max(ay,[],'all')) max(ay,[],'all')+0.005*abs(max(ay,[],'all'))])
-ylabel('a_y [m/s^2]')
+ayout = rmoutliers(ay,'mean');
+outpct = (length(ay)-length(ayout))*100/length(ay);
+ylim([-max(ayout,[],'all')-0.005*abs(max(ayout,[],'all')) max(ayout,[],'all')+0.005*abs(max(ayout,[],'all'))])
+a=annotation('textbox',[0.75 0.4375 0 0],'String',[sprintf('%05.2f%% Not Shown',outpct)],'FitBoxToText','on');
+a.FontSize = 8;
+ylabel('a_y [cm/s^2]')
 xticklabels([])
 
 ah(5)=subplot(5,2,[9 10]);
@@ -329,19 +346,21 @@ hold on
 plot(d2.t(1:int:end-2),az2(1:int:end),'g')
 plot(d3.t(1:int:end-2),az3(1:int:end),'b')
 plot(d4.t(1:int:end-2),az4(1:int:end),'m')
-plot(badtz1(1:int:end),badaz1(1:int:end),'color',[0.7 0.7 0.7])
-plot(badtz2(1:int:end),badaz2(1:int:end),'color',[0.7 0.7 0.7])
-plot(badtz3(1:int:end),badaz3(1:int:end),'color',[0.7 0.7 0.7])
-plot(badtz4(1:int:end),badaz4(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badtz1(1:int:end),badaz1(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badtz2(1:int:end),badaz2(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badtz3(1:int:end),badaz3(1:int:end),'color',[0.7 0.7 0.7])
+% plot(badtz4(1:int:end),badaz4(1:int:end),'color',[0.7 0.7 0.7])
 grid on
-longticks
+longticks([],3)
 xlim([d1.t(1) d1.t(end-2)])
 az = abs([az1 az2 az3 az4]);
-az = rmoutliers(az,'mean');
-ylim([-max(az,[],'all')-0.005*abs(max(az,[],'all')) max(az,[],'all')+0.005*abs(max(az,[],'all'))])
-ylabel('a_z [m/s^2]')
+azout = rmoutliers(az,'mean');
+outpct = (length(az)-length(azout))*100/length(az);
+ylim([-max(azout,[],'all')-0.005*abs(max(azout,[],'all')) max(azout,[],'all')+0.005*abs(max(azout,[],'all'))])
+a=annotation('textbox',[0.75 0.265 0 0],'String',[sprintf('%05.2f%% Not Shown',outpct)],'FitBoxToText','on');
+a.FontSize = 8;
+ylabel('a_z [cm/s^2]')
 
-%keyboard
 
 tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d1.t(1))));
 movev(tt,0.3)
@@ -350,5 +369,7 @@ movev(tt,0.3)
 %a.FontSize = 12;
 
 %figdisp(fname,[],'',2,[],'epstopdf')
+
+keyboard
 
 %close
