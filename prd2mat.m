@@ -16,10 +16,10 @@ function varargout=prd2mat(prdfile,plt)
 %
 % EXAMPLE
 %
-% d=kin2mat('prdfile'); plot(d.t,d.height)
+% d=prd2mat('prdfile'); plot(d.t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 11/09/2021
+% Last modified by tschuh-at-princeton.edu, 11/21/2021
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
