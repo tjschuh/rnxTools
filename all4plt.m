@@ -12,7 +12,7 @@ function all4plt(unit1file,unit2file,unit3file,unit4file)
 % unit4file     mat file containing data collected by unit 4
 %
 % Originally written by tschuh-at-princeton.edu, 11/12/2021
-% Last modified by tschuh-at-princeton.edu, 11/15/2021
+% Last modified by tschuh-at-princeton.edu, 11/22/2021
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
@@ -73,7 +73,7 @@ plot(d1.t(1:int:end),d1.height(1:int:end),'r')
 hold on
 plot(d2.t(1:int:end),d2.height(1:int:end),'g')
 plot(d3.t(1:int:end),d3.height(1:int:end),'b')
-plot(d4.t(1:int:end),d4.height(1:int:end),'m')
+plot(d4.t(1:int:end),d4.height(1:int:end),'k')
 xlim([d1.t(1) d1.t(end)])
 xticklabels([])
 ylabel('Height relative to WGS84 [m]')
@@ -291,14 +291,13 @@ azcorr = corr([az1 az2 az3 az4],'rows','complete');
 % baday4 = ay4(ay4rows); badty4 = d4.t(ay4rows);
 % badaz4 = az4(az4rows); badtz4 = d4.t(az4rows);
 
-% how does Frederik want me to plot this exactly?
 % grey out bad data?
 ah(3)=subplot(5,2,[5 6]);
 plot(d1.t(1:int:end-2),ax1(1:int:end),'r')
 hold on
 plot(d2.t(1:int:end-2),ax2(1:int:end),'g')
 plot(d3.t(1:int:end-2),ax3(1:int:end),'b')
-plot(d4.t(1:int:end-2),ax4(1:int:end),'m')
+plot(d4.t(1:int:end-2),ax4(1:int:end),'k')
 % plot(badtx1(1:int:end),badax1(1:int:end),'color',[0.7 0.7 0.7])
 % plot(badtx2(1:int:end),badax2(1:int:end),'color',[0.7 0.7 0.7])
 % plot(badtx3(1:int:end),badax3(1:int:end),'color',[0.7 0.7 0.7])
@@ -313,6 +312,8 @@ outpct = (length(ax)-length(axout))*100/length(ax);
 ylim([-max(axout,[],'all')-0.005*abs(max(axout,[],'all')) max(axout,[],'all')+0.005*abs(max(axout,[],'all'))])
 a=annotation('textbox',[0.75 0.61 0 0],'String',[sprintf('%05.2f%% Not Shown',outpct)],'FitBoxToText','on');
 a.FontSize = 8;
+b=annotation('textbox',[0.13 0.625 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%.2f, %.2f, %.2f',axcorr(1,2),axcorr(1,3),axcorr(1,4),axcorr(2,3),axcorr(2,4),axcorr(3,4))],'FitBoxToText','on');
+b.FontSize = 8;
 ylabel('a_x [cm/s^2]')
 sat=title(sprintf('Ship Acceleration Components (Every %dth Point)',int));
 movev(sat,2.5)
@@ -323,7 +324,7 @@ plot(d1.t(1:int:end-2),ay1(1:int:end),'r')
 hold on
 plot(d2.t(1:int:end-2),ay2(1:int:end),'g')
 plot(d3.t(1:int:end-2),ay3(1:int:end),'b')
-plot(d4.t(1:int:end-2),ay4(1:int:end),'m')
+plot(d4.t(1:int:end-2),ay4(1:int:end),'k')
 % plot(badty1(1:int:end),baday1(1:int:end),'color',[0.7 0.7 0.7])
 % plot(badty2(1:int:end),baday2(1:int:end),'color',[0.7 0.7 0.7])
 % plot(badty3(1:int:end),baday3(1:int:end),'color',[0.7 0.7 0.7])
@@ -337,6 +338,10 @@ outpct = (length(ay)-length(ayout))*100/length(ay);
 ylim([-max(ayout,[],'all')-0.005*abs(max(ayout,[],'all')) max(ayout,[],'all')+0.005*abs(max(ayout,[],'all'))])
 a=annotation('textbox',[0.75 0.4375 0 0],'String',[sprintf('%05.2f%% Not Shown',outpct)],'FitBoxToText','on');
 a.FontSize = 8;
+b=annotation('textbox',[0.13 0.45 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%.2f, %.2f, %.2f',aycorr(1,2),aycorr(1,3),aycorr(1,4),aycorr(2,3),aycorr(2,4),aycorr(3,4))],'FitBoxToText','on');
+b.FontSize = 8;
+c=annotation('textbox',[0.4 0.45 0 0],'String',[sprintf('GPS 1 - red, GPS 2 - green,\nGPS 3 - blue, GPS 4 - black')],'FitBoxToText','on');
+c.FontSize = 8;
 ylabel('a_y [cm/s^2]')
 xticklabels([])
 
@@ -345,7 +350,7 @@ plot(d1.t(1:int:end-2),az1(1:int:end),'r')
 hold on
 plot(d2.t(1:int:end-2),az2(1:int:end),'g')
 plot(d3.t(1:int:end-2),az3(1:int:end),'b')
-plot(d4.t(1:int:end-2),az4(1:int:end),'m')
+plot(d4.t(1:int:end-2),az4(1:int:end),'k')
 % plot(badtz1(1:int:end),badaz1(1:int:end),'color',[0.7 0.7 0.7])
 % plot(badtz2(1:int:end),badaz2(1:int:end),'color',[0.7 0.7 0.7])
 % plot(badtz3(1:int:end),badaz3(1:int:end),'color',[0.7 0.7 0.7])
@@ -359,17 +364,20 @@ outpct = (length(az)-length(azout))*100/length(az);
 ylim([-max(azout,[],'all')-0.005*abs(max(azout,[],'all')) max(azout,[],'all')+0.005*abs(max(azout,[],'all'))])
 a=annotation('textbox',[0.75 0.265 0 0],'String',[sprintf('%05.2f%% Not Shown',outpct)],'FitBoxToText','on');
 a.FontSize = 8;
+b=annotation('textbox',[0.13 0.2775 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%.2f, %.2f, %.2f',azcorr(1,2),azcorr(1,3),azcorr(1,4),azcorr(2,3),azcorr(2,4),azcorr(3,4))],'FitBoxToText','on');
+b.FontSize = 8;
+c=annotation('textbox',[0.44 0.2775 0 0],'String',[sprintf('X12, X13, X14,\nX23, X24, X34')],'FitBoxToText','on');
+c.FontSize = 8;
 ylabel('a_z [cm/s^2]')
-
 
 tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d1.t(1))));
 movev(tt,0.3)
 
-%a = annotation('textbox',[0.45 0.075 0 0],'String',['jaxs'],'FitBoxToText','on');
-%a.FontSize = 12;
+a = annotation('textbox',[0.465 0.085 0 0],'String',['leg 1'],'FitBoxToText','on');
+a.FontSize = 12;
 
 %figdisp(fname,[],'',2,[],'epstopdf')
 
-keyboard
-
 %close
+
+keyboard
