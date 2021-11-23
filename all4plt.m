@@ -14,6 +14,9 @@ function all4plt(unit1file,unit2file,unit3file,unit4file)
 % Originally written by tschuh-at-princeton.edu, 11/12/2021
 % Last modified by tschuh-at-princeton.edu, 11/22/2021
 
+% currently statistics (correlation coeff, ployfit, rms, std)
+% are computed using all data including grey out parts
+
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
 [~,fname,~] = fileparts(unit1file);
@@ -76,9 +79,12 @@ grid on
 longticks
 % to set best ylim, remove outliers from alldht
 % then find the global min
-alldht = [d1.height d2.height d3.height d4.height];
-alldht = rmoutliers(alldht,'mean');
-ylim([min(alldht,[],'all')-0.005*abs(min(alldht,[],'all')) max(alldht,[],'all')+0.005*abs(max(alldht,[],'all'))])
+allht = [d1.height d2.height d3.height d4.height];
+allhtout = rmoutliers(allht,'mean');
+outpct = (length(allht)-length(allhtout))*100/length(allht);
+ylim([min(allhtout,[],'all')-0.005*abs(min(allhtout,[],'all')) max(allhtout,[],'all')+0.005*abs(max(allhtout,[],'all'))])
+a=annotation('textbox',[0.325 0.655 0 0],'String',[sprintf('%05.2f%% Outliers',outpct)],'FitBoxToText','on');
+a.FontSize = 8;
 % grey out bad data
 plot(d1.t(1:int:end),b1(1:int:end),'color',[0.7 0.7 0.7])
 plot(d2.t(1:int:end),b2(1:int:end),'color',[0.7 0.7 0.7])
