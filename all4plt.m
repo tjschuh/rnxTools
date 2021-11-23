@@ -153,13 +153,13 @@ ylim([0.25 6.75])
 yticklabels({'1-2','1-3','1-4','2-3','2-4','3-4'})
 ylabel('GPS Pair')
 gpst=title(sprintf('Distances between GPS Receivers'));
-text(d1.t(850),6.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a34,b34,rms34,std34))
-text(d1.t(850),5.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a24,b24,rms24,std24))
-text(d1.t(850),4.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a23,b23,rms23,std23))
-text(d1.t(850),3.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a14,b14,rms14,std14))
-text(d1.t(850),2.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a13,b13,rms13,std13))
-text(d1.t(850),1.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a12,b12,rms12,std12))
-text(d1.t(520),0.5,sprintf('a [mm/s], b [m], rms [m], std [m]'))
+text(d1.t(floor(length(d1.t)/4)),6.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a34,b34,rms34,std34))
+text(d1.t(floor(length(d1.t)/4)),5.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a24,b24,rms24,std24))
+text(d1.t(floor(length(d1.t)/4)),4.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a23,b23,rms23,std23))
+text(d1.t(floor(length(d1.t)/4)),3.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a14,b14,rms14,std14))
+text(d1.t(floor(length(d1.t)/4)),2.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a13,b13,rms13,std13))
+text(d1.t(floor(length(d1.t)/4)),1.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a12,b12,rms12,std12))
+text(d1.t(floor(length(d1.t)/6)),0.5,sprintf('a [mm/s], b [m], rms [m], std [m]'))
 grid on
 longticks
 % grey out bad data
@@ -215,32 +215,32 @@ az4 = diff(vz4)./(2*seconds(diff(d4.t(1:end-1))));
 % find good (g) and bad (b) data
 % [g b] = h
 gax1 = ax1; bax1 = ax1; gax2 = ax2; bax2 = ax2; gax3 = ax3; bax3 = ax3; gax4 = ax4; bax4 = ax4;
-gax1(p1>=pthresh | p1==0 | n1<=nthresh) = NaN;
-bax1(p1<pthresh & n1>nthresh) = NaN;
-gax2(p2>=pthresh | p2==0 | n2<=nthresh) = NaN;
-bax2(p2<pthresh & n2>nthresh) = NaN;
-gax3(p3>=pthresh | p3==0 | n3<=nthresh) = NaN;
-bax3(p3<pthresh & n3>nthresh) = NaN;
-gax4(p4>=pthresh | p4==0 | n4<=nthresh) = NaN;
-bax4(p4<pthresh & n4>nthresh) = NaN;
+gax1(p1(1:end-2)>=pthresh | p1(1:end-2)==0 | n1(1:end-2)<=nthresh) = NaN;
+bax1(p1(1:end-2)<pthresh & n1(1:end-2)>nthresh) = NaN;
+gax2(p2(1:end-2)>=pthresh | p2(1:end-2)==0 | n2(1:end-2)<=nthresh) = NaN;
+bax2(p2(1:end-2)<pthresh & n2(1:end-2)>nthresh) = NaN;
+gax3(p3(1:end-2)>=pthresh | p3(1:end-2)==0 | n3(1:end-2)<=nthresh) = NaN;
+bax3(p3(1:end-2)<pthresh & n3(1:end-2)>nthresh) = NaN;
+gax4(p4(1:end-2)>=pthresh | p4(1:end-2)==0 | n4(1:end-2)<=nthresh) = NaN;
+bax4(p4(1:end-2)<pthresh & n4(1:end-2)>nthresh) = NaN;
 gay1 = ay1; bay1 = ay1; gay2 = ay2; bay2 = ay2; gay3 = ay3; bay3 = ay3; gay4 = ay4; bay4 = ay4;
-gay1(p1>=pthresh | p1==0 | n1<=nthresh) = NaN;
-bay1(p1<pthresh & n1>nthresh) = NaN;
-gay2(p2>=pthresh | p2==0 | n2<=nthresh) = NaN;
-bay2(p2<pthresh & n2>nthresh) = NaN;
-gay3(p3>=pthresh | p3==0 | n3<=nthresh) = NaN;
-bay3(p3<pthresh & n3>nthresh) = NaN;
-gay4(p4>=pthresh | p4==0 | n4<=nthresh) = NaN;
-bay4(p4<pthresh & n4>nthresh) = NaN;
+gay1(p1(1:end-2)>=pthresh | p1(1:end-2)==0 | n1(1:end-2)<=nthresh) = NaN;
+bay1(p1(1:end-2)<pthresh & n1(1:end-2)>nthresh) = NaN;
+gay2(p2(1:end-2)>=pthresh | p2(1:end-2)==0 | n2(1:end-2)<=nthresh) = NaN;
+bay2(p2(1:end-2)<pthresh & n2(1:end-2)>nthresh) = NaN;
+gay3(p3(1:end-2)>=pthresh | p3(1:end-2)==0 | n3(1:end-2)<=nthresh) = NaN;
+bay3(p3(1:end-2)<pthresh & n3(1:end-2)>nthresh) = NaN;
+gay4(p4(1:end-2)>=pthresh | p4(1:end-2)==0 | n4(1:end-2)<=nthresh) = NaN;
+bay4(p4(1:end-2)<pthresh & n4(1:end-2)>nthresh) = NaN;
 gaz1 = az1; baz1 = az1; gaz2 = az2; baz2 = az2; gaz3 = az3; baz3 = az3; gaz4 = az4; baz4 = az4;
-gaz1(p1>=pthresh | p1==0 | n1<=nthresh) = NaN;
-baz1(p1<pthresh & n1>nthresh) = NaN;
-gaz2(p2>=pthresh | p2==0 | n2<=nthresh) = NaN;
-baz2(p2<pthresh & n2>nthresh) = NaN;
-gaz3(p3>=pthresh | p3==0 | n3<=nthresh) = NaN;
-baz3(p3<pthresh & n3>nthresh) = NaN;
-gaz4(p4>=pthresh | p4==0 | n4<=nthresh) = NaN;
-baz4(p4<pthresh & n4>nthresh) = NaN;
+gaz1(p1(1:end-2)>=pthresh | p1(1:end-2)==0 | n1(1:end-2)<=nthresh) = NaN;
+baz1(p1(1:end-2)<pthresh & n1(1:end-2)>nthresh) = NaN;
+gaz2(p2(1:end-2)>=pthresh | p2(1:end-2)==0 | n2(1:end-2)<=nthresh) = NaN;
+baz2(p2(1:end-2)<pthresh & n2(1:end-2)>nthresh) = NaN;
+gaz3(p3(1:end-2)>=pthresh | p3(1:end-2)==0 | n3(1:end-2)<=nthresh) = NaN;
+baz3(p3(1:end-2)<pthresh & n3(1:end-2)>nthresh) = NaN;
+gaz4(p4(1:end-2)>=pthresh | p4(1:end-2)==0 | n4(1:end-2)<=nthresh) = NaN;
+baz4(p4(1:end-2)<pthresh & n4(1:end-2)>nthresh) = NaN;
 
 a1 = sqrt(ax1.^2 + ay1.^2 + az1.^2); 
 a2 = sqrt(ax2.^2 + ay2.^2 + az2.^2); 
@@ -272,7 +272,6 @@ b=annotation('textbox',[0.13 0.625 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%.
 b.FontSize = 8;
 ylabel('a_x [cm/s^2]')
 sat=title(sprintf('Ship Acceleration Components (Every %dth Point)',int));
-movev(sat,2.5)
 xticklabels([])
 % grey out bad data
 plot(d1.t(1:int:end-2),bax1(1:int:end),'color',[0.7 0.7 0.7])
@@ -341,11 +340,9 @@ plot(d4.t(1:int:end-2),baz4(1:int:end),'color',[0.7 0.7 0.7])
 tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d1.t(1))));
 movev(tt,0.3)
 
-a = annotation('textbox',[0.465 0.085 0 0],'String',['leg 1'],'FitBoxToText','on');
+a = annotation('textbox',[0.465 0.085 0 0],'String',['leg 2'],'FitBoxToText','on');
 a.FontSize = 12;
 
-%figdisp(fname,[],'',2,[],'epstopdf')
+figdisp(fname,[],'',2,[],'epstopdf')
 
-%close
-
-%keyboard
+close
