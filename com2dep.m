@@ -33,12 +33,12 @@ dist = sqrt((d.x(:) - dogx).^2 + (d.y(:) - dogy).^2 + (d.z(:) - dogz).^2);
 % plot the distance [km] vs time
 % would be nice to eventually add error bars
 plot(d.t,dist*1e-3,'LineWidth',2)
-set(gca,'YDir','reverse')
+%set(gca,'YDir','reverse')
 xlim([d.t(1) d.t(end)])
 buff = 0.01;
 ylim([min(dist*1e-3)-buff*min(dist*1e-3) max(dist*1e-3)+buff*max(dist*1e-3)])
-ylabel('Distance [km]')
-title(sprintf('Ship-Beacon Distance Starting from %s',datestr(d.t(1))))
+ylabel('Slant Range [km]')
+title(sprintf('Raw Slant Range Measurements: %s',datestr(d.t(1))))
 grid on
 longticks
 
