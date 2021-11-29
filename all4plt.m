@@ -12,10 +12,12 @@ function all4plt(unit1file,unit2file,unit3file,unit4file)
 % unit4file     mat file containing data collected by unit 4
 %
 % Originally written by tschuh-at-princeton.edu, 11/12/2021
-% Last modified by tschuh-at-princeton.edu, 11/22/2021
+% Last modified by tschuh-at-princeton.edu, 11/29/2021
 
 % currently statistics (correlation coeff, ployfit, rms, std)
-% are computed using all data including grey out parts
+% are computed using all data including greyed out parts
+
+% need to play with the annotation positioning on Ariel
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
@@ -85,6 +87,8 @@ outpct = (length(allht)-length(allhtout))*100/length(allht);
 ylim([min(allhtout,[],'all')-0.005*abs(min(allhtout,[],'all')) max(allhtout,[],'all')+0.005*abs(max(allhtout,[],'all'))])
 a=annotation('textbox',[0.325 0.655 0 0],'String',[sprintf('%05.2f%% Outliers',outpct)],'FitBoxToText','on');
 a.FontSize = 8;
+b=annotation('textbox',[0.16 0.655 0 0],'String',[sprintf('Nsats > %d & PDOP < %d',nthresh,pthresh)],'FitBoxToText','on');
+b.FontSize = 8;
 % grey out bad data
 plot(d1.t(1:int:end),b1(1:int:end),'color',[0.7 0.7 0.7])
 plot(d2.t(1:int:end),b2(1:int:end),'color',[0.7 0.7 0.7])
@@ -98,27 +102,33 @@ plot(d4.t(1:int:end),b4(1:int:end),'color',[0.7 0.7 0.7])
 dist12 = sqrt((d1.xyz(:,1)-d2.xyz(:,1)).^2 + (d1.xyz(:,2)-d2.xyz(:,2)).^2 + (d1.xyz(:,3)-d2.xyz(:,3)).^2);
 normdist12 = dist12 - nanmean(dist12) + 1;
 dist12 = rmNaNrows(dist12); p = polyfit([1:length(dist12)]',dist12,1);
-a12 = 1000*p(1); b12 = p(2); rms12 = rms(dist12); std12 = std(dist12);
+a12 = 1000*p(1); b12 = p(2); rms12 = rms(dist12); std12 = std(1000*dist12);
+x12 = (a12/1000).*[1:length(dist12)]' + b12; e12 = x12 - dist12; erms12 = 1000*rms(e12);
 dist13 = sqrt((d1.xyz(:,1)-d3.xyz(:,1)).^2 + (d1.xyz(:,2)-d3.xyz(:,2)).^2 + (d1.xyz(:,3)-d3.xyz(:,3)).^2);
 normdist13 = dist13 - nanmean(dist13) + 2;
 dist13 = rmNaNrows(dist13); p = polyfit([1:length(dist13)]',dist13,1);
-a13 = 1000*p(1); b13 = p(2); rms13 = rms(dist13); std13 = std(dist13);
+a13 = 1000*p(1); b13 = p(2); rms13 = rms(dist13); std13 = std(1000*dist13);
+x13 = (a13/1000).*[1:length(dist13)]' + b13; e13 = x13 - dist13; erms13 = 1000*rms(e13);
 dist14 = sqrt((d1.xyz(:,1)-d4.xyz(:,1)).^2 + (d1.xyz(:,2)-d4.xyz(:,2)).^2 + (d1.xyz(:,3)-d4.xyz(:,3)).^2);
 normdist14 = dist14 - nanmean(dist14) + 3;
 dist14 = rmNaNrows(dist14); p = polyfit([1:length(dist14)]',dist14,1);
-a14 = 1000*p(1); b14 = p(2); rms14 = rms(dist14); std14 = std(dist14);
+a14 = 1000*p(1); b14 = p(2); rms14 = rms(dist14); std14 = std(1000*dist14);
+x14 = (a14/1000).*[1:length(dist14)]' + b14; e14 = x14 - dist14; erms14 = 1000*rms(e14);
 dist23 = sqrt((d2.xyz(:,1)-d3.xyz(:,1)).^2 + (d2.xyz(:,2)-d3.xyz(:,2)).^2 + (d2.xyz(:,3)-d3.xyz(:,3)).^2);
 normdist23 = dist23 - nanmean(dist23) + 4;
 dist23 = rmNaNrows(dist23); p = polyfit([1:length(dist23)]',dist23,1);
-a23 = 1000*p(1); b23 = p(2); rms23 = rms(dist23); std23 = std(dist23);
+a23 = 1000*p(1); b23 = p(2); rms23 = rms(dist23); std23 = std(1000*dist23);
+x23 = (a23/1000).*[1:length(dist23)]' + b23; e23 = x23 - dist23; erms23 = 1000*rms(e23);
 dist24 = sqrt((d2.xyz(:,1)-d4.xyz(:,1)).^2 + (d2.xyz(:,2)-d4.xyz(:,2)).^2 + (d2.xyz(:,3)-d4.xyz(:,3)).^2);
 normdist24 = dist24 - nanmean(dist24) + 5;
 dist24 = rmNaNrows(dist24); p = polyfit([1:length(dist24)]',dist24,1);
-a24 = 1000*p(1); b24 = p(2); rms24 = rms(dist24); std24 = std(dist24);
+a24 = 1000*p(1); b24 = p(2); rms24 = rms(dist24); std24 = std(1000*dist24);
+x24 = (a24/1000).*[1:length(dist24)]' + b24; e24 = x24 - dist24; erms24 = 1000*rms(e24);
 dist34 = sqrt((d3.xyz(:,1)-d4.xyz(:,1)).^2 + (d3.xyz(:,2)-d4.xyz(:,2)).^2 + (d3.xyz(:,3)-d4.xyz(:,3)).^2);
 normdist34 = dist34 - nanmean(dist34) + 6;
 dist34 = rmNaNrows(dist34); p = polyfit([1:length(dist34)]',dist34,1);
-a34 = 1000*p(1); b34 = p(2); rms34 = rms(dist34); std34 = std(dist34);
+a34 = 1000*p(1); b34 = p(2); rms34 = rms(dist34); std34 = std(1000*dist34);
+x34 = (a34/1000).*[1:length(dist34)]' + b34; e34 = x34 - dist34; erms34 = 1000*rms(e34);
 
 % find good (g) and bad (b) data
 % [g b] = h
@@ -153,13 +163,13 @@ ylim([0.25 6.75])
 yticklabels({'1-2','1-3','1-4','2-3','2-4','3-4'})
 ylabel('GPS Pair')
 gpst=title(sprintf('Distances between GPS Receivers'));
-text(d1.t(floor(length(d1.t)/4)),6.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a34,b34,rms34,std34))
-text(d1.t(floor(length(d1.t)/4)),5.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a24,b24,rms24,std24))
-text(d1.t(floor(length(d1.t)/4)),4.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a23,b23,rms23,std23))
-text(d1.t(floor(length(d1.t)/4)),3.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a14,b14,rms14,std14))
-text(d1.t(floor(length(d1.t)/4)),2.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a13,b13,rms13,std13))
-text(d1.t(floor(length(d1.t)/4)),1.4,sprintf('%.2e, %05.2f, %05.2f, %.2f',a12,b12,rms12,std12))
-text(d1.t(floor(length(d1.t)/6)),0.5,sprintf('a [mm/s], b [m], rms [m], std [m]'))
+text(d1.t(floor(length(d1.t)/4)),6.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a34,b34,rms34,std34,erms34))
+text(d1.t(floor(length(d1.t)/4)),5.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a24,b24,rms24,std24,erms24))
+text(d1.t(floor(length(d1.t)/4)),4.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a23,b23,rms23,std23,erms23))
+text(d1.t(floor(length(d1.t)/4)),3.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a14,b14,rms14,std14,erms14))
+text(d1.t(floor(length(d1.t)/4)),2.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a13,b13,rms13,std13,erms13))
+text(d1.t(floor(length(d1.t)/4)),1.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a12,b12,rms12,std12,erms12))
+text(d1.t(floor(length(d1.t)/6)),0.5,sprintf('a [mm/s], b [m], rms(x) [m], std [mm], rms(e) [mm]'))
 grid on
 longticks
 % grey out bad data
@@ -187,16 +197,14 @@ vx4 = 100*diff(d4.xyz(:,1))./seconds(diff(d4.t));
 vy4 = 100*diff(d4.xyz(:,2))./seconds(diff(d4.t));
 vz4 = 100*diff(d4.xyz(:,3))./seconds(diff(d4.t));
 
-% time and spatial velocity average doesnt seem to work right
-% vxavg = (vx1+vx2+vx3+vx4)./4;
-% vyavg = (vy1+vy2+vy3+vy4)./4;
-% vxyavg = sqrt(vxavg.^2 + vyavg.^2);
-% vxytavg = nanmean(vxyavg);
-
-v1 = sqrt(vx1.^2 + vy1.^2 + vz1.^2);
-v2 = sqrt(vx2.^2 + vy2.^2 + vz2.^2);
-v3 = sqrt(vx3.^2 + vy3.^2 + vz3.^2);
-v4 = sqrt(vx4.^2 + vy4.^2 + vz4.^2);
+% compute average spatial and time velocity in knots (1 knot = 1852 m/hr)
+vx = [vx1 vx2 vx3 vx4];
+vy = [vy1 vy2 vy3 vy4];
+vxavg = nanmean(vx,2);
+vyavg = nanmean(vy,2);
+vxymag = sqrt(vxavg.^2 + vyavg.^2);
+vavg = nanmean(vxymag,1);
+vavg = vavg*3600*1e-2/1852;
 
 % then compute acceleration components ax, ay, az in cm/s^2
 ax1 = diff(vx1)./(2*seconds(diff(d1.t(1:end-1))));
@@ -211,6 +219,14 @@ az3 = diff(vz3)./(2*seconds(diff(d3.t(1:end-1))));
 ax4 = diff(vx4)./(2*seconds(diff(d4.t(1:end-1))));
 ay4 = diff(vy4)./(2*seconds(diff(d4.t(1:end-1))));
 az4 = diff(vz4)./(2*seconds(diff(d4.t(1:end-1))));
+
+% compute average ax,ay,az in cm/s^2
+ax = [ax1 ax2 ax3 ax4];
+ay = [ay1 ay2 ay3 ay4];
+az = [az1 az2 az3 az4];
+axavg = nanmean(nanmean(ax,2),1);
+ayavg = nanmean(nanmean(ay,2),1);
+azavg = nanmean(nanmean(az,2),1);
 
 % find good (g) and bad (b) data
 % [g b] = h
@@ -270,6 +286,10 @@ a=annotation('textbox',[0.77 0.61 0 0],'String',[sprintf('%05.2f%% Outliers',out
 a.FontSize = 8;
 b=annotation('textbox',[0.13 0.625 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%.2f, %.2f, %.2f',axcorr(1,2),axcorr(1,3),axcorr(1,4),axcorr(2,3),axcorr(2,4),axcorr(3,4))],'FitBoxToText','on');
 b.FontSize = 8;
+c=annotation('textbox',[0.325 0.92 0 0],'String',[sprintf('v = %.2f knots',vavg)],'FitBoxToText','on');
+c.FontSize = 8;
+d=annotation('textbox',[0.135 0.58 0 0],'String',[sprintf('mean = %f cm/s^2',axavg)],'FitBoxToText','on');
+d.FontSize = 8;
 ylabel('a_x [cm/s^2]')
 sat=title(sprintf('Ship Acceleration Components (Every %dth Point)',int));
 xticklabels([])
@@ -299,6 +319,8 @@ b=annotation('textbox',[0.13 0.45 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%.2
 b.FontSize = 8;
 c=annotation('textbox',[0.4 0.45 0 0],'String',[sprintf('GPS 1 - red, GPS 2 - green,\nGPS 3 - blue, GPS 4 - black')],'FitBoxToText','on');
 c.FontSize = 8;
+d=annotation('textbox',[0.135 0.405 0 0],'String',[sprintf('mean = %f cm/s^2',ayavg)],'FitBoxToText','on');
+d.FontSize = 8;
 ylabel('a_y [cm/s^2]')
 xticklabels([])
 % grey out bad data
@@ -327,6 +349,8 @@ b=annotation('textbox',[0.13 0.2775 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%
 b.FontSize = 8;
 c=annotation('textbox',[0.44 0.2775 0 0],'String',[sprintf('X12, X13, X14,\nX23, X24, X34')],'FitBoxToText','on');
 c.FontSize = 8;
+d=annotation('textbox',[0.135 0.2325 0 0],'String',[sprintf('mean = %f cm/s^2',azavg)],'FitBoxToText','on');
+d.FontSize = 8;
 ylabel('a_z [cm/s^2]')
 % grey out bad data
 plot(d1.t(1:int:end-2),baz1(1:int:end),'color',[0.7 0.7 0.7])
