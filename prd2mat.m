@@ -19,7 +19,7 @@ function varargout=prd2mat(prdfile,plt)
 % d=prd2mat('prdfile'); plot(d.t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 11/21/2021
+% Last modified by tschuh-at-princeton.edu, 11/24/2021
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
@@ -143,12 +143,12 @@ if plt == 1
 
     % find rows where nsats <= 4
     nthresh = 4;
-    nrows=find(d.nsats(:,1)<=nthresh);
+    n = d.nsats(:,1);
 
     % also should find rows where pdop is >= 10 or = 0
     % this doesnt always coincide with low nsats
     pthresh = 15;
-    prows = find(d.pdop(:,1)>=pthresh | d.pdop(:,1)==0);
+    p = d.pdop;
 
     % plotting interval
     int = 10;
@@ -159,52 +159,52 @@ if plt == 1
     y = d.utmnorthing-(min(d.utmnorthing)-.05*(max(d.utmnorthing)-min(d.utmnorthing)));
     tc = datetime(d.t,'Format','HH:mm:ss'); 
     z=zeros(size(x));
+
+    % find good (g) and bad (b) data
+    % [gx bx] = x
+    gx = x; bx = x;
+    gy = y; by = y;
+    gx(p>=pthresh | p==0 | n<=nthresh) = NaN;
+    bx(p<pthresh & n>nthresh) = NaN;
+    gy(p>=pthresh | p==0 | n<=nthresh) = NaN;
+    by(p<pthresh & n>nthresh) = NaN;
+
     ah(1)=subplot(2,2,[1 3]);
     c = linspace(1,10,length(x(1:int:end)));
-    scatter(x(1:int:end)',y(1:int:end)',[],c,'filled')
+    scatter(gx(1:int:end)',gy(1:int:end)',[],c,'filled')
     colormap(jet)
     colorbar('southoutside','Ticks',[1:3:10],'TickLabels',...
              {datestr(tc(1),'HH:MM:SS'),datestr(tc(floor(end/3)),'HH:MM:SS'),...
               datestr(tc(ceil(2*end/3)),'HH:MM:SS'),datestr(tc(end),'HH:MM:SS')})
     hold on
     % grey out "bad" data where nsats is too low or pdop is too high or 0
-    nbadx = x(nrows);
-    nbady = y(nrows);
-    pbadx = x(prows);
-    pbady = y(prows);
-    scatter(nbadx(1:int:end)',nbady(1:int:end)',[],[0.7 0.7 0.7],'filled')
-    hold on
-    scatter(pbadx(1:int:end)',pbady(1:int:end)',[],[0.7 0.7 0.7],'filled')
+    scatter(bx(1:int:end)',by(1:int:end)',[],[0.7 0.7 0.7],'filled')
     grid on
     longticks
-    %xlabel(sprintf('easting [m] (UTM Zone %s)'),zones{1})
     xlabel('Easting [m]')
-    %ylabel(sprintf('northing [m] (UTM Zone) %s'),zones{1})
     ylabel('Northing [m]')
-    title('Location of Ship in UTM coordinates')
+    title(sprintf('Ship Location (Every %dth Point)',int))
 
     % plot heights relative to WGS84
+    gh = d.height; bh = d.height;
+    gh(p>=pthresh | p==0 | n<=nthresh) = NaN;
+    bh(p<pthresh & n>nthresh) = NaN;
+
     ah(2)=subplot(2,2,2);
-    plot(d.t,d.height,'color',[0.4660 0.6740 0.1880])
+    plot(d.t(1:int:end),gh(1:int:end),'color',[0.4660 0.6740 0.1880])
     hold on
     % grey out "bad" data where nsats is too low or pdop is too high or 0
-    nbadt = d.t(nrows); 
-    nbadht = d.height(nrows);
-    pbadt = d.t(prows);
-    pbadht = d.height(prows);
-    plot(nbadt,nbadht,'color',[0.7 0.7 0.7])
-    hold on
-    plot(pbadt,pbadht,'color',[0.7 0.7 0.7])
+    plot(d.t(1:int:end),bh(1:int:end),'color',[0.7 0.7 0.7])
     xlim([d.t(1) d.t(end)])
     xticklabels([])
     % remove outliers so plotting looks better
-    d.height = rmoutliers(d.height,'mean');
-    % need to make 0.005 multiplier more general!
-    ylim([min(d.height)-0.005*abs(min(d.height)) max(d.height)+0.005*abs(max(d.height))])
+    htout = rmoutliers(d.height,'mean');
+    outpct = (length(d.height)-length(htout))*100/length(d.height);
+    ylim([min(htout,[],'all')-0.005*abs(min(htout,[],'all')) max(htout,[],'all')+0.005*abs(max(htout,[],'all'))])
     grid on
     longticks
     ylabel('Height relative to WGS84 [m]')
-    title('Height of Ship relative to WGS84')
+    title(sprintf('Ship Height (Every %dth Point)',int))
     
     % plot nsats and pdop on same plot
     ah(3)=subplot(2,2,4);
@@ -226,7 +226,7 @@ if plt == 1
     tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d.t(1))));
     movev(tt,0.3)
 
-    a = annotation('textbox',[0.23 0.1 0 0],'String',['Unit 4: leg 2'],'FitBoxToText','on');
+    a = annotation('textbox',[0.23 0.1 0 0],'String',['Unit 1: leg 2'],'FitBoxToText','on');
     a.FontSize = 12;
     
     % how do I save .pdf to working directory?
