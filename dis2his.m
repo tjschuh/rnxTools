@@ -78,6 +78,9 @@ good34(p3>=pthresh | p3==0 | n3<=nthresh | p4>=pthresh | p4==0 | n4<=nthresh) = 
 bad34(p3<pthresh & n3>nthresh & p4<pthresh & n4>nthresh) = NaN;
 
 % plotting
+f=figure;
+f.Position = [250 500 1100 400];
+
 ah(1) = subplot(3,2,1);
 histogram(e12)
 title('GPS Pair 1-2')
@@ -116,3 +119,5 @@ ylabel('Counts')
 
 tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d1.t(1))));
 movev(tt,0.3)
+
+figdisp([],[],'',2,[],'epstopdf')
