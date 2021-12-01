@@ -12,12 +12,10 @@ function all4plt(unit1file,unit2file,unit3file,unit4file)
 % unit4file     mat file containing data collected by unit 4
 %
 % Originally written by tschuh-at-princeton.edu, 11/12/2021
-% Last modified by tschuh-at-princeton.edu, 11/29/2021
+% Last modified by tschuh-at-princeton.edu, 12/01/2021
 
 % currently statistics (correlation coeff, ployfit, rms, std)
 % are computed using all data including greyed out parts
-
-% need to play with the annotation positioning on Ariel
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
@@ -46,8 +44,10 @@ function all4plt(unit1file,unit2file,unit3file,unit4file)
 nthresh = 4;
 % find rows where pdop >= 15 or = 0
 pthresh = 15;
-% plotting interval
-int=15;
+% plotting intervals
+int1 = 15;
+int2 = 5;
+int3 = 15;
 
 % find good (g) and bad (b) data
 % [g b] = h
@@ -68,32 +68,36 @@ b4(p4<pthresh & n4>nthresh) = NaN;
 f=figure;
 f.Position = [500 250 800 900];
 ah(1)=subplot(5,2,[1 3]);
-plot(d1.t(1:int:end),g1(1:int:end),'r')
+plot(d1.t(1:int1:end),g1(1:int1:end),'r')
 hold on
-plot(d2.t(1:int:end),g2(1:int:end),'g')
-plot(d3.t(1:int:end),g3(1:int:end),'b')
-plot(d4.t(1:int:end),g4(1:int:end),'k')
+plot(d2.t(1:int1:end),g2(1:int1:end),'g')
+plot(d3.t(1:int1:end),g3(1:int1:end),'b')
+plot(d4.t(1:int1:end),g4(1:int1:end),'k')
 xlim([d1.t(1) d1.t(end)])
 xticklabels([])
 ylabel('Height relative to WGS84 [m]')
-sht=title(sprintf('Ship Height (Every %dth Point)',int));
+sht=title(sprintf('Ship Height (Every %dth Point)',int1));
 grid on
 longticks
 % to set best ylim, remove outliers from alldht
 % then find the global min
-allht = [d1.height d2.height d3.height d4.height];
-allhtout = rmoutliers(allht,'mean');
+allht = [g1 g2 g3 g4];
+try
+    allhtout = rmoutliers(allht,'gesd');
+catch
+    allhtout = rmoutliers(allht,'mean');
+end
 outpct = (length(allht)-length(allhtout))*100/length(allht);
 ylim([min(allhtout,[],'all')-0.005*abs(min(allhtout,[],'all')) max(allhtout,[],'all')+0.005*abs(max(allhtout,[],'all'))])
 a=annotation('textbox',[0.325 0.655 0 0],'String',[sprintf('%05.2f%% Outliers',outpct)],'FitBoxToText','on');
 a.FontSize = 8;
-b=annotation('textbox',[0.16 0.655 0 0],'String',[sprintf('Nsats > %d & PDOP < %d',nthresh,pthresh)],'FitBoxToText','on');
+b=annotation('textbox',[0.135 0.655 0 0],'String',[sprintf('Nsats > %d & PDOP < %d',nthresh,pthresh)],'FitBoxToText','on');
 b.FontSize = 8;
 % grey out bad data
-plot(d1.t(1:int:end),b1(1:int:end),'color',[0.7 0.7 0.7])
-plot(d2.t(1:int:end),b2(1:int:end),'color',[0.7 0.7 0.7])
-plot(d3.t(1:int:end),b3(1:int:end),'color',[0.7 0.7 0.7])
-plot(d4.t(1:int:end),b4(1:int:end),'color',[0.7 0.7 0.7])
+plot(d1.t(1:int1:end),b1(1:int1:end),'color',[0.7 0.7 0.7])
+plot(d2.t(1:int1:end),b2(1:int1:end),'color',[0.7 0.7 0.7])
+plot(d3.t(1:int1:end),b3(1:int1:end),'color',[0.7 0.7 0.7])
+plot(d4.t(1:int1:end),b4(1:int1:end),'color',[0.7 0.7 0.7])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -150,35 +154,35 @@ good34(p3>=pthresh | p3==0 | n3<=nthresh | p4>=pthresh | p4==0 | n4<=nthresh) = 
 bad34(p3<pthresh & n3>nthresh & p4<pthresh & n4>nthresh) = NaN;
 
 ah(2)=subplot(5,2,[2 4]);
-plot(d1.t,good12)
+plot(d1.t(1:int2:end),good12(1:int2:end))
 hold on
-plot(d1.t,good13)
-plot(d1.t,good14)
-plot(d1.t,good23)
-plot(d1.t,good24)
-plot(d1.t,good34)
+plot(d1.t(1:int2:end),good13(1:int2:end))
+plot(d1.t(1:int2:end),good14(1:int2:end))
+plot(d1.t(1:int2:end),good23(1:int2:end))
+plot(d1.t(1:int2:end),good24(1:int2:end))
+plot(d1.t(1:int2:end),good34(1:int2:end))
 xlim([d1.t(1) d1.t(end)])
 xticklabels([])
 ylim([0.25 6.75])
 yticklabels({'1-2','1-3','1-4','2-3','2-4','3-4'})
 ylabel('GPS Pair')
-gpst=title(sprintf('Distances between GPS Receivers'));
-text(d1.t(floor(length(d1.t)/4)),6.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a34,b34,rms34,std34,erms34))
-text(d1.t(floor(length(d1.t)/4)),5.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a24,b24,rms24,std24,erms24))
-text(d1.t(floor(length(d1.t)/4)),4.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a23,b23,rms23,std23,erms23))
-text(d1.t(floor(length(d1.t)/4)),3.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a14,b14,rms14,std14,erms14))
-text(d1.t(floor(length(d1.t)/4)),2.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a13,b13,rms13,std13,erms13))
-text(d1.t(floor(length(d1.t)/4)),1.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a12,b12,rms12,std12,erms12))
-text(d1.t(floor(length(d1.t)/6)),0.5,sprintf('a [mm/s], b [m], rms(x) [m], std [mm], rms(e) [mm]'))
+gpst=title(sprintf('Distances between GPS Receivers\n(Every %dth Point)',int2));
 grid on
 longticks
 % grey out bad data
-plot(d1.t,bad12,'color',[0.7 0.7 0.7])
-plot(d1.t,bad13,'color',[0.7 0.7 0.7])
-plot(d1.t,bad14,'color',[0.7 0.7 0.7])
-plot(d1.t,bad23,'color',[0.7 0.7 0.7])
-plot(d1.t,bad24,'color',[0.7 0.7 0.7])
-plot(d1.t,bad34,'color',[0.7 0.7 0.7])
+plot(d1.t(1:int2:end),bad12(1:int2:end),'color',[0.7 0.7 0.7])
+plot(d1.t(1:int2:end),bad13(1:int2:end),'color',[0.7 0.7 0.7])
+plot(d1.t(1:int2:end),bad14(1:int2:end),'color',[0.7 0.7 0.7])
+plot(d1.t(1:int2:end),bad23(1:int2:end),'color',[0.7 0.7 0.7])
+plot(d1.t(1:int2:end),bad24(1:int2:end),'color',[0.7 0.7 0.7])
+plot(d1.t(1:int2:end),bad34(1:int2:end),'color',[0.7 0.7 0.7])
+text(d1.t(10),6.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a34,b34,rms34,std34,erms34),'FontSize',9)
+text(d1.t(10),5.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a24,b24,rms24,std24,erms24),'FontSize',9)
+text(d1.t(10),4.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a23,b23,rms23,std23,erms23),'FontSize',9)
+text(d1.t(10),3.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a14,b14,rms14,std14,erms14),'FontSize',9)
+text(d1.t(10),2.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a13,b13,rms13,std13,erms13),'FontSize',9)
+text(d1.t(10),1.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a12,b12,rms12,std12,erms12),'FontSize',9)
+text(d1.t(10),0.5,sprintf('a [mm/s], b [m], rms(x) [m], std [mm], rms(e) [mm]'),'FontSize',7.5)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -270,47 +274,55 @@ azcorr = corr([az1 az2 az3 az4],'rows','complete');
 
 % plot ax
 ah(3)=subplot(5,2,[5 6]);
-plot(d1.t(1:int:end-2),gax1(1:int:end),'r')
+plot(d1.t(1:int3:end-2),gax1(1:int3:end),'r')
 hold on
-plot(d2.t(1:int:end-2),gax2(1:int:end),'g')
-plot(d3.t(1:int:end-2),gax3(1:int:end),'b')
-plot(d4.t(1:int:end-2),gax4(1:int:end),'k')
+plot(d2.t(1:int3:end-2),gax2(1:int3:end),'g')
+plot(d3.t(1:int3:end-2),gax3(1:int3:end),'b')
+plot(d4.t(1:int3:end-2),gax4(1:int3:end),'k')
 grid on
 longticks([],3)
 xlim([d1.t(1) d1.t(end-2)])
-ax = abs([ax1 ax2 ax3 ax4]);
-axout = rmoutliers(ax,'mean');
+ax = abs([gax1 gax2 gax3 gax4]);
+try
+    axout = rmoutliers(ax,'gesd');
+catch
+    axout = rmoutliers(ax,'mean');
+end
 outpct = (length(ax)-length(axout))*100/length(ax);
 ylim([-max(axout,[],'all')-0.005*abs(max(axout,[],'all')) max(axout,[],'all')+0.005*abs(max(axout,[],'all'))])
 a=annotation('textbox',[0.77 0.61 0 0],'String',[sprintf('%05.2f%% Outliers',outpct)],'FitBoxToText','on');
 a.FontSize = 8;
 b=annotation('textbox',[0.13 0.625 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%.2f, %.2f, %.2f',axcorr(1,2),axcorr(1,3),axcorr(1,4),axcorr(2,3),axcorr(2,4),axcorr(3,4))],'FitBoxToText','on');
 b.FontSize = 8;
-c=annotation('textbox',[0.325 0.92 0 0],'String',[sprintf('v = %.2f knots',vavg)],'FitBoxToText','on');
+c=annotation('textbox',[0.335 0.9225 0 0],'String',[sprintf('v = %.2f knots',vavg)],'FitBoxToText','on');
 c.FontSize = 8;
 d=annotation('textbox',[0.135 0.58 0 0],'String',[sprintf('mean = %f cm/s^2',axavg)],'FitBoxToText','on');
 d.FontSize = 8;
 ylabel('a_x [cm/s^2]')
-sat=title(sprintf('Ship Acceleration Components (Every %dth Point)',int));
+sat=title(sprintf('Ship Acceleration Components (Every %dth Point)',int3));
 xticklabels([])
 % grey out bad data
-plot(d1.t(1:int:end-2),bax1(1:int:end),'color',[0.7 0.7 0.7])
-plot(d2.t(1:int:end-2),bax2(1:int:end),'color',[0.7 0.7 0.7])
-plot(d3.t(1:int:end-2),bax3(1:int:end),'color',[0.7 0.7 0.7])
-plot(d4.t(1:int:end-2),bax4(1:int:end),'color',[0.7 0.7 0.7])
+plot(d1.t(1:int3:end-2),bax1(1:int3:end),'color',[0.7 0.7 0.7])
+plot(d2.t(1:int3:end-2),bax2(1:int3:end),'color',[0.7 0.7 0.7])
+plot(d3.t(1:int3:end-2),bax3(1:int3:end),'color',[0.7 0.7 0.7])
+plot(d4.t(1:int3:end-2),bax4(1:int3:end),'color',[0.7 0.7 0.7])
 
 % plot ay
 ah(4)=subplot(5,2,[7 8]);
-plot(d1.t(1:int:end-2),gay1(1:int:end),'r')
+plot(d1.t(1:int3:end-2),gay1(1:int3:end),'r')
 hold on
-plot(d2.t(1:int:end-2),gay2(1:int:end),'g')
-plot(d3.t(1:int:end-2),gay3(1:int:end),'b')
-plot(d4.t(1:int:end-2),gay4(1:int:end),'k')
+plot(d2.t(1:int3:end-2),gay2(1:int3:end),'g')
+plot(d3.t(1:int3:end-2),gay3(1:int3:end),'b')
+plot(d4.t(1:int3:end-2),gay4(1:int3:end),'k')
 grid on
 longticks([],3)
 xlim([d1.t(1) d1.t(end-2)])
-ay = abs([ay1 ay2 ay3 ay4]);
-ayout = rmoutliers(ay,'mean');
+ay = abs([gay1 gay2 gay3 gay4]);
+try
+    ayout = rmoutliers(ay,'gesd');
+catch
+    ayout = rmoutliers(ay,'mean');
+end
 outpct = (length(ay)-length(ayout))*100/length(ay);
 ylim([-max(ayout,[],'all')-0.005*abs(max(ayout,[],'all')) max(ayout,[],'all')+0.005*abs(max(ayout,[],'all'))])
 a=annotation('textbox',[0.77 0.4375 0 0],'String',[sprintf('%05.2f%% Outliers',outpct)],'FitBoxToText','on');
@@ -324,23 +336,27 @@ d.FontSize = 8;
 ylabel('a_y [cm/s^2]')
 xticklabels([])
 % grey out bad data
-plot(d1.t(1:int:end-2),bay1(1:int:end),'color',[0.7 0.7 0.7])
-plot(d2.t(1:int:end-2),bay2(1:int:end),'color',[0.7 0.7 0.7])
-plot(d3.t(1:int:end-2),bay3(1:int:end),'color',[0.7 0.7 0.7])
-plot(d4.t(1:int:end-2),bay4(1:int:end),'color',[0.7 0.7 0.7])
+plot(d1.t(1:int3:end-2),bay1(1:int3:end),'color',[0.7 0.7 0.7])
+plot(d2.t(1:int3:end-2),bay2(1:int3:end),'color',[0.7 0.7 0.7])
+plot(d3.t(1:int3:end-2),bay3(1:int3:end),'color',[0.7 0.7 0.7])
+plot(d4.t(1:int3:end-2),bay4(1:int3:end),'color',[0.7 0.7 0.7])
 
 % plot az
 ah(5)=subplot(5,2,[9 10]);
-plot(d1.t(1:int:end-2),gaz1(1:int:end),'r')
+plot(d1.t(1:int3:end-2),gaz1(1:int3:end),'r')
 hold on
-plot(d2.t(1:int:end-2),gaz2(1:int:end),'g')
-plot(d3.t(1:int:end-2),gaz3(1:int:end),'b')
-plot(d4.t(1:int:end-2),gaz4(1:int:end),'k')
+plot(d2.t(1:int3:end-2),gaz2(1:int3:end),'g')
+plot(d3.t(1:int3:end-2),gaz3(1:int3:end),'b')
+plot(d4.t(1:int3:end-2),gaz4(1:int3:end),'k')
 grid on
 longticks([],3)
 xlim([d1.t(1) d1.t(end-2)])
-az = abs([az1 az2 az3 az4]);
-azout = rmoutliers(az,'mean');
+az = abs([gaz1 gaz2 gaz3 gaz4]);
+try
+    azout = rmoutliers(az,'gesd');
+catch
+    azout = rmoutliers(az,'mean');
+end
 outpct = (length(az)-length(azout))*100/length(az);
 ylim([-max(azout,[],'all')-0.005*abs(max(azout,[],'all')) max(azout,[],'all')+0.005*abs(max(azout,[],'all'))])
 a=annotation('textbox',[0.77 0.265 0 0],'String',[sprintf('%05.2f%% Outliers',outpct)],'FitBoxToText','on');
@@ -353,10 +369,10 @@ d=annotation('textbox',[0.135 0.2325 0 0],'String',[sprintf('mean = %f cm/s^2',a
 d.FontSize = 8;
 ylabel('a_z [cm/s^2]')
 % grey out bad data
-plot(d1.t(1:int:end-2),baz1(1:int:end),'color',[0.7 0.7 0.7])
-plot(d2.t(1:int:end-2),baz2(1:int:end),'color',[0.7 0.7 0.7])
-plot(d3.t(1:int:end-2),baz3(1:int:end),'color',[0.7 0.7 0.7])
-plot(d4.t(1:int:end-2),baz4(1:int:end),'color',[0.7 0.7 0.7])
+plot(d1.t(1:int3:end-2),baz1(1:int3:end),'color',[0.7 0.7 0.7])
+plot(d2.t(1:int3:end-2),baz2(1:int3:end),'color',[0.7 0.7 0.7])
+plot(d3.t(1:int3:end-2),baz3(1:int3:end),'color',[0.7 0.7 0.7])
+plot(d4.t(1:int3:end-2),baz4(1:int3:end),'color',[0.7 0.7 0.7])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
