@@ -19,7 +19,10 @@ function varargout=prd2mat(prdfile,plt)
 % d=prd2mat('prdfile'); plot(d.t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 11/24/2021
+% Last modified by tschuh-at-princeton.edu, 12/01/2021
+
+% need to extract trip section from fname somehow
+% currently manually changing at end of code
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
@@ -226,7 +229,7 @@ if plt == 1
     tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d.t(1))));
     movev(tt,0.3)
 
-    a = annotation('textbox',[0.23 0.1 0 0],'String',['Unit 1: leg 2'],'FitBoxToText','on');
+    a = annotation('textbox',[0.23 0.1 0 0],'String',['Unit 1: camp'],'FitBoxToText','on');
     a.FontSize = 12;
     
     % how do I save .pdf to working directory?
