@@ -13,17 +13,11 @@ function dis2his(unit1file,unit2file,unit3file,unit4file)
 % unit4file     mat file containing data collected by unit 4
 %
 % Originally written by tschuh-at-princeton.edu, 12/01/2021
+% Last modified by tschuh-at-princeton.edu, 12/06/2021
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
-
-% find rows where nsats <= 4
-nthresh = 4;
-% find rows where pdop >= 15 or = 0
-pthresh = 15;
-
-p1 = d1.pdop; p2 = d2.pdop; p3 = d3.pdop; p4 = d4.pdop;
-n1 = d1.nsats(:,1); n2 = d2.nsats(:,1); n3 = d3.nsats(:,1); n4 = d4.nsats(:,1);
+[~,fname,~] = fileparts(unit1file);
 
 % plot distances between all 4 GPS units
 % compute all 6 distances between 4 GPS receivers
@@ -58,66 +52,73 @@ dist34 = rmNaNrows(dist34); p = polyfit([1:length(dist34)]',dist34,1);
 a34 = 1000*p(1); b34 = p(2); rms34 = rms(dist34); std34 = std(1000*dist34);
 x34 = (a34/1000).*[1:length(dist34)]' + b34; e34 = 1000*(x34 - dist34); erms34 = rms(e34);
 
-% find good (g) and bad (b) data
-% [g b] = h
-d12 = normdist12; d13 = normdist13; d14 = normdist14;
-d23 = normdist23; d24 = normdist24; d34 = normdist34;
-good12 = d12; bad12 = d12; good13 = d13; bad13 = d13; good14 = d14; bad14 = d14;
-good23 = d23; bad23 = d23; good24 = d24; bad24 = d24; good34 = d34; bad34 = d34;
-good12(p1>=pthresh | p1==0 | n1<=nthresh | p2>=pthresh | p2==0 | n2<=nthresh) = NaN;
-bad12(p1<pthresh & n1>nthresh & p2<pthresh & n2>nthresh) = NaN;
-good13(p1>=pthresh | p1==0 | n1<=nthresh | p3>=pthresh | p3==0 | n3<=nthresh) = NaN;
-bad13(p1<pthresh & n1>nthresh & p3<pthresh & n3>nthresh) = NaN;
-good14(p1>=pthresh | p1==0 | n1<=nthresh | p4>=pthresh | p4==0 | n4<=nthresh) = NaN;
-bad14(p1<pthresh & n1>nthresh & p4<pthresh & n4>nthresh) = NaN;
-good23(p2>=pthresh | p2==0 | n2<=nthresh | p3>=pthresh | p3==0 | n3<=nthresh) = NaN;
-bad23(p2<pthresh & n2>nthresh & p3<pthresh & n3>nthresh) = NaN;
-good24(p2>=pthresh | p2==0 | n2<=nthresh | p4>=pthresh | p4==0 | n4<=nthresh) = NaN;
-bad24(p2<pthresh & n2>nthresh & p4<pthresh & n4>nthresh) = NaN;
-good34(p3>=pthresh | p3==0 | n3<=nthresh | p4>=pthresh | p4==0 | n4<=nthresh) = NaN;
-bad34(p3<pthresh & n3>nthresh & p4<pthresh & n4>nthresh) = NaN;
-
 % plotting
 f=figure;
-f.Position = [250 500 1100 400];
+f.Position = [250 500 1100 600];
+
+nbins = 30;
 
 ah(1) = subplot(3,2,1);
-histogram(e12)
-title('GPS Pair 1-2')
-xlabel('Residuals [mm]')
-ylabel('Counts')
+histObj = histfit(e12,nbins);
+cosmo(gca,'GPS Pair 1-2','Residuals [mm]','Counts',e12,histObj(1))
+%histObj = histogram(e12);
+%cosmo(gca,'GPS Pair 1-2','Residuals [mm]','Counts',e12,histObj)
 
 ah(2) = subplot(3,2,2);
-histogram(e13)
-title('GPS Pair 1-3')
-xlabel('Residuals [mm]')
-ylabel('Counts')
+histObj = histfit(e13,nbins);
+cosmo(gca,'GPS Pair 1-3','Residuals [mm]','Counts',e13,histObj(1))
+%histObj = histogram(e13);
+%cosmo(gca,'GPS Pair 1-3','Residuals [mm]','Counts',e13,histObj)
 
 ah(3) = subplot(3,2,3);
-histogram(e14)
-title('GPS Pair 1-4')
-xlabel('Residuals [mm]')
-ylabel('Counts')
+histObj = histfit(e14,nbins);
+cosmo(gca,'GPS Pair 1-4','Residuals [mm]','Counts',e14,histObj(1))
+%histObj = histogram(e14);
+%cosmo(gca,'GPS Pair 1-4','Residuals [mm]','Counts',e14,histObj)
 
 ah(4) = subplot(3,2,4);
-histogram(e23)
-title('GPS Pair 2-3')
-xlabel('Residuals [mm]')
-ylabel('Counts')
+histObj = histfit(e23,nbins);
+cosmo(gca,'GPS Pair 2-3','Residuals [mm]','Counts',e23,histObj(1))
+%histObj = histogram(e23);
+%cosmo(gca,'GPS Pair 2-3','Residuals [mm]','Counts',e23,histObj)
 
 ah(5) = subplot(3,2,5);
-histogram(e24)
-title('GPS Pair 2-4')
-xlabel('Residuals [mm]')
-ylabel('Counts')
+histObj = histfit(e24,nbins);
+cosmo(gca,'GPS Pair 2-4','Residuals [mm]','Counts',e24,histObj(1))
+%histObj = histogram(e24);
+%cosmo(gca,'GPS Pair 2-4','Residuals [mm]','Counts',e24,histObj)
 
 ah(6) = subplot(3,2,6);
-histogram(e34)
-title('GPS Pair 3-4')
-xlabel('Residuals [mm]')
-ylabel('Counts')
+histObj = histfit(e34);
+cosmo(gca,'GPS Pair 3-4','Residuals [mm]','Counts',e34,histObj(1))
+%histObj = histogram(e34);
+%cosmo(gca,'GPS Pair 3-4','Residuals [mm]','Counts',e34,histObj)
 
+% finishing touches
 tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d1.t(1))));
 movev(tt,0.3)
 
-figdisp([],[],'',2,[],'epstopdf')
+figdisp(sprintf('%s-histo',fname),[],'',2,[],'epstopdf')
+
+close
+
+% Cosmetics
+function cosmo(ax,titl,xlab,ylab,data,hobj)
+ax.XGrid = 'on';
+ax.YGrid = 'off';
+ax.GridColor = [0 0 0];
+ax.TickLength = [0 0];
+title(titl)
+xlabel(xlab)
+xlim([round(-3*std(data),2) round(3*std(data),2)])
+xticks([round(-3*std(data),2) round(-2*std(data),2) round(-std(data),2) 0 round(std(data),2) round(2*std(data),2) round(3*std(data),2)])
+ylabel(ylab)
+ylim([0 max(hobj.YData)+0.1*max(hobj.YData)])
+longticks([],2)
+hobj.FaceColor = [0.4 0.6667 0.8431];
+text(1.55*std(data),4*max(hobj.YData)/5,sprintf('std = %05.2f\nmed = %.2f\nmin = %.2f\nmax = %.2f',std(data),median(data),min(data),max(data)),'FontSize',9)
+pct = (length(data(data<=round(3*std(data)) & data>=round(-3*std(data))))/length(data))*100;
+text(-2.9*std(data),99*max(hobj.YData)/100,sprintf('%05.2f%%',pct),'FontSize',9)
+% plot vertical line at median
+hold on
+xline(median(data),'k-.','LineWidth',2);
