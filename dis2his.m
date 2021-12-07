@@ -1,5 +1,5 @@
-function dis2his(unit1file,unit2file,unit3file,unit4file)
-% DIS2HIS(unit1file,unit2file,unit3file,unit4file)
+function dis2his(unit1file,unit2file,unit3file,unit4file,nbins)
+% DIS2HIS(unit1file,unit2file,unit3file,unit4file,nbins)
 %
 % compute distance between 6 sets of reciever pairs
 % calculate linear polyfit and residuals
@@ -11,9 +11,10 @@ function dis2his(unit1file,unit2file,unit3file,unit4file)
 % unit2file     mat file containing data collected by unit 2
 % unit3file     mat file containing data collected by unit 3
 % unit4file     mat file containing data collected by unit 4
+% nbins         number of bins desired for histograms [default: 30]
 %
 % Originally written by tschuh-at-princeton.edu, 12/01/2021
-% Last modified by tschuh-at-princeton.edu, 12/06/2021
+% Last modified by tschuh-at-princeton.edu, 12/07/2021
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
@@ -56,7 +57,7 @@ x34 = (a34/1000).*[1:length(dist34)]' + b34; e34 = 1000*(x34 - dist34); erms34 =
 f=figure;
 f.Position = [250 500 1100 600];
 
-nbins = 30;
+defval('nbins',30)
 
 ah(1) = subplot(3,2,1);
 histObj = histfit(e12,nbins);
@@ -65,7 +66,7 @@ cosmo(gca,'GPS Pair 1-2','Residuals [mm]','Counts',e12,histObj(1))
 %cosmo(gca,'GPS Pair 1-2','Residuals [mm]','Counts',e12,histObj)
 
 ah(2) = subplot(3,2,2);
-histObj = histfit(e13,nbins);
+histObj = histfit(e13);
 cosmo(gca,'GPS Pair 1-3','Residuals [mm]','Counts',e13,histObj(1))
 %histObj = histogram(e13);
 %cosmo(gca,'GPS Pair 1-3','Residuals [mm]','Counts',e13,histObj)
@@ -116,9 +117,9 @@ ylabel(ylab)
 ylim([0 max(hobj.YData)+0.1*max(hobj.YData)])
 longticks([],2)
 hobj.FaceColor = [0.4 0.6667 0.8431];
-text(1.55*std(data),4*max(hobj.YData)/5,sprintf('std = %05.2f\nmed = %.2f\nmin = %.2f\nmax = %.2f',std(data),median(data),min(data),max(data)),'FontSize',9)
+text(1.55*std(data),4*max(hobj.YData)/5,sprintf('std = %05.2f\nmed = %.2f\navg = %.2e',std(data),median(data),mean(data)),'FontSize',9)
 pct = (length(data(data<=round(3*std(data)) & data>=round(-3*std(data))))/length(data))*100;
-text(-2.9*std(data),99*max(hobj.YData)/100,sprintf('%05.2f%%',pct),'FontSize',9)
+text(-2.9*std(data),90*max(hobj.YData)/100,sprintf('%05.2f%%\nmin = %.2f\nmax = %.2f',pct,min(data),max(data)),'FontSize',9)
 % plot vertical line at median
 hold on
 xline(median(data),'k-.','LineWidth',2);
