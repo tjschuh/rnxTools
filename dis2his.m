@@ -89,7 +89,7 @@ cosmo(gca,'GPS Pair 2-4','Residuals [mm]','Counts',e24,histObj(1))
 %cosmo(gca,'GPS Pair 2-4','Residuals [mm]','Counts',e24,histObj)
 
 ah(6) = subplot(3,2,6);
-histObj = histfit(e34);
+histObj = histfit(e34,nbins);
 cosmo(gca,'GPS Pair 3-4','Residuals [mm]','Counts',e34,histObj(1))
 %histObj = histogram(e34);
 %cosmo(gca,'GPS Pair 3-4','Residuals [mm]','Counts',e34,histObj)
