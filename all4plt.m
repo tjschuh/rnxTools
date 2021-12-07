@@ -296,8 +296,7 @@ b=annotation('textbox',[0.13 0.625 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%.
 b.FontSize = 8;
 c=annotation('textbox',[0.335 0.9225 0 0],'String',[sprintf('v = %.2f knots',vavg)],'FitBoxToText','on');
 c.FontSize = 8;
-d=annotation('textbox',[0.135 0.58 0 0],'String',[sprintf('mean = %f cm/s^2',axavg)],'FitBoxToText','on');
-d.FontSize = 8;
+text(d1.t(10),4*max(axout,[],'all')/5,sprintf('mean = %f cm/s^2',axavg),'FontSize',8)
 ylabel('a_x [cm/s^2]')
 sat=title(sprintf('Ship Acceleration Components (Every %dth Point)',int3));
 xticklabels([])
@@ -331,8 +330,7 @@ b=annotation('textbox',[0.13 0.45 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%.2
 b.FontSize = 8;
 c=annotation('textbox',[0.4 0.45 0 0],'String',[sprintf('GPS 1 - red, GPS 2 - green,\nGPS 3 - blue, GPS 4 - black')],'FitBoxToText','on');
 c.FontSize = 8;
-d=annotation('textbox',[0.135 0.405 0 0],'String',[sprintf('mean = %f cm/s^2',ayavg)],'FitBoxToText','on');
-d.FontSize = 8;
+text(d1.t(10),4*max(ayout,[],'all')/5,sprintf('mean = %f cm/s^2',ayavg),'FontSize',8)
 ylabel('a_y [cm/s^2]')
 xticklabels([])
 % grey out bad data
@@ -365,8 +363,7 @@ b=annotation('textbox',[0.13 0.2775 0 0],'String',[sprintf('%.2f, %.2f, %.2f,\n%
 b.FontSize = 8;
 c=annotation('textbox',[0.44 0.2775 0 0],'String',[sprintf('X12, X13, X14,\nX23, X24, X34')],'FitBoxToText','on');
 c.FontSize = 8;
-d=annotation('textbox',[0.135 0.2325 0 0],'String',[sprintf('mean = %f cm/s^2',azavg)],'FitBoxToText','on');
-d.FontSize = 8;
+text(d1.t(10),4*max(azout,[],'all')/5,sprintf('mean = %f cm/s^2',azavg),'FontSize',8)
 ylabel('a_z [cm/s^2]')
 % grey out bad data
 plot(d1.t(1:int3:end-2),baz1(1:int3:end),'color',[0.7 0.7 0.7])
