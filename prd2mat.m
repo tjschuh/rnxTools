@@ -19,7 +19,7 @@ function varargout=prd2mat(prdfile,plt)
 % d=prd2mat('prdfile'); plot(d.t,d.height)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 12/01/2021
+% Last modified by tschuh-at-princeton.edu, 12/08/2021
 
 % need to extract trip section from fname somehow
 % currently manually changing at end of code
@@ -161,7 +161,6 @@ if plt == 1
     x = d.utmeasting-(min(d.utmeasting)-.05*(max(d.utmeasting)-min(d.utmeasting)));
     y = d.utmnorthing-(min(d.utmnorthing)-.05*(max(d.utmnorthing)-min(d.utmnorthing)));
     tc = datetime(d.t,'Format','HH:mm:ss'); 
-    z=zeros(size(x));
 
     % find good (g) and bad (b) data
     % [gx bx] = x
@@ -174,14 +173,15 @@ if plt == 1
 
     ah(1)=subplot(2,2,[1 3]);
     c = linspace(1,10,length(x(1:int:end)));
-    scatter(gx(1:int:end)',gy(1:int:end)',[],c,'filled')
+    sz = 10;
+    scatter(gx(1:int:end)',gy(1:int:end)',sz,c,'filled')
     colormap(jet)
     colorbar('southoutside','Ticks',[1:3:10],'TickLabels',...
              {datestr(tc(1),'HH:MM:SS'),datestr(tc(floor(end/3)),'HH:MM:SS'),...
               datestr(tc(ceil(2*end/3)),'HH:MM:SS'),datestr(tc(end),'HH:MM:SS')})
     hold on
     % grey out "bad" data where nsats is too low or pdop is too high or 0
-    scatter(bx(1:int:end)',by(1:int:end)',[],[0.7 0.7 0.7],'filled')
+    scatter(bx(1:int:end)',by(1:int:end)',sz,[0.7 0.7 0.7],'filled')
     grid on
     longticks
     xlabel('Easting [m]')
