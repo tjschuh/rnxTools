@@ -12,7 +12,7 @@ function all4plt(unit1file,unit2file,unit3file,unit4file)
 % unit4file     mat file containing data collected by unit 4
 %
 % Originally written by tschuh-at-princeton.edu, 11/12/2021
-% Last modified by tschuh-at-princeton.edu, 12/01/2021
+% Last modified by tschuh-at-princeton.edu, 12/08/2021
 
 % currently statistics (correlation coeff, ployfit, rms, std)
 % are computed using all data including greyed out parts
@@ -377,7 +377,7 @@ plot(d4.t(1:int3:end-2),baz4(1:int3:end),'color',[0.7 0.7 0.7])
 tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d1.t(1))));
 movev(tt,0.3)
 
-a = annotation('textbox',[0.465 0.085 0 0],'String',['leg 2'],'FitBoxToText','on');
+a = annotation('textbox',[0.465 0.085 0 0],'String',['camp'],'FitBoxToText','on');
 a.FontSize = 12;
 
 figdisp(fname,[],'',2,[],'epstopdf')
