@@ -18,7 +18,7 @@ function varargout=mat2com(unit1file,unit2file,unit3file,unit4file,plt)
 % d             actual data struct
 %
 % Originally written by tschuh-at-princeton.edu, 11/23/2021
-% Last modified by tschuh-at-princeton.edu, 11/24/2021
+% Last modified by tschuh-at-princeton.edu, 12/08/2021
 
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
 [~,fname,~] = fileparts(unit1file);
@@ -67,14 +67,13 @@ if plt == 1
     p = d.pdop;
 
     % plotting interval
-    int = 10;
+    int = 5;
 
     % plot utm coordinates
     % set the zero for the UTM coordinates based on the min and max of data
     x = d.utme-(min(d.utme)-.05*(max(d.utme)-min(d.utme)));
     y = d.utmn-(min(d.utmn)-.05*(max(d.utmn)-min(d.utmn)));
     tc = datetime(d.t,'Format','HH:mm:ss'); 
-    z=zeros(size(x));
 
     % find good (g) and bad (b) data
     % [gx bx] = x
@@ -87,18 +86,21 @@ if plt == 1
 
     ah(1)=subplot(2,2,[1 3]);
     c = linspace(1,10,length(x(1:int:end)));
-    scatter(gx(1:int:end)',gy(1:int:end)',[],c,'filled')
+    sz = 10;
+    scatter(gx(1:int:end)',gy(1:int:end)',sz,c,'filled')
     colormap(jet)
     colorbar('southoutside','Ticks',[1:3:10],'TickLabels',...
              {datestr(tc(1),'HH:MM:SS'),datestr(tc(floor(end/3)),'HH:MM:SS'),...
               datestr(tc(ceil(2*end/3)),'HH:MM:SS'),datestr(tc(end),'HH:MM:SS')})
     hold on
     % grey out "bad" data where nsats is too low or pdop is too high or 0
-    scatter(bx(1:int:end)',by(1:int:end)',[],[0.7 0.7 0.7],'filled')
+    scatter(bx(1:int:end)',by(1:int:end)',sz,[0.7 0.7 0.7],'filled')
     grid on
     longticks
     xlabel('Easting [m]')
+    %xticklabels({'0','5','10','15'})
     ylabel('Northing [m]')
+    %yticklabels({'0','2','4','6','8','10','12','14','16','18','20'})
     title(sprintf('Ship Location (Every %dth point)',int))
 
     % plot heights relative to WGS84
@@ -144,7 +146,7 @@ if plt == 1
     tt=supertit(ah([1 2]),sprintf('1 Hour of Averaged Ship Data Starting from %s',datestr(d.t(1))));
     movev(tt,0.3)
 
-    a = annotation('textbox',[0.23 0.1 0 0],'String',['leg 2'],'FitBoxToText','on');
+    a = annotation('textbox',[0.23 0.1 0 0],'String',['camp'],'FitBoxToText','on');
     a.FontSize = 12;
 
     figdisp(fname,[],'',2,[],'epstopdf')
