@@ -1,7 +1,7 @@
 function varargout=prd2mat(prdfile,plt)
 % d=PRD2MAT(prdfile,plt)
 %
-% take a PRIDE-PPPAR kin_* solution file
+% take a PRIDE-PPPAR *.prd solution file
 % and create a structured MATLAB .mat file 
 %
 % INPUT:
