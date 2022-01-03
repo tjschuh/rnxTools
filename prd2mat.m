@@ -1,13 +1,14 @@
-function varargout=prd2mat(prdfile,plt)
-% d=PRD2MAT(prdfile,plt)
+function varargout=prd2mat(prdfile,protype,plt)
+% d=PRD2MAT(prdfile,protype,plt)
 %
-% take a PRIDE-PPPAR *.prd solution file
-% and create a structured MATLAB .mat file 
+% take a *.prd solution file and
+% create a structured MATLAB .mat file 
 %
 % INPUT:
 %
-% .prd file    kinematic solution output file created by kin2prd
-% plt         0 for no plot, 1 for plot (default: 1)
+% .prd file    processed, solution output file created by kin2prd or pos2prd
+% protype      type of prd file (ppp or rtk)
+% plt          0 for no plot, 1 for plot (default: 1)
 %
 % OUTPUT:
 %
@@ -16,13 +17,15 @@ function varargout=prd2mat(prdfile,plt)
 %
 % EXAMPLE
 %
-% d=prd2mat('prdfile'); plot(d.t,d.height)
+% d=prd2mat('prdfile','ppp',1);
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 12/08/2021
+% Last modified by tschuh-at-princeton.edu, 01/03/2022
 
 % need to extract trip section from fname somehow
 % currently manually changing at end of code
+
+% need someway to signify on plot when utmzone changes
 
 % prepare the outfile
 % extract just the filename from prdfile with no extension    
@@ -30,87 +33,148 @@ function varargout=prd2mat(prdfile,plt)
 % build the *.mat outfile from fname
 outfile = sprintf('%s.mat',fname);
 
-% if outfile doesnt exist, make it and save it
-% otherwise load it
-if exist(outfile,'file') == 0
-    
-    % load data
-    % file comes in: Mjd, SoD, X, Y, Z, Lat, Lon, Ht, Nsat, PDOP
-    dm = load(prdfile);
+if protype == 'ppp'
+    % if outfile doesnt exist, make it and save it
+    % otherwise load it
+    if exist(outfile,'file') == 0
+        
+        % load data
+        % file comes in: Mjd, SoD, X, Y, Z, Lat, Lon, Ht, Nsat, PDOP
+        dm = load(prdfile);
 
-    % explicitly define header from kinfile
-    h = {'t','xyz','lat','lon','height','nsats','pdop'};
-    
-    % make datetime array from kinfile columns 1 and 2
-    % convert Mjd to ymd
-    ymd = datestr(dm(:,1)+678942);
-    % convert SoD to hms
-    hms = datestr(seconds(dm(:,2)),'HH:MM:SS');
-    % need to use for loop here bc dealing with char arrays
-    for i = 1:length(dm)
-        % combine ymd and hms into one str
-        tstr(i,:) = append(ymd(i,:),' ',hms(i,:));
-    end
-    % convert tstr to datetime
-    t = datetime(tstr,'InputFormat','dd-MMM-yyyy HH:mm:ss');
+        % explicitly define header from kinfile
+        h = {'t','xyz','lat','lon','height','nsats','pdop'};
+        
+        % make datetime array from kinfile columns 1 and 2
+        % convert Mjd to ymd
+        ymd = datestr(dm(:,1)+678942);
+        % convert SoD to hms
+        hms = datestr(seconds(dm(:,2)),'HH:MM:SS');
+        % need to use for loop here bc dealing with char arrays
+        for i = 1:length(dm)
+            % combine ymd and hms into one str
+            tstr(i,:) = append(ymd(i,:),' ',hms(i,:));
+        end
+        % convert tstr to datetime
+        t = datetime(tstr,'InputFormat','dd-MMM-yyyy HH:mm:ss');
 
-    % convert lat,lon to utm easting,northing in meters
-    % create cell array with length(dm)
-    zones = cell(length(dm),1);
-    % lat lon cols are 6 and 7
-    % To do: without a loop?
-    for i = 1:length(dm)
-        % need to use rem to convert lon from (0,360) to (-180,180) to get utm zone correct
-        [x(i,1),y(i,1),zone] = deg2utm(dm(i,6),rem((dm(i,7)+180),360)-180);
-        % save utmzone to cell array
-        zones{i} = zone;
-    end
-    
-    % get rid of sat cols that are all zeros
-    % all possible satellite types
-    sattypes = {'Total','GPS','GLONASS','Galileo','BDS-2','BDS-3','QZSS'};
-    % cols 9:15 are sat info
-    counter = 1;
-    
-    defval('meth',1)
-    switch meth
-      case 1
-       for i = 9:15
-	 % if any rows of col i are nonzero, we keep entire col
-	 if sum(dm(:,i)) ~= 0
-	   % copy entire col to sats
-	   sats(:,counter) = dm(:,i);
-	   % copy col's header info to hsat
-	   hsat{counter} = sattypes{i-8};
-	   counter = counter + 1;
-	 end
-       end
-     case 2
-      % To do: Do without a loop
+        % convert lat,lon to utm easting,northing in meters
+        % create cell array with length(dm)
+        zones = cell(length(dm),1);
+        % lat lon cols are 6 and 7
+        % To do: without a loop?
+        for i = 1:length(dm)
+            % need to use rem to convert lon from (0,360) to (-180,180) to get utm zone correct
+            [x(i,1),y(i,1),zone] = deg2utm(dm(i,6),rem((dm(i,7)+180),360)-180);
+            % save utmzone to cell array
+            zones{i} = zone;
+        end
+        
+        % get rid of sat cols that are all zeros
+        % all possible satellite types
+        sattypes = {'Total','GPS','GLONASS','Galileo','BDS-2','BDS-3','QZSS'};
+        % cols 9:15 are sat info
+        counter = 1;
+        
+        defval('meth',1)
+        switch meth
+          case 1
+            for i = 9:15
+                % if any rows of col i are nonzero, we keep entire col
+                if sum(dm(:,i)) ~= 0
+                    % copy entire col to sats
+                    sats(:,counter) = dm(:,i);
+                    % copy col's header info to hsat
+                    hsat{counter} = sattypes{i-8};
+                    counter = counter + 1;
+                end
+            end
+          case 2
+            % To do: Do without a loop
+        end
+
+        % make data struct explicitly
+        d.(h{1}) = t;
+        d.(h{2}) = dm(:,3:5);
+        d.xyzunit = 'm';
+        d.(h{3}) = dm(:,6);
+        d.(h{4}) = dm(:,7);
+        d.lonlatunit = 'deg';
+        d.utmeasting = x;
+        d.utmnorthing = y;
+        d.utmunit = 'm';
+        d.utmzone = zones;
+        % if all zones are equal, collapes to a single zone
+        d.(h{5}) = dm(:,8);
+        d.heightunit = 'm (rel to WGS84)';
+        d.satlabels = hsat;
+        d.(h{6}) = sats;
+        d.(h{7}) = dm(:,end);
+        
+        save(outfile,'d')
+    else
+        load(outfile)
     end
 
-    % make data struct explicitly
-    d.(h{1}) = t;
-    d.(h{2}) = dm(:,3:5);
-    d.xyzunit = 'm';
-    d.(h{3}) = dm(:,6);
-    d.(h{4}) = dm(:,7);
-    d.lonlatunit = 'deg';
-    d.utmeasting = x;
-    d.utmnorthing = y;
-    d.utmunit = 'm';
-    d.utmzone = zones;
-    % if all zones are equal, collapes to a single zone
-    d.(h{5}) = dm(:,8);
-    d.heightunit = 'm (rel to WGS84)';
-    d.satlabels = hsat;
-    d.(h{6}) = sats;
-    d.(h{7}) = dm(:,end);
-    
-    save(outfile,'d')
+elseif protype == 'rtk'
+    % if outfile doesnt exist, make it and save it
+    % otherwise load it
+    if exist(outfile,'file') == 0
+        
+        % load data using readtable rather than load bc
+        % columns 1 and 2 have / and : which dont work with load
+        dm = readtable(prdfile,'FileType','text');
+
+        % make datetime array from prdfile columns 1 and 2
+        % convert column 1 from a cell array to datetime array
+        col1=datetime(dm.Var1,'InputFormat','yyyy/MM/dd');
+        % combine col1 and dm.Var2 into a datetime array
+        dt = col1 + dm.Var2;
+
+        % convert lat,lon,height to x,y,z in meters
+        % specify reference ellipsoid as WGS84
+        wgs84 = wgs84Ellipsoid('meter');
+        % use built-in matlab function geodetic2ecef to do conversion
+        [x,y,z] = geodetic2ecef(wgs84,dm.Var3,dm.Var4,dm.Var5);
+        
+        % convert lat,lon to utm easting,northing in meters
+        % create cell array with height(dm)
+        zones = cell(height(dm),1);
+        % lat lon cols are 3 and 4
+        % To do: without a loop?
+        for i = 1:height(dm)
+            % need to use rem to convert lon from (0,360) to (-180,180) to get utm zone correct
+            [utmx(i,1),utmy(i,1),zone] = deg2utm(dm.Var3(i),dm.Var4(i));
+            % save utmzone to cell array
+            zones{i} = zone;
+        end
+        
+        d.t = dt;
+        d.xyz = [x y z];
+        d.xyzunit = 'm';
+        d.lat = dm.Var3;
+        d.lon = dm.Var4;
+        d.latlonunit = 'deg';
+        d.utmeasting = utmx;
+        d.utmnorthing = utmy;
+        d.utmunit = 'm';
+        d.utmzone = zones;
+        d.height = dm.Var5;
+        d.heightunit = 'm (rel to WGS84)';
+        d.satlabels = 'Total';
+        d.nsats = dm.Var7;
+        d.pdop = dm.Var15;
+
+        save(outfile,'d')
+    else
+        load(outfile)
+    end
+
 else
-    load(outfile)
+    error('Please select a valid protype')
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % plotting
 % only make the plot if it doesnt exist
