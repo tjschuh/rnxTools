@@ -20,7 +20,7 @@ function varargout=prd2mat(prdfile,protype,plt)
 % d=prd2mat('prdfile','ppp',1);
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 01/03/2022
+% Last modified by tschuh-at-princeton.edu, 01/04/2022
 
 % need to extract trip section from fname somehow
 % currently manually changing at end of code
@@ -290,7 +290,7 @@ if plt == 1
     longticks
     title('Total Number of Satellites and PDOP')
 
-    tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d.t(1))));
+    tt=supertit(ah([1 2]),sprintf('Ship Data from %s to %s',datestr(d.t(1)),datestr(d.t(end))));
     movev(tt,0.3)
 
     a = annotation('textbox',[0.23 0.1 0 0],'String',['Unit 1: camp'],'FitBoxToText','on');
