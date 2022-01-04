@@ -12,7 +12,7 @@ function all4plt(unit1file,unit2file,unit3file,unit4file)
 % unit4file     mat file containing data collected by unit 4
 %
 % Originally written by tschuh-at-princeton.edu, 11/12/2021
-% Last modified by tschuh-at-princeton.edu, 12/08/2021
+% Last modified by tschuh-at-princeton.edu, 01/04/2022
 
 % currently statistics (correlation coeff, ployfit, rms, std)
 % are computed using all data including greyed out parts
@@ -45,9 +45,9 @@ nthresh = 4;
 % find rows where pdop >= 15 or = 0
 pthresh = 15;
 % plotting intervals
-int1 = 15;
-int2 = 5;
-int3 = 15;
+int1 = 50;
+int2 = 20;
+int3 = 50;
 
 % find good (g) and bad (b) data
 % [g b] = h
@@ -374,12 +374,12 @@ plot(d4.t(1:int3:end-2),baz4(1:int3:end),'color',[0.7 0.7 0.7])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % finishing touches
-tt=supertit(ah([1 2]),sprintf('1 Hour of Ship Data Starting from %s',datestr(d1.t(1))));
+tt=supertit(ah([1 2]),sprintf('Ship Data from %s to %s',datestr(d1.t(1)),datestr(d1.t(end))));
 movev(tt,0.3)
 
 a = annotation('textbox',[0.465 0.085 0 0],'String',['camp'],'FitBoxToText','on');
 a.FontSize = 12;
 
-figdisp(fname,[],'',2,[],'epstopdf')
+figdisp(sprintf('all4plt'),[],'',2,[],'epstopdf')
 
 close
