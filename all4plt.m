@@ -12,7 +12,7 @@ function all4plt(unit1file,unit2file,unit3file,unit4file)
 % unit4file     mat file containing data collected by unit 4
 %
 % Originally written by tschuh-at-princeton.edu, 11/12/2021
-% Last modified by tschuh-at-princeton.edu, 01/04/2022
+% Last modified by tschuh-at-princeton.edu, 01/11/2022
 
 % currently statistics (correlation coeff, ployfit, rms, std)
 % are computed using all data including greyed out parts
@@ -45,9 +45,9 @@ nthresh = 4;
 % find rows where pdop >= 15 or = 0
 pthresh = 15;
 % plotting intervals
-int1 = 50;
-int2 = 20;
-int3 = 50;
+int1 = 30;
+int2 = 5;
+int3 = 15;
 
 % find good (g) and bad (b) data
 % [g b] = h
@@ -176,12 +176,12 @@ plot(d1.t(1:int2:end),bad14(1:int2:end),'color',[0.7 0.7 0.7])
 plot(d1.t(1:int2:end),bad23(1:int2:end),'color',[0.7 0.7 0.7])
 plot(d1.t(1:int2:end),bad24(1:int2:end),'color',[0.7 0.7 0.7])
 plot(d1.t(1:int2:end),bad34(1:int2:end),'color',[0.7 0.7 0.7])
-text(d1.t(10),6.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a34,b34,rms34,std34,erms34),'FontSize',9)
-text(d1.t(10),5.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a24,b24,rms24,std24,erms24),'FontSize',9)
-text(d1.t(10),4.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a23,b23,rms23,std23,erms23),'FontSize',9)
-text(d1.t(10),3.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a14,b14,rms14,std14,erms14),'FontSize',9)
-text(d1.t(10),2.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a13,b13,rms13,std13,erms13),'FontSize',9)
-text(d1.t(10),1.4,sprintf('%f, %05.2f, %05.2f, %.2f, %.2f',a12,b12,rms12,std12,erms12),'FontSize',9)
+text(d1.t(10),6.4,sprintf('%f, %05.3f, %05.3f, %.0f, %.0f',a34,b34,rms34,std34,erms34),'FontSize',9)
+text(d1.t(10),5.4,sprintf('%f, %05.3f, %05.3f, %.0f, %.0f',a24,b24,rms24,std24,erms24),'FontSize',9)
+text(d1.t(10),4.4,sprintf('%f, %05.3f, %05.3f, %.0f, %.0f',a23,b23,rms23,std23,erms23),'FontSize',9)
+text(d1.t(10),3.4,sprintf('%f, %05.3f, %05.3f, %.0f, %.0f',a14,b14,rms14,std14,erms14),'FontSize',9)
+text(d1.t(10),2.4,sprintf('%f, %05.3f, %05.3f, %.0f, %.0f',a13,b13,rms13,std13,erms13),'FontSize',9)
+text(d1.t(10),1.4,sprintf('%f, %05.3f, %05.3f, %.0f, %.0f',a12,b12,rms12,std12,erms12),'FontSize',9)
 text(d1.t(10),0.5,sprintf('a [mm/s], b [m], rms(x) [m], std [mm], rms(e) [mm]'),'FontSize',7.5)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -380,6 +380,6 @@ movev(tt,0.3)
 a = annotation('textbox',[0.465 0.085 0 0],'String',['camp'],'FitBoxToText','on');
 a.FontSize = 12;
 
-figdisp(sprintf('all4plt'),[],'',2,[],'epstopdf')
+figdisp(sprintf('all4plt-%s',fname),[],'',2,[],'epstopdf')
 
 close
