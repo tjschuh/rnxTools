@@ -19,8 +19,16 @@ function varargout=prd2mat(prdfile,protype,plt)
 %
 % d=prd2mat('prdfile','ppp',1);
 %
+% OTHER FUNCTIONS NEEDED:
+%
+% deg2utm.m
+%
+% TESTED ON:
+%
+% R2020a Update 4 (9.8.0.1417392)
+%
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 01/04/2022
+% Last modified by tschuh-at-princeton.edu, 01/11/2022
 
 % need to extract trip section from fname somehow
 % currently manually changing at end of code
@@ -123,7 +131,8 @@ elseif protype == 'rtk'
         
         % load data using readtable rather than load bc
         % columns 1 and 2 have / and : which dont work with load
-        dm = readtable(prdfile,'FileType','text');
+        % need the 'MultipleDelimAsOne' to load columns in correct order
+        dm = readtable(prdfile,'FileType','text','MultipleDelimsAsOne',true);
 
         % make datetime array from prdfile columns 1 and 2
         % convert column 1 from a cell array to datetime array
