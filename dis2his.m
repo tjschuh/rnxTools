@@ -14,7 +14,7 @@ function dis2his(unit1file,unit2file,unit3file,unit4file,nbins)
 % nbins         number of bins desired for histograms [default: 30]
 %
 % Originally written by tschuh-at-princeton.edu, 12/01/2021
-% Last modified by tschuh-at-princeton.edu, 01/04/2022
+% Last modified by tschuh-at-princeton.edu, 01/11/2022
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
@@ -57,7 +57,7 @@ x34 = (a34/1000).*[1:length(dist34)]' + b34; e34 = 1000*(x34 - dist34); erms34 =
 f=figure;
 f.Position = [250 500 1100 600];
 
-defval('nbins',20)
+defval('nbins',25)
 
 % rmoutliers
 % by default, an outlier is a value > 3 scaled median absolute deviations (MAD)
@@ -93,10 +93,10 @@ histObj = histfit(ee34,nbins);
 cosmo(gca,'GPS Pair 3-4','Residuals [mm]','Counts',ee34,histObj(1))
 
 % finishing touches
-tt=supertit(ah([1 2]),sprintf('Ship Data from %s to %s',datestr(d1.t(1)),datestr(d1.t(end))));
+tt=supertit(ah([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(d1.t(1)),datestr(d1.t(end))));
 movev(tt,0.3)
 
-figdisp(sprintf('%s-histo',fname),[],'',2,[],'epstopdf')
+figdisp(sprintf('histo-%s',fname),[],'',2,[],'epstopdf')
 
 close
 
@@ -110,13 +110,15 @@ title(titl)
 xlabel(xlab)
 xlim([round(-3*std(rawdata),2) round(3*std(rawdata),2)])
 xticks([round(-3*std(rawdata),2) round(-2*std(rawdata),2) round(-std(rawdata),2) 0 round(std(rawdata),2) round(2*std(rawdata),2) round(3*std(rawdata),2)])
+xticklabels({round(-3*std(rawdata),0),round(-2*std(rawdata),0),round(-std(rawdata),0),0,round(std(rawdata),0),round(2*std(rawdata),0),round(3*std(rawdata),0)})
 ylabel(ylab)
 ylim([0 max(hobj.YData)+0.1*max(hobj.YData)])
 longticks([],2)
-hobj.FaceColor = [0.4 0.6667 0.8431];
-text(1.55*std(rawdata),4*max(hobj.YData)/5,sprintf('std = %05.2f\nmed = %.2f',std(rawdata),median(rawdata)),'FontSize',9)
+hobj.FaceColor = [0.4 0.6667 0.8431]; %light blue bars
+%hobj.FaceColor = [0.466 0.674 0.188]; %lime green bars
+text(1.55*std(rawdata),4*max(hobj.YData)/5,sprintf('std = %.0f\nmed = %.0f',std(rawdata),median(rawdata)),'FontSize',9)
 pct = (length(rawdata(rawdata<=round(3*std(rawdata)) & rawdata>=round(-3*std(rawdata))))/length(rawdata))*100;
-text(-2.9*std(rawdata),90*max(hobj.YData)/100,sprintf('%05.2f%%\nmin = %.2f\nmax = %.2f',pct,min(rawdata),max(rawdata)),'FontSize',9)
+text(-2.9*std(rawdata),90*max(hobj.YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',pct,min(rawdata),max(rawdata)),'FontSize',9)
 % plot vertical line at median
 hold on
 xline(median(rawdata),'k-.','LineWidth',2);
