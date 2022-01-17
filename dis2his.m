@@ -14,7 +14,7 @@ function dis2his(unit1file,unit2file,unit3file,unit4file,nbins)
 % nbins         number of bins desired for histograms [default: 25]
 %
 % Originally written by tschuh-at-princeton.edu, 12/01/2021
-% Last modified by tschuh-at-princeton.edu, 01/14/2022
+% Last modified by tschuh-at-princeton.edu, 01/17/2022
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
@@ -103,7 +103,6 @@ catch
     ee14 = rmoutliers(e14,'percentiles',[10 90]);
 end
 histObj14 = histfit(ee14,nbins);
-cosmo(gca,'GPS Pair 1-4','Residuals [mm]','Counts',ee14,histObj14(1))
 cosmo(gca,sprintf('GPS Pair 1-4, # of Points = %i/%i',length(ee14),length(d1.t)),'Residuals [mm]','Counts',ee14,histObj14(1))
 
 ah(4) = subplot(3,2,4);
@@ -114,7 +113,6 @@ catch
     ee23 = rmoutliers(e23,'percentiles',[10 90]);
 end
 histObj23 = histfit(ee23,nbins);
-cosmo(gca,'GPS Pair 2-3','Residuals [mm]','Counts',ee23,histObj23(1))
 cosmo(gca,sprintf('GPS Pair 2-3, # of Points = %i/%i',length(ee23),length(d1.t)),'Residuals [mm]','Counts',ee23,histObj23(1))
 
 ah(5) = subplot(3,2,5);
@@ -125,7 +123,6 @@ catch
     ee24 = rmoutliers(e24,'percentiles',[10 90]);
 end
 histObj24 = histfit(ee24,nbins);
-cosmo(gca,'GPS Pair 2-4','Residuals [mm]','Counts',ee24,histObj24(1))
 cosmo(gca,sprintf('GPS Pair 2-4, # of Points = %i/%i',length(ee24),length(d1.t)),'Residuals [mm]','Counts',ee24,histObj24(1))
 
 ah(6) = subplot(3,2,6);
@@ -136,7 +133,6 @@ catch
     ee34 = rmoutliers(e34,'percentiles',[10 90]);
 end
 histObj34 = histfit(ee34,nbins);
-cosmo(gca,'GPS Pair 3-4','Residuals [mm]','Counts',ee34,histObj34(1))
 cosmo(gca,sprintf('GPS Pair 3-4, # of Points = %i/%i',length(ee34),length(d1.t)),'Residuals [mm]','Counts',ee34,histObj34(1))
 
 % finishing touches
@@ -173,3 +169,7 @@ text(-2.9*std(data),90*max(hobj.YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = 
 % plot vertical line at median
 hold on
 xline(median(data),'k--','LineWidth',2);
+% plot histogram below x-axis
+% will also need to edit histObj(2) to move curve
+% this will be what I do for pvsr.m
+%hobj.YData = -1*hobj.YData;
