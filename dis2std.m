@@ -14,8 +14,7 @@ function dis2std(unit1file,unit2file,unit3file,unit4file)
 % unit4file     mat file containing data collected by unit 4
 %
 % Originally written by tschuh-at-princeton.edu, 01/14/2022
-
-% need to add capability to use rtk data as well
+% Last modified by tschuh-at-princeton.edu, 01/17/2022
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
@@ -187,8 +186,5 @@ xlabel(xlab)
 ylabel(ylab)
 xlim([length(minlen) length(maxlen)])
 ylim([0 maxstd+0.05*maxstd])
-legend('PPP')
 grid on
 longticks
-
-
