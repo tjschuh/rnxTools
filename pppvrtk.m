@@ -259,49 +259,52 @@ maxstd = max([pvar12(1,2) pvar13(1,2) pvar14(1,2) pvar23(1,2) pvar24(1,2) pvar34
 f=figure;
 f.Position = [250 500 1100 800];
 
-ah(1) = subplot(3,2,1);
+ah1(1) = subplot(3,2,1);
 plot(pvar12(:,1),pvar12(:,2),'Color',[0.4 0.6667 0.8431],'LineWidth',2)
 hold on
 plot(rvar12(:,1),rvar12(:,2),'Color',[0.466 0.674 0.188],'LineWidth',2)
 cosmo1(gca,'GPS Pair 1-2','# of Data Points','Std [mm]',e12,d1.t,maxstd)
 
-ah(2) = subplot(3,2,2);
+ah1(2) = subplot(3,2,2);
 plot(pvar13(:,1),pvar13(:,2),'Color',[0.4 0.6667 0.8431],'LineWidth',2)
 hold on
 plot(rvar13(:,1),rvar13(:,2),'Color',[0.466 0.674 0.188],'LineWidth',2)
 cosmo1(gca,'GPS Pair 1-3','# of Data Points','Std [mm]',e13,d1.t,maxstd)
 
-ah(3) = subplot(3,2,3);
+ah1(3) = subplot(3,2,3);
 plot(pvar14(:,1),pvar14(:,2),'Color',[0.4 0.6667 0.8431],'LineWidth',2)
 hold on
 plot(rvar14(:,1),rvar14(:,2),'Color',[0.466 0.674 0.188],'LineWidth',2)
 cosmo1(gca,'GPS Pair 1-4','# of Data Points','Std [mm]',e14,d1.t,maxstd)
 
-ah(4) = subplot(3,2,4);
+ah1(4) = subplot(3,2,4);
 plot(pvar23(:,1),pvar23(:,2),'Color',[0.4 0.6667 0.8431],'LineWidth',2)
 hold on
 plot(rvar23(:,1),rvar23(:,2),'Color',[0.466 0.674 0.188],'LineWidth',2)
 cosmo1(gca,'GPS Pair 2-3','# of Data Points','Std [mm]',e23,d1.t,maxstd)
 
-ah(5) = subplot(3,2,5);
+ah1(5) = subplot(3,2,5);
 plot(pvar24(:,1),pvar24(:,2),'Color',[0.4 0.6667 0.8431],'LineWidth',2)
 hold on
 plot(rvar24(:,1),rvar24(:,2),'Color',[0.466 0.674 0.188],'LineWidth',2)
 cosmo1(gca,'GPS Pair 2-4','# of Data Points','Std [mm]',e24,d1.t,maxstd)
 
-ah(6) = subplot(3,2,6);
+ah1(6) = subplot(3,2,6);
 plot(pvar34(:,1),pvar34(:,2),'Color',[0.4 0.6667 0.8431],'LineWidth',2)
 hold on
 plot(rvar34(:,1),rvar34(:,2),'Color',[0.466 0.674 0.188],'LineWidth',2)
 cosmo1(gca,'GPS Pair 3-4','# of Data Points','Std [mm]',e34,d1.t,maxstd)
 
 % finishing touches
-tt=supertit(ah([1 2]),sprintf('Std vs # of Data Points (Ship Data from %s to %s)',datestr(rtime(1)),datestr(rtime(end))));
+tt=supertit(ah1([1 2]),sprintf('Std vs # of Data Points (Ship Data from %s to %s)',datestr(rtime(1)),datestr(rtime(end))));
 movev(tt,0.3)
+a = annotation('textbox',[0.465 0.085 0 0],'String',['leg2'],'FitBoxToText','on');
+a.FontSize = 12;
 
-%figdisp(sprintf('std-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
 
-%close
+figdisp(sprintf('std-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
+
+close
 
 % plotting histograms
 g=figure;
@@ -312,13 +315,13 @@ nbins = 30;
 
 ah2(1) = subplot(3,2,1);
 % remove outliers to get better results
-try
-    pee12 = rmoutliers(pe12,'gesd');
-    ree12 = rmoutliers(re12,'gesd');
-catch
-    pee12 = rmoutliers(pe12,'percentiles',[10 90]);
-    ree12 = rmoutliers(re12,'percentiles',[10 90]);
-end
+%try
+%    pee12 = rmoutliers(pe12,'gesd');
+%    ree12 = rmoutliers(re12,'gesd');
+%catch
+    pee12 = rmoutliers(pe12,'percentiles',[5 95]);
+    ree12 = rmoutliers(re12,'percentiles',[5 95]);
+    %end
 phObj12 = histfit(pee12,nbins);
 hold on
 rhObj12 = histfit(ree12,nbins);
@@ -326,13 +329,13 @@ cosmo2(gca,sprintf('PPP = %i/%i, GPS Pair 1-2, RTK = %i/%i',length(pee12),length
 
 ah2(2) = subplot(3,2,2);
 % remove outliers to get better results
-try
-    pee13 = rmoutliers(pe13,'gesd');
-    ree13 = rmoutliers(re13,'gesd');
-catch
-    pee13 = rmoutliers(pe13,'percentiles',[10 90]);
-    ree13 = rmoutliers(re13,'percentiles',[10 90]);
-end
+%try
+%    pee13 = rmoutliers(pe13,'gesd');
+%    ree13 = rmoutliers(re13,'gesd');
+%catch
+    pee13 = rmoutliers(pe13,'percentiles',[5 95]);
+    ree13 = rmoutliers(re13,'percentiles',[5 95]);
+    %end
 phObj13 = histfit(pee13,nbins);
 hold on
 rhObj13 = histfit(ree13,nbins);
@@ -340,13 +343,13 @@ cosmo2(gca,sprintf('PPP = %i/%i, GPS Pair 1-3, RTK = %i/%i',length(pee13),length
 
 ah2(3) = subplot(3,2,3);
 % remove outliers to get better results
-try
-    pee14 = rmoutliers(pe14,'gesd');
-    ree14 = rmoutliers(re14,'gesd');
-catch
-    pee14 = rmoutliers(pe14,'percentiles',[10 90]);
-    ree14 = rmoutliers(re14,'percentiles',[10 90]);
-end
+%try
+%    pee14 = rmoutliers(pe14,'gesd');
+%    ree14 = rmoutliers(re14,'gesd');
+%catch
+    pee14 = rmoutliers(pe14,'percentiles',[5 95]);
+    ree14 = rmoutliers(re14,'percentiles',[5 95]);
+    %end
 phObj14 = histfit(pee14,nbins);
 hold on
 rhObj14 = histfit(ree14,nbins);
@@ -354,13 +357,13 @@ cosmo2(gca,sprintf('PPP = %i/%i, GPS Pair 1-4, RTK = %i/%i',length(pee14),length
 
 ah2(4) = subplot(3,2,4);
 % remove outliers to get better results
-try
-    pee23 = rmoutliers(pe23,'gesd');
-    ree23 = rmoutliers(re23,'gesd');
-catch
-    pee23 = rmoutliers(pe23,'percentiles',[10 90]);
-    ree23 = rmoutliers(re23,'percentiles',[10 90]);
-end
+%try
+%    pee23 = rmoutliers(pe23,'gesd');
+%    ree23 = rmoutliers(re23,'gesd');
+%catch
+    pee23 = rmoutliers(pe23,'percentiles',[5 95]);
+    ree23 = rmoutliers(re23,'percentiles',[5 95]);
+    %end
 phObj23 = histfit(pee23,nbins);
 hold on
 rhObj23 = histfit(ree23,nbins);
@@ -368,13 +371,13 @@ cosmo2(gca,sprintf('PPP = %i/%i, GPS Pair 2-3, RTK = %i/%i',length(pee23),length
 
 ah2(5) = subplot(3,2,5);
 % remove outliers to get better results
-try
-    pee24 = rmoutliers(pe24,'gesd');
-    ree24 = rmoutliers(re24,'gesd');
-catch
-    pee24 = rmoutliers(pe24,'percentiles',[10 90]);
-    ree24 = rmoutliers(re24,'percentiles',[10 90]);
-end
+%try
+%    pee24 = rmoutliers(pe24,'gesd');
+%    ree24 = rmoutliers(re24,'gesd');
+%catch
+    pee24 = rmoutliers(pe24,'percentiles',[5 95]);
+    ree24 = rmoutliers(re24,'percentiles',[5 95]);
+    %end
 phObj24 = histfit(pee24,nbins);
 hold on
 rhObj24 = histfit(ree24,nbins);
@@ -382,25 +385,27 @@ cosmo2(gca,sprintf('PPP = %i/%i, GPS Pair 2-4, RTK = %i/%i',length(pee24),length
 
 ah2(6) = subplot(3,2,6);
 % remove outliers to get better results
-try
-    pee34 = rmoutliers(pe34,'gesd');
-    ree34 = rmoutliers(re34,'gesd');
-catch
-    pee34 = rmoutliers(pe34,'percentiles',[10 90]);
-    ree34 = rmoutliers(re34,'percentiles',[10 90]);
-end
+%try
+%    pee34 = rmoutliers(pe34,'gesd');
+%    ree34 = rmoutliers(re34,'gesd');
+%catch
+    pee34 = rmoutliers(pe34,'percentiles',[5 95]);
+    ree34 = rmoutliers(re34,'percentiles',[5 95]);
+    %end
 phObj34 = histfit(pee34,nbins);
 hold on
 rhObj34 = histfit(ree34,nbins);
 cosmo2(gca,sprintf('PPP = %i/%i, GPS Pair 3-4, RTK = %i/%i',length(pee34),length(ptime),length(ree34),length(rtime)),'Residuals [mm]','Counts',pee34,phObj34,ree34,rhObj34)
 
 % finishing touches
-tt=supertit(ah([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(rtime(1)),datestr(rtime(end))));
+tt=supertit(ah2([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(rtime(1)),datestr(rtime(end))));
 movev(tt,0.3)
+b = annotation('textbox',[0.465 0.085 0 0],'String',['leg2'],'FitBoxToText','on');
+b.FontSize = 12;
 
-%figdisp(sprintf('histo-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
+figdisp(sprintf('histo-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
 
-%close
+close
 
 % cosmetics for std plots
 function cosmo1(ax,titl,xlab,ylab,minlen,maxlen,maxstd)
@@ -429,10 +434,22 @@ if std(pdata)>=std(rdata)
     xlim([round(-3*std(pdata),2) round(3*std(pdata),2)])
     xticks([round(-3*std(pdata),2) round(-2*std(pdata),2) round(-std(pdata),2) 0 round(std(pdata),2) round(2*std(pdata),2) round(3*std(pdata),2)])
     xticklabels({round(-3*std(pdata),0),round(-2*std(pdata),0),round(-std(pdata),0),0,round(std(pdata),0),round(2*std(pdata),0),round(3*std(pdata),0)})
+    text(1.55*std(pdata),4*max(phobj(1).YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f',std(pdata),median(pdata),mean(pdata)),'FontSize',9)
+    text(1.55*std(pdata),4*min(rhobj(1).YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f',std(rdata),median(rdata),mean(rdata)),'FontSize',9)
+    ppct = (length(pdata(pdata<=round(3*std(pdata)) & pdata>=round(-3*std(pdata))))/length(pdata))*100;
+    text(-2.9*std(pdata),85*max(phobj(1).YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',ppct,min(pdata),max(pdata)),'FontSize',9)
+    rpct = (length(rdata(rdata<=round(3*std(rdata)) & rdata>=round(-3*std(rdata))))/length(rdata))*100;
+    text(-2.9*std(pdata),85*min(rhobj(1).YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',rpct,min(rdata),max(rdata)),'FontSize',9)
 elseif std(pdata)<std(rdata)
     xlim([round(-3*std(rdata),2) round(3*std(rdata),2)])
     xticks([round(-3*std(rdata),2) round(-2*std(rdata),2) round(-std(rdata),2) 0 round(std(rdata),2) round(2*std(rdata),2) round(3*std(rdata),2)])
     xticklabels({round(-3*std(rdata),0),round(-2*std(rdata),0),round(-std(rdata),0),0,round(std(rdata),0),round(2*std(rdata),0),round(3*std(rdata),0)})
+    text(1.55*std(rdata),4*max(phobj(1).YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f',std(pdata),median(pdata),mean(pdata)),'FontSize',9)
+    text(1.55*std(rdata),4*min(rhobj(1).YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f',std(rdata),median(rdata),mean(rdata)),'FontSize',9)
+    ppct = (length(pdata(pdata<=round(3*std(pdata)) & pdata>=round(-3*std(pdata))))/length(pdata))*100;
+    text(-2.9*std(rdata),85*max(phobj(1).YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',ppct,min(pdata),max(pdata)),'FontSize',9)
+    rpct = (length(rdata(rdata<=round(3*std(rdata)) & rdata>=round(-3*std(rdata))))/length(rdata))*100;
+    text(-2.9*std(rdata),85*min(rhobj(1).YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',rpct,min(rdata),max(rdata)),'FontSize',9)
 end
 ylabel(ylab)
 if abs(max(phobj(1).YData)) >= abs(min(rhobj(1).YData))
@@ -443,14 +460,16 @@ end
 longticks([],2)
 phobj(1).FaceColor = [0.4 0.6667 0.8431]; %light blue bars
 rhobj(1).FaceColor = [0.466 0.674 0.188]; %lime green bars
-text(1.55*std(pdata),4*max(phobj(1).YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f',std(pdata),median(pdata),mean(pdata)),'FontSize',9)
-text(1.55*std(rdata),4*min(rhobj(1).YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f',std(rdata),median(rdata),mean(rdata)),'FontSize',9)
-ppct = (length(pdata(pdata<=round(3*std(pdata)) & pdata>=round(-3*std(pdata))))/length(pdata))*100;
-text(-2.9*std(pdata),85*max(phobj(1).YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',ppct,min(pdata),max(pdata)),'FontSize',9)
-rpct = (length(rdata(rdata<=round(3*std(rdata)) & rdata>=round(-3*std(rdata))))/length(rdata))*100;
-text(-2.9*std(rdata),85*min(rhobj(1).YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',rpct,min(rdata),max(rdata)),'FontSize',9)
+
+% text(1.55*std(pdata),4*max(phobj(1).YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f',std(pdata),median(pdata),mean(pdata)),'FontSize',9)
+% text(1.55*std(rdata),4*min(rhobj(1).YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f',std(rdata),median(rdata),mean(rdata)),'FontSize',9)
+% ppct = (length(pdata(pdata<=round(3*std(pdata)) & pdata>=round(-3*std(pdata))))/length(pdata))*100;
+% text(-2.9*std(pdata),85*max(phobj(1).YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',ppct,min(pdata),max(pdata)),'FontSize',9)
+% rpct = (length(rdata(rdata<=round(3*std(rdata)) & rdata>=round(-3*std(rdata))))/length(rdata))*100;
+% text(-2.9*std(rdata),85*min(rhobj(1).YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',rpct,min(rdata),max(rdata)),'FontSize',9)
+
 % plot vertical lines at respective medians
-line([median(pdata) median(pdata)],[0 max(phobj(2).YData)],'Color','k','LineStyle','--','LineWidth',1.5)
-line([median(rdata) median(rdata)],[0 min(rhobj(2).YData)],'Color','k','LineStyle','--','LineWidth',1.5)
+line([median(pdata) median(pdata)],[0 max(phobj(2).YData)],'Color','k','LineStyle','--','LineWidth',1.5);
+line([median(rdata) median(rdata)],[0 min(rhobj(2).YData)],'Color','k','LineStyle','--','LineWidth',1.5);
 % plot horizontal line at 0
-yline(0,'k','LineWidth',1.5)
+yline(0,'k','LineWidth',1.5);
