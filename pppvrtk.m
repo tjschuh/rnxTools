@@ -24,7 +24,7 @@ function pppvrtk(pppfile1,pppfile2,pppfile3,pppfile4,rtkfile1,rtkfile2,rtkfile3,
 % subplot of histograms back-to-back of both datasets
 %
 % Originally written by tschuh-at-princeton.edu, 01/17/2022
-% Last modified by tschuh-at-princeton.edu, 01/18/2022
+% Last modified by tschuh-at-princeton.edu, 01/19/2022
 
 % (i=1) go through all 4 ppp datasets and compute pvar datasets
 % which are the residuals from the GPS receiver distances, then
@@ -301,12 +301,11 @@ movev(tt,0.3)
 a = annotation('textbox',[0.465 0.085 0 0],'String',['leg2'],'FitBoxToText','on');
 a.FontSize = 12;
 
-
 figdisp(sprintf('std-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
 
 close
 
-% plotting histograms
+% plotting histograms second
 g=figure;
 g.Position = [250 500 1100 800];
 
@@ -321,7 +320,7 @@ ah2(1) = subplot(3,2,1);
 %catch
     pee12 = rmoutliers(pe12,'percentiles',[5 95]);
     ree12 = rmoutliers(re12,'percentiles',[5 95]);
-    %end
+%end
 phObj12 = histfit(pee12,nbins);
 hold on
 rhObj12 = histfit(ree12,nbins);
