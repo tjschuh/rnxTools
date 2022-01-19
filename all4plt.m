@@ -377,7 +377,7 @@ plot(d4.t(1:int3:end-2),baz4(1:int3:end),'color',[0.7 0.7 0.7])
 tt=supertit(ah([1 2]),sprintf('Ship Data from %s to %s',datestr(d1.t(1)),datestr(d1.t(end))));
 movev(tt,0.3)
 
-a = annotation('textbox',[0.465 0.085 0 0],'String',['camp'],'FitBoxToText','on');
+a = annotation('textbox',[0.465 0.085 0 0],'String',['leg2'],'FitBoxToText','on');
 a.FontSize = 12;
 
 figdisp(sprintf('all4plt-%s',fname),[],'',2,[],'epstopdf')
