@@ -28,11 +28,12 @@ function varargout=prd2mat(prdfile,protype,plt)
 % R2020a Update 4 (9.8.0.1417392)
 %
 % Originally written by tschuh-at-princeton.edu, 10/06/2021
-% Last modified by tschuh-at-princeton.edu, 01/11/2022
+% Last modified by tschuh-at-princeton.edu, 01/20/2022
 
+% To do:
 % need to extract trip section from fname somehow
 % currently manually changing at end of code
-
+%
 % need someway to signify on plot when utmzone changes
 
 % prepare the outfile
