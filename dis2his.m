@@ -1,5 +1,5 @@
-function dis2his(unit1file,unit2file,unit3file,unit4file,nbins)
-% DIS2HIS(unit1file,unit2file,unit3file,unit4file,nbins)
+function dis2his(unit1file,unit2file,unit3file,unit4file)
+% DIS2HIS(unit1file,unit2file,unit3file,unit4file)
 %
 % compute distances between 6 sets of receiver pairs
 % calculate linear polyfit and residuals
@@ -11,10 +11,9 @@ function dis2his(unit1file,unit2file,unit3file,unit4file,nbins)
 % unit2file     mat file containing data collected by unit 2
 % unit3file     mat file containing data collected by unit 3
 % unit4file     mat file containing data collected by unit 4
-% nbins         number of bins desired for histograms [default: 25]
 %
 % Originally written by tschuh-at-princeton.edu, 12/01/2021
-% Last modified by tschuh-at-princeton.edu, 01/17/2022
+% Last modified by tschuh-at-princeton.edu, 01/20/2022
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
@@ -71,9 +70,6 @@ x34 = (a34/1000).*[1:length(d34)]' + b34; e34 = 1000*(x34 - d34);
 f=figure;
 f.Position = [250 500 1100 600];
 
-% default number of bins
-defval('nbins',25)
-
 % plot histogram with normal curve over top
 ah(1) = subplot(3,2,1);
 % remove outliers to get better results
@@ -82,58 +78,78 @@ try
 catch
     ee12 = rmoutliers(e12,'percentiles',[10 90]);
 end
-histObj12 = histfit(ee12,nbins);
-cosmo(gca,sprintf('GPS Pair 1-2, # of Points = %i/%i',length(ee12),length(d1.t)),'Residuals [mm]','Counts',ee12,histObj12(1))
+% nbins is computed for each dataset using Freedman-Diaconis' Rule
+% this is a personal choice over other methods including Sturges' Rule
+% experimented with other methods and this was my preference
+nbins12 = round((max(ee12) - min(ee12))/(2*iqr(ee12)*(length(ee12))^(-1/3)));
+% calculate goodness of fit (gof) compared to a normal distribution
+[~,~,stats12] = chi2gof(ee12,'NBins',nbins12);
+% divide chi squared by degrees of freedom to reduce to 1 DoF
+% with 1 Dof, chi squared <= 3 signifies ~93% chance data is normal
+% make red curve dotted if gof > 3
+gof12 = stats12.chi2stat/stats12.df;
+histObj12 = histfit(ee12,nbins12);
+cosmo(gca,ah(1),sprintf('GPS Pair 1-2, # of Points = %i/%i',length(ee12),length(d1.t)),'Residuals [mm]','Counts',ee12,gof12,histObj12)
 
 ah(2) = subplot(3,2,2);
-% remove outliers to get better results
 try
     ee13 = rmoutliers(e13,'gesd');
 catch
     ee13 = rmoutliers(e13,'percentiles',[10 90]);
 end
-histObj13 = histfit(ee13,nbins);
-cosmo(gca,sprintf('GPS Pair 1-3, # of Points = %i/%i',length(ee13),length(d1.t)),'Residuals [mm]','Counts',ee13,histObj13(1))
+nbins13 = round((max(ee13) - min(ee13))/(2*iqr(ee13)*(length(ee13))^(-1/3)));
+[~,~,stats13] = chi2gof(ee13,'NBins',nbins13);
+gof13 = stats13.chi2stat/stats13.df;
+histObj13 = histfit(ee13,nbins13);
+cosmo(gca,ah(2),sprintf('GPS Pair 1-3, # of Points = %i/%i',length(ee13),length(d1.t)),'Residuals [mm]','Counts',ee13,gof13,histObj13)
 
 ah(3) = subplot(3,2,3);
-% remove outliers to get better results
 try
     ee14 = rmoutliers(e14,'gesd');
 catch
     ee14 = rmoutliers(e14,'percentiles',[10 90]);
 end
-histObj14 = histfit(ee14,nbins);
-cosmo(gca,sprintf('GPS Pair 1-4, # of Points = %i/%i',length(ee14),length(d1.t)),'Residuals [mm]','Counts',ee14,histObj14(1))
+nbins14 = round((max(ee14) - min(ee14))/(2*iqr(ee14)*(length(ee14))^(-1/3)));
+[~,~,stats14] = chi2gof(ee14,'NBins',nbins14);
+gof14 = stats14.chi2stat/stats14.df;
+histObj14 = histfit(ee14,nbins14);
+cosmo(gca,ah(3),sprintf('GPS Pair 1-4, # of Points = %i/%i',length(ee14),length(d1.t)),'Residuals [mm]','Counts',ee14,gof14,histObj14)
 
 ah(4) = subplot(3,2,4);
-% remove outliers to get better results
 try
     ee23 = rmoutliers(e23,'gesd');
 catch
     ee23 = rmoutliers(e23,'percentiles',[10 90]);
 end
-histObj23 = histfit(ee23,nbins);
-cosmo(gca,sprintf('GPS Pair 2-3, # of Points = %i/%i',length(ee23),length(d1.t)),'Residuals [mm]','Counts',ee23,histObj23(1))
+nbins23 = round((max(ee23) - min(ee23))/(2*iqr(ee23)*(length(ee23))^(-1/3)));
+[~,~,stats23] = chi2gof(ee23,'NBins',nbins23);
+gof23 = stats23.chi2stat/stats23.df;
+histObj23 = histfit(ee23,nbins23);
+cosmo(gca,ah(4),sprintf('GPS Pair 2-3, # of Points = %i/%i',length(ee23),length(d1.t)),'Residuals [mm]','Counts',ee23,gof23,histObj23)
 
 ah(5) = subplot(3,2,5);
-% remove outliers to get better results
 try
     ee24 = rmoutliers(e24,'gesd');
 catch
     ee24 = rmoutliers(e24,'percentiles',[10 90]);
 end
-histObj24 = histfit(ee24,nbins);
-cosmo(gca,sprintf('GPS Pair 2-4, # of Points = %i/%i',length(ee24),length(d1.t)),'Residuals [mm]','Counts',ee24,histObj24(1))
+nbins24 = round((max(ee24) - min(ee24))/(2*iqr(ee24)*(length(ee24))^(-1/3)));
+[~,~,stats24] = chi2gof(ee24,'NBins',nbins24);
+gof24 = stats24.chi2stat/stats24.df;
+histObj24 = histfit(ee24,nbins24);
+cosmo(gca,ah(5),sprintf('GPS Pair 2-4, # of Points = %i/%i',length(ee24),length(d1.t)),'Residuals [mm]','Counts',ee24,gof24,histObj24)
 
 ah(6) = subplot(3,2,6);
-% remove outliers to get better results
 try
     ee34 = rmoutliers(e34,'gesd');
 catch
     ee34 = rmoutliers(e34,'percentiles',[10 90]);
 end
-histObj34 = histfit(ee34,nbins);
-cosmo(gca,sprintf('GPS Pair 3-4, # of Points = %i/%i',length(ee34),length(d1.t)),'Residuals [mm]','Counts',ee34,histObj34(1))
+nbins34 = round((max(ee34) - min(ee34))/(2*iqr(ee34)*(length(ee34))^(-1/3)));
+[~,~,stats34] = chi2gof(ee34,'NBins',nbins34);
+gof34 = stats34.chi2stat/stats34.df;
+histObj34 = histfit(ee34,nbins34);
+cosmo(gca,ah(6),sprintf('GPS Pair 3-4, # of Points = %i/%i',length(ee34),length(d1.t)),'Residuals [mm]','Counts',ee34,gof34,histObj34)
 
 % finishing touches
 tt=supertit(ah([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(d1.t(1)),datestr(d1.t(end))));
@@ -144,7 +160,7 @@ movev(tt,0.3)
 %close
 
 % cosmetics
-function cosmo(ax,titl,xlab,ylab,data,hobj)
+function cosmo(ax,ah,titl,xlab,ylab,data,gof,hobj)
 ax.XGrid = 'on';
 ax.YGrid = 'off';
 ax.GridColor = [0 0 0];
@@ -155,21 +171,16 @@ xlim([round(-3*std(data),2) round(3*std(data),2)])
 xticks([round(-3*std(data),2) round(-2*std(data),2) round(-std(data),2) 0 round(std(data),2) round(2*std(data),2) round(3*std(data),2)])
 xticklabels({round(-3*std(data),0),round(-2*std(data),0),round(-std(data),0),0,round(std(data),0),round(2*std(data),0),round(3*std(data),0)})
 ylabel(ylab)
-ylim([0 max(hobj.YData)+0.1*max(hobj.YData)])
+ylim([0 max(hobj(1).YData)+0.1*max(hobj(1).YData)])
 longticks([],2)
-hobj.FaceColor = [0.4 0.6667 0.8431]; %light blue bars
-%hobj.FaceColor = [0.466 0.674 0.188]; %lime green bars
-if abs(mean(data)) < 1
-    text(1.55*std(data),4*max(hobj.YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = 0',std(data),median(data)),'FontSize',9)
-else
-    text(1.55*std(data),4*max(hobj.YData)/5,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f',std(data),median(data),mean(data)),'FontSize',9)
-end
+hobj(1).FaceColor = [0.4 0.6667 0.8431]; %light blue bars
+text(1.55*std(data),7.25*ah.YLim(2)/10,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(data),median(data),mean(data),gof),'FontSize',9)
 pct = (length(data(data<=round(3*std(data)) & data>=round(-3*std(data))))/length(data))*100;
-text(-2.9*std(data),90*max(hobj.YData)/100,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',pct,min(data),max(data)),'FontSize',9)
+text(-2.9*std(data),8*ah.YLim(2)/10,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',pct,min(data),max(data)),'FontSize',9)
+% if gof > 3 make red curve dotted b/c data is not normal
+if gof > 3
+    hobj(2).LineStyle = '--';
+end
 % plot vertical line at median
 hold on
 xline(median(data),'k--','LineWidth',2);
-% plot histogram below x-axis
-% will also need to edit histObj(2) to move curve
-% this will be what I do for pvsr.m
-%hobj.YData = -1*hobj.YData;
