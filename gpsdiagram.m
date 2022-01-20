@@ -1,8 +1,8 @@
-function diagram(dist12,dist13,dist14,dist23,dist24,dist34)
-% DIAGRAM(dist12,dist13,dist14,dist23,dist24,dist34)
+function gpsdiagram(dist12,dist13,dist14,dist23,dist24,dist34)
+% GPSDIAGRAM(dist12,dist13,dist14,dist23,dist24,dist34)
 %
-% make a simple diagram of 4 GPS locations
-% given 6 distances between them all
+% Make a simple diagram of 4 GPS locations given 6 distances between them
+% all
 %
 % INPUT:
 %
