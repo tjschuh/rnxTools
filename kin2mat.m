@@ -117,20 +117,30 @@ if plt == 1
     % position = [left bottom width height]
     f.Position = [500 250 850 550];
 
+
     % find rows where nsats <= 7
     thresh = 7;
     rows=find(d.nsats(:,1)<=thresh);
     
-    % plot utm coordinates
     % set the zero for the UTM coordinates based on the min and max of data
     x = d.utmeasting-(min(d.utmeasting)-.05*(max(d.utmeasting)-min(d.utmeasting)));
     y = d.utmnorthing-(min(d.utmnorthing)-.05*(max(d.utmnorthing)-min(d.utmnorthing)));
     tc = datetime(d.t,'Format','HH:mm:ss'); 
-    z=zeros(size(x));
+    % z=zeros(size(x));
+
+    % To do: 
+    % Find the jumps in the time, and insert NaNs where they occur
+    % unique(seconds(diff(d.t)))
+
+    % Plotting interval
+    intv=10;
+
+    % plot utm coordinates
     ah(1)=subplot(2,2,[1 3]);
-    c = linspace(1,10,length(x(1:10:end)));
-    scatter(x(1:10:end)',y(1:10:end)',[],c,'filled')
-    %plot(x(1:10:end)',y(1:10:end)','k','LineWidth',0.5)
+    c = linspace(1,10,length(x(1:intv:end)));
+    scatter(x(1:intv:end)',y(1:intv:end)',[],c,'filled')
+
+    %plot(x(1:intv:end)',y(1:intv:end)','k','LineWidth',0.5)
     colormap(jet)
     colorbar('southoutside','Ticks',[1:3:10],'TickLabels',...
              {datestr(tc(1),'HH:MM:SS'),datestr(tc(floor(end/3)),'HH:MM:SS'),...
@@ -139,7 +149,7 @@ if plt == 1
     % grey out "bad" data where nsats is low
     badx = x(rows);
     bady = y(rows);
-    scatter(badx(1:10:end)',bady(1:10:end)',[],[0.7 0.7 0.7],'filled')
+    scatter(badx(1:intv:end)',bady(1:intv:end)',[],[0.7 0.7 0.7],'filled')
     grid on
     longticks
     xlabel(sprintf('easting [m] (UTM Zone %s)'),zone{1})
