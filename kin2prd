@@ -14,12 +14,12 @@
 # kinfile.prd          file only containing solution information from input kin file
 #
 # Originally written by tschuh-at-princeton.edu, 10/06/2021
-# Last modified by tschuh-at-princeton.edu, 10/26/2021
+# Last modified by tschuh-at-princeton.edu, 11/07/2021
 
 set infile = $1
 # set outfile to be og filename which is 2 directories back
 # need to pipe to xargs to avoid displaying full path
-set outfile = `/bin/ls -1 ../../*.obs | xargs -n1 basename`
+set outfile = `/bin/ls -1 *.cfg | xargs -n1 basename`
 
 set hdrend = `rnx2hdr $infile`
 set hdrend = `echo "$hdrend+1" | bc`

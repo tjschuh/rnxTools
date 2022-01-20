@@ -1,0 +1,24 @@
+#!/bin/tcsh
+#
+# take a RTKLIB *.pos solution file and split
+# it into 2 files, 1 containing just header info
+# and 1 containing just solution/processed data
+#
+# INPUT:
+#
+# pos solution file    output file created by RTKLIB containing differential processed solutions
+#
+# OUTPUT:
+#
+# posfile.hdr          file only containing header information from input pos file
+# posfile.prd          file only containing solution information from input pos file
+#
+# Originally written by tschuh-at-princeton.edu, 12/28/2021
+
+set infile = $1
+
+set hdrend = `awk '/%  GPST/ {print NR; exit}' $infile`
+
+# create hdr and prd files from original file
+awk 'NR<='"$hdrend"' {print}' $infile >! $infile:r.hdr
+awk 'NR>'"$hdrend"' {print}' $infile >! $infile:r.prd
