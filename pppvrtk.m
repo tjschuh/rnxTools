@@ -23,8 +23,12 @@ function pppvrtk(pppfile1,pppfile2,pppfile3,pppfile4,rtkfile1,rtkfile2,rtkfile3,
 % subplot of standard deviation vs number of points in both datasets
 % subplot of histograms back-to-back of both datasets
 %
+% EXAMPLE:
+%
+% pppvrtk('0001-05340.mat','0002-05340.mat','0003-05340.mat','0004-05340.mat','0001-F089.mat','0002-F089.mat','0003-F089.mat','0004-F089.mat')
+%
 % Originally written by tschuh-at-princeton.edu, 01/17/2022
-% Last modified by tschuh-at-princeton.edu, 01/19/2022
+% Last modified by tschuh-at-princeton.edu, 01/20/2022
 
 % (i=1) go through all 4 ppp datasets and compute pvar datasets
 % which are the residuals from the GPS receiver distances, then
@@ -301,9 +305,9 @@ movev(tt,0.3)
 a = annotation('textbox',[0.465 0.085 0 0],'String',['leg2'],'FitBoxToText','on');
 a.FontSize = 12;
 
-figdisp(sprintf('std-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
+%figdisp(sprintf('std-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
 
-close
+%close
 
 % plotting histograms second
 g=figure;
@@ -399,12 +403,12 @@ cosmo2(gca,sprintf('PPP = %i/%i, GPS Pair 3-4, RTK = %i/%i',length(pee34),length
 % finishing touches
 tt=supertit(ah2([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(rtime(1)),datestr(rtime(end))));
 movev(tt,0.3)
-b = annotation('textbox',[0.465 0.085 0 0],'String',['leg2'],'FitBoxToText','on');
+b = annotation('textbox',[0.465 0.085 0 0],'String',['camp'],'FitBoxToText','on');
 b.FontSize = 12;
 
-figdisp(sprintf('histo-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
+%figdisp(sprintf('histo-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
 
-close
+%close
 
 % cosmetics for std plots
 function cosmo1(ax,titl,xlab,ylab,minlen,maxlen,maxstd)
