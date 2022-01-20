@@ -2,7 +2,6 @@ function gpsdiagram(dist12,dist13,dist14,dist23,dist24,dist34)
 % GPSDIAGRAM(dist12,dist13,dist14,dist23,dist24,dist34)
 %
 % Make a simple diagram of 4 GPS locations given 6 distances between them
-% all
 %
 % INPUT:
 %
@@ -33,8 +32,8 @@ pct = 0.05;
 % offset to add to coordinates for neater plotting
 offset = [1 1];
 
-% Font size of box
-fs=8;
+% Font size of box tex
+fs=10;
 
 % Text box locations
 tx=[0.15 0.22 0 0.7;
