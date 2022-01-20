@@ -1,0 +1,60 @@
+#!/bin/tcsh -f
+#
+# takes an unaltered RINEX file
+# and outputs the approx position
+# in XYZ, Lat, Lon, Height, and the
+# RINEX file start and end times
+#
+# INPUT:
+#
+# $1     RIENX file
+#
+# OUTPUT:
+#
+# output to screen
+#
+# REQUIRES:
+#
+# A full installation of GipsyX, in particular, XYZ2LLH
+#
+# Originally written by tschuh-at-princeton.edu, 06/25/2021
+# Last modified by tschuh-at-princeton.edu, 08/20/2021
+
+set file = $1
+
+# Find the header bottom
+set nrh = `rnx2hdr $file`
+
+# awk the entire "time of first obs" line
+set line = `head -$nrh $file | awk '/TIME OF FIRST OBS/'`
+
+# save each time component with leading zeros
+# need to use f instead of i because
+# 08 and 09 don't completely convert with i
+set fyr = `printf "%04.0f" $line[1]`
+set fmo = `printf "%02.0f" $line[2]`
+set fdy = `printf "%02.0f" $line[3]`
+set fhr = `printf "%02.0f" $line[4]`
+set fmn = `printf "%02.0f" $line[5]`
+set fsc = `printf "%010.7f" $line[6]`
+
+# do the same as above, but for "time of last obs"
+set line = `head -$nrh $file | awk '/TIME OF LAST OBS/'`
+
+set lyr = `printf "%04.0f" $line[1]`
+set lmo = `printf "%02.0f" $line[2]`
+set ldy = `printf "%02.0f" $line[3]`
+set lhr = `printf "%02.0f" $line[4]`
+set lmn = `printf "%02.0f" $line[5]`
+set lsc = `printf "%010.7f" $line[6]`
+
+# awk the approx position x,y,z of file
+set x = `head -$nrh $file | awk '/APPROX POSITION/ {print $1}'`
+set y = `head -$nrh $file | awk '/APPROX POSITION/ {print $2}'`
+set z = `head -$nrh $file | awk '/APPROX POSITION/ {print $3}'`
+
+# convert approx position to lat,lon,height
+set llh = `xyz2llh.py -xyz $x $y $z`
+
+# print out all above variables
+echo $x $y $z "  " $llh "  " $fyr $fmo $fdy $fhr $fmn $fsc "  " $lyr $lmo $ldy $lhr $lmn $lsc

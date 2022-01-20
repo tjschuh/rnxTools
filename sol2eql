@@ -1,0 +1,44 @@
+#!/bin/tcsh
+#
+# takes in 2 data files containing the PPP solutions
+# and removes lines unique to either file so that
+# both files are returned with the same number of lines
+# and the same timestamps
+#
+# INPUT:
+#
+# $1     solution file 1
+# $2     solution file 2
+#
+# OUTPUT:
+#
+# modified solution file 1
+# modified solution file 2
+#
+# Originally written by tschuh-at-princeton.edu, 09/29/2021
+
+# might still have some bugs
+
+set file1 = $1
+set file2 = $2
+
+awk '{print $2}' $file1 >! times1
+awk '{print $2}' $file2 >! times2
+
+comm -23 times1 times2 >! remove1
+comm -13 times1 times2 >! remove2
+
+set del1 = `awk '{print}' remove1`
+set del2 = `awk '{print}' remove2`
+
+foreach blah ($del1[*])
+    set linenum = `awk '/'"$blah"'/ {print NR}' $file1`
+    sed -i ''"$linenum"'d' $file1
+end
+
+foreach bleh ($del2[*])
+    set linenum = `awk '/'"$bleh"'/ {print NR}' $file2`
+    sed -i ''"$linenum"'d' $file2
+end
+
+rm -rf times* remove*

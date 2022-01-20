@@ -1,0 +1,26 @@
+#!/bin/tcsh
+#
+# convert a RINEX file from
+# kinematic mode to static mode
+# sister function to STA2KIN
+#
+# INPUT:
+#
+# $1       kinematic RINEX file
+#
+# OUTPUT:
+#
+# file-s   static RINEX file
+#
+# Originally written by tschuh-at-princeton.edu, 07/12/2021
+
+set file = $1
+
+# find end of header line number
+set nrh = `rnx2hdr $file`
+
+# kinematic identifier line number is next line
+set del = `echo "$nrh+1" | bc`
+
+# delete entire line
+sed -i ''"$del"'d' $file

@@ -1,109 +1,175 @@
-#!/bin/tcsh
+#!/bin/tcsh -f
+#
+# Takes a RINEX file and creates another RINEX file from it that
+# begins at # a user defined start time and ends at a user defined
+# end time
+#
+# INPUT:
+#
+# $1      a RINEX file
+# $2      offset from original start time in seconds   
+# $3      duration of generated RINEX file in seconds
+#
+# OUTPUT:
+#
+# *.rnx   RINEX file with new start and end times, newly named *.rnx
+#
+# Originally written by tschuh-at-princeton.edu, 06/11/2021 
+# Last modified by tschuh-at-princeton.edu, 08/09/2021
 
-# $1 is original file
-# $2 is desired number of seconds for rinex length
+set warnin = 0
+if($#argv < 3)then
+  echo ' '
+  echo 'RNX2RNX: At least three input arguments expected.'
+  echo ' '
+  echo '----------> RNX2RNX file offset duration'
+  echo '----------> where offset and duration in s'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
 
-set hlength = `awk '/END OF HEADER/ {print NR}' $1`
+# Input parsing
+set infile = $1
+set offset = $2
+set duration = $3
+
+# fail-safe
+# if $offset +$duration > length of RINEX file (rnx2epc)
+# rnx2rnx won't work, it will request data beyond file's limits
+set epc = `rnx2epc $1`
+set offdur = `echo "$offset+$duration" | bc`
+if ($offdur > $epc) then
+    echo ' '
+    echo 'RNX2RNX: choose a smaller offset and/or duration'
+    @ warnin +=1
+    goto label999
+endif
+
+################################################################################
+# Now the code starts
+
+# New extension
+#set outfile = `echo $infile:r.rnx`
+set outfile = `echo $infile:r_{$offset}_{$duration}.rnx`
+
+# Warn if the output file already exist
+#test -f $outfile && echo Overwriting $outfile
+
+# compute the number of header lines
+set hlength = `awk '/END OF HEADER/ {print NR; exit}' $infile`
+
+# copy header from $1 to new file 
+# which we will use to run gd2e.py on
+sed -n '1,'"$hlength"'p' $infile >! $outfile
 
 # save the start and end time variables (yr,mm,dd,hr,min,sec)
-set yr1 = `awk '/FIRST/ {print $1}' $1`
-set mon1 = `awk '/FIRST/ {print $2}' $1`
-set day1 = `awk '/FIRST/ {print $3}' $1`
-set hr1 = `awk '/FIRST/ {print $4}' $1`
-set min1 = `awk '/FIRST/ {print $5}' $1`
-set sec1 = `awk '/FIRST/ {print $6}' $1`
+set yr1 = `awk '/FIRST/ {print $1}' $infile`
+set mon1 = `awk '/FIRST/ {print $2}' $infile`
+set day1 = `awk '/FIRST/ {print $3}' $infile`
+set hr1 = `awk '/FIRST/ {print $4}' $infile`
+set min1 = `awk '/FIRST/ {print $5}' $infile`
+set sec1 = `awk '/FIRST/ {print $6}' $infile`
 
-set yr2 = `awk '/LAST/ {print $1}' $1`
-set mon2 = `awk '/LAST/ {print $2}' $1`
-set day2 = `awk '/LAST/ {print $3}' $1`
-set hr2 = `awk '/LAST/ {print $4}' $1`
-set min2 = `awk '/LAST/ {print $5}' $1`
-set sec2 = `awk '/LAST/ {print $6}' $1`
+set yr2 = `awk '/LAST/ {print $1}' $infile`
+set mon2 = `awk '/LAST/ {print $2}' $infile`
+set day2 = `awk '/LAST/ {print $3}' $infile`
+set hr2 = `awk '/LAST/ {print $4}' $infile`
+set min2 = `awk '/LAST/ {print $5}' $infile`
+set sec2 = `awk '/LAST/ {print $6}' $infile`
 
-# take start time and $2, and compute the necessary end time
-./rnx2end $yr1 $mon1 $day1 $hr1 $min1 $sec1 $2
+# this is where computation of start time has to go
+# take start time and $2, and compute the new start time
+rnx2beg $yr1 $mon1 $day1 $hr1 $min1 $sec1 $offset
 
-# save the end time variables (yr,mm,dd,hr,min,sec)
-# need to make if statements like I did for the seconds at the end
-set yr = `awk '/ / {print $1}' endtime`
+set yr1p = `awk '/ / {print $1}' starttime`
+set mon1p = `awk '/ / {print $2}' starttime`
+set day1p = `awk '/ / {print $3}' starttime`
+set hr1p = `awk '/ / {print $4}' starttime`
+set min1p = `awk '/ / {print $5}' starttime`
+set sec1p = `awk '/ / {print $6}' starttime`
 
-set mon = `awk '/ / {print $2}' endtime`
-if ($mon < 10) then
-   set mon = `printf "%1.1i" $mon`
-endif
+# must get rid of all the leading zeroes 
 
-set day = `awk '/ / {print $3}' endtime`
-if ($day < 10) then
-   set day = `printf "%1.1i" $day`
-endif
+rm starttime
 
-set hr = `awk '/ / {print $4}' endtime`
-if ($hr < 10) then
-   set hr = `printf "%1.1i" $hr`
-endif
+# take new start time and $3, and compute the new end time
+rnx2end $yr1p $mon1p $day1p $hr1p $min1p $sec1p $duration
 
-set min = `awk '/ / {print $5}' endtime`
-if ($min < 10) then
-   set min = `printf "%1.1i" $min`
-endif
-
-set sec = `awk '/ / {print $6}' endtime`
-# dont add leading zero to $sec, just add 7 trailing zeros
-set sec = `printf "%2.7f" $sec`
-
-set seci = `printf "%i" $sec`
-set sec2i = `printf "%i" $sec2`
+set yr2p = `awk '/ / {print $1}' endtime`
+set mon2p = `awk '/ / {print $2}' endtime`
+set day2p = `awk '/ / {print $3}' endtime`
+set hr2p = `awk '/ / {print $4}' endtime`
+set min2p = `awk '/ / {print $5}' endtime`
+set sec2p = `awk '/ / {print $6}' endtime`
 
 rm endtime
 
-# copy header from $1 to new file rinex
-# which we will use to run gd2e.py on
-sed -n '1,'"$hlength"'p' $1 >! rinex
+set stline = `awk '/TIME OF FIRST OBS/ {print NR}' $infile`
+sed -i ''"$stline"'d' $outfile
+sed -i ''"$stline"' i \ \ '"$yr1p"'    '"$mon1p"'    '"$day1p"'    '"$hr1p"'    '"$min1p"'   '"$sec1p"'.0000000     GPS         TIME OF FIRST OBS' $outfile
 
-# replace end time in new file with
-# the new, appropriate end time
-set etline = `awk '/TIME OF LAST OBS/ {print NR}' $1`
-sed -i ''"$etline"' s/'"$yr2"'/'"$yr"'/' rinex
-sed -i ''"$etline"' s/'"$mon2"'/'"$mon"'/' rinex
-sed -i ''"$etline"' s/'"$day2"'/'"$day"'/' rinex
-sed -i ''"$etline"' s/'"$hr2"'/'"$hr"'/' rinex
-sed -i ''"$etline"' s/'"$min2"'/'"$min"'/' rinex
-
-# this is to make the spacing correct in the new file
-if ($sec2i < 10 && $seci >= 10) then
-    sed -i ''"$etline"' s/    '"$sec2"'/   '"$sec"'/' rinex
-else if ($sec2i < 10 && $seci < 10) then
-    sed -i ''"$etline"' s/    '"$sec2"'/    '"$sec"'/' rinex
-else if ($sec2i >= 10 && $seci < 10) then
-    sed -i ''"$etline"' s/   '"$sec2"'/    '"$sec"'/' rinex
-else if ($sec2i >= 10 && $seci >= 10) then
-    sed -i ''"$etline"' s/   '"$sec2"'/   '"$sec"'/' rinex
-endif
+set etline = `awk '/TIME OF LAST OBS/ {print NR}' $infile`
+sed -i ''"$etline"'d' $outfile
+sed -i ''"$etline"' i \ \ '"$yr2p"'    '"$mon2p"'    '"$day2p"'    '"$hr2p"'    '"$min2p"'   '"$sec2p"'.0000000     GPS         TIME OF LAST OBS' $outfile
 
 # text match the end time of rinex in the original file
 # then copy all the lines in between start time
 # and end time + the block after end time 
-set yrstart = `echo "$yr1-2000" | bc`
-set yrend = `echo "$yr-2000" | bc`
+set yrstart = `echo "$yr1p-2000" | bc`
+set yrend = `echo "$yr2p-2000" | bc`
 
-# text match the appropriate start and end times to 
-# obtain the line numbers of each
+set mon1p = `printf "%1.0f" $mon1p`
+set day1p = `printf "%1.0f" $day1p`
+set hr1p = `printf "%1.0f" $hr1p`
+set min1p = `printf "%1.0f" $min1p`
+set sec1p = `printf "%1.7f" $sec1p`
+set mon2p = `printf "%1.0f" $mon2p`
+set day2p = `printf "%1.0f" $day2p`
+set hr2p = `printf "%1.0f" $hr2p`
+set min2p = `printf "%1.0f" $min2p`
+set sec2p = `printf "%1.7f" $sec2p`
+
+# text match the appropriate start time to 
+# obtain the line number so we know where
+# to start copying from
 # \s+ means expect at least one space
-set startln = `awk '/'"$yrstart"'\s+'"$mon1"'\s+'"$day1"'\s+'"$hr1"'\s+'"$min1"'\s+'"$sec1"'/ && NR>'"$hlength"' {print NR}' $1`
+set startln = `awk '/'"$yrstart"'\s+'"$mon1p"'\s+'"$day1p"'\s+'"$hr1p"'\s+'"$min1p"'\s+'"$sec1p"'/ && NR>'"$hlength"' {print NR}' $infile`
 
 # each block length is (3*#obs) where #obs is the first numbr in column 8 of the time line
-set multiple = `awk '/'"$yrend"'\s+'"$mon"'\s+'"$day"'\s+'"$hr"'\s+'"$min"'\s+'"$seci"'/ && NR>'"$hlength"' {print substr($8,1,2)}' $1`
+set multiple = `awk '/'"$yrend"'\s+'"$mon2p"'\s+'"$day2p"'\s+'"$hr2p"'\s+'"$min2p"'\s+'"$sec2p"'/ && NR>'"$hlength"' {print substr($8,1,2)}' $infile`
+# each blk hdr is either 1, 2, or 3 lines
+# long depending on value of $multiple
+# because we already account for 1 hdr line,
+# we need to either add 0, 1, or 2 more lines
+if ($multiple <= 12) then
+    set extra = 0
+else if (12 < $multiple && $multiple <= 24) then
+    set extra = 1
+else
+    set extra = 2
+endif
+ 
+# text match the appropriate end time to
+# obtain the line number so we know where
+# to copy up to, HOWEVER, we also want to
+# copy the entire last block, not just up
+# to the last block so we need to use
+# $multiple and $extra to figure out the
+# precise length of the last block
+set endln = `awk '/'"$yrend"'\s+'"$mon2p"'\s+'"$day2p"'\s+'"$hr2p"'\s+'"$min2p"'\s+'"$sec2p"'/ && NR>'"$hlength"' {print NR}' $infile`
+set endln = `echo "${multiple}*3+${endln}+${extra}" | bc`
 
-set endln = `awk '/'"$yrend"'\s+'"$mon"'\s+'"$day"'\s+'"$hr"'\s+'"$min"'\s+'"$seci"'/ && NR>'"$hlength"' {print NR}' $1`
-# to calculate the final line # of the endtime
-# we take the endtime line # and add to it the
-# length of the corresponding block
-# each block is (3*multiple) but we also need
-# to add 2 more because the header of each block
-# is 3 lines, but we already took ino account the
-# fist line of the block header
-set endln = `echo "$multiple*3+$endln+2" | bc`
-
-# copy everything from startln to endln to rinex
+# copy everything from startln to endln to outfile
 # to get all the necessary data
-sed -n ''"$startln"','"$endln"'p' $1 >> rinex
+sed -n ''"$startln"','"$endln"'p' $infile >> $outfile
+
+################################################################################
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNX2RNX stopped, $warnin warning message generated"
+else
+    echo "Script RNX2RNX finished, $warnin warning messages generated"
+endif
+echo ' '

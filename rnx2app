@@ -1,0 +1,37 @@
+#!/bin/tcsh
+#
+# save the xyz solution of the
+# online version of GipsyX (pppx/apps)
+#
+# INPUT:
+#
+# $1      tar file/package downloaded from pppx site
+#
+# OUTPUT:
+#
+# solution to screen
+#
+# Originally written by tschuh-at-princeton.edu, 07/15/2021
+
+set pack = $1
+
+# untar $pack and change name of results
+tar -xf $pack
+set direct = $pack:r:r
+mv run $direct
+rm -f $pack
+
+# get XYZ solution from gd2e_summary.txt
+set x = `awk '/BIOS/ {print $2}' $direct/gd2e_summary.txt`
+set y = `awk '/BIOS/ {print $3}' $direct/gd2e_summary.txt`
+set z = `awk '/BIOS/ {print $4}' $direct/gd2e_summary.txt`
+
+# convert XYZ solution to lat lon height
+set llh = `xyz2llh.py -xyz $x $y $z`
+
+# find start and end times of file and format them correctly
+set t1 = `awk '/time_begin/ {print $2}' $direct/detail.json | sed 's/T/ /' | sed 's/Z//' | sed 's/^.//;s/.$//' | sed 's/.$//' | sed 's/-/ /g' | sed 's/:/ /g'`
+set t2 = `awk '/time_end/   {print $2}' $direct/detail.json | sed 's/T/ /' | sed 's/Z//' | sed 's/^.//;s/.$//' | sed 's/.$//' | sed 's/-/ /g' | sed 's/:/ /g'`
+
+# output results: X Y Z  LT LN HT  YYYY MM DD HH MM SS  YYYY MM DD HH MM SS
+echo $x $y $z "  " $llh "  " $t1 "  " $t2

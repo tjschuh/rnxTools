@@ -1,0 +1,38 @@
+#!/bin/tcsh -f
+#
+# Takes a time (year, month, day, hour, minute, second)
+# and a given offset in seconds and computes a new time
+#
+# INPUT:
+#
+# $1        start year
+# $2        start month
+# $3        start day
+# $4        start hour
+# $5        start minute
+# $6        start second
+# $7        desired # of seconds following start time
+#
+# OUTPUT:
+#
+# time      file that contains new time
+#
+# A full installation of GipsyX, in particular, DATE2SEC and SEC2DATE
+#
+# Last modified by tschuh-at-princeton.edu on 06/16/2021
+
+set yr = `printf "%04.0f" $1`
+set mon = `printf "%02.0f" $2`
+set day = `printf "%02.0f" $3`
+set hr = `printf "%02.0f" $4`
+set min = `printf "%02.0f" $5`
+set sec = `printf "%02.0f" $6`
+
+set start = `date2sec $yr-$mon-$day ${hr}:${min}:${sec}`
+
+set end = `echo "$start+(${7})" | bc`
+
+sec2date $end >! starttime
+
+sed -i 's/-/ /g' starttime
+sed -i 's/:/ /g' starttime

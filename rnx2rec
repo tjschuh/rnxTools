@@ -1,0 +1,18 @@
+#!/bin/tcsh
+#
+# Add receiver NOV OEMV3 to RINEX
+# file currently without a receiver
+#
+# INPUT:
+#
+# $1      RINEX file
+#
+# OUTPUT:
+#
+# Modifed RINEX file
+#
+# Originally written by tschuh-at-princeton.edu, 07/02/2021
+
+set rec = `awk '/REC #/ {print NR}' $1`
+
+sed -i ''"$rec"' s/                                                            /                    NOV OEMV3                               /' $1

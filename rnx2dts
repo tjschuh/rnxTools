@@ -12,7 +12,7 @@
 #
 # REQUIRES:
 #
-# A full installation of GIPSY, in particular, DATE2SEC
+# A full installation of GipsyX, in particular, DATE2SEC
 #
 # Last modified by tschuh-at-princeton.edu on 06/11/2021
 
@@ -26,15 +26,19 @@ set hlength = `rnx2hdr $1`
 
 # go through every line and subtract the value on the previous line
 
-set dum = `awk '/[A-z]/ && NR>'"$hlength"' && $1!~/[A-z]/ {printf "20%2.2i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i\n",$1,$2,$3,$4,$5,$6}' $1 | date2sec | awk 'NR > 1 { print $0 - prev } { prev = $0 }'`
+set sub = `awk '/[A-z]/ && NR>'"$hlength"' && $1!~/[A-z]/ {printf "20%2.2i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i\n",$1,$2,$3,$4,$5,$6}' $1 | date2sec | awk 'NR > 1 { print $0 - prev } { prev = $0 }'`
 
 # tests whether any one is identical to all of them
-set thedif = $dum[1]
+set thedif = $sub[1]
 
 # if the difference between lines is something
 # other than that one, then report this (make variable err)
 set index = 0
+<<<<<<< HEAD
 foreach num ($dum[*])
+=======
+foreach num ($sub[*])
+>>>>>>> 4aae1db3dade5e73a324ba0304400f8ee4658ad5
     @ index +=1
     if ($num != $thedif) then
        printf "File %s Block %4.4i Increment %2.2i\n" $fname $index $num
@@ -50,4 +54,3 @@ if ( $?err ) then
 else
     echo "TEST SUCCESSFUL: All increments are $thedif s"
 endif
-

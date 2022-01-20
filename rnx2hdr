@@ -1,3 +1,18 @@
 #!/bin/tcsh
+#
+# count the number of header lines in RINEX file
+#
+# INPUT:
+#
+# $1    RINEX file
+#
+# OUTPUT:
+#
+# output to screen
+#
+# Originally written by tschuh-at-princeton.edu, 06/11/2021
+# Last modified by tschuh-at-princeton.edu, 07/08/2021
 
-awk '/END OF HEADER/ {print NR}' $1
+# this is very fast now due to the "exit"
+
+awk '/END OF HEADER/ {print NR; exit}' $1

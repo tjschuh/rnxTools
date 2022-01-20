@@ -1,0 +1,85 @@
+#!/bin/tcsh
+#
+# run GipsyX on a RINEX file of min length
+# 1201 seconds. post-process the first 1201
+# seconds, then offset the file by 1 second
+# and post-process the next 1201 seconds and
+# so on. write solutions to a new file along
+# with timestamps and approx position
+#
+# INPUT:
+#
+# $1         RINEX file, must be *.obs
+#
+# OUTPUT:
+#
+# data.ppp    multi-column data file with XYZ positions before and after GipsyX
+#
+# REQUIRES:
+#
+# A full installation of GipsyX, in particular, GD2E 
+# A directory ~/Trees where the user desired tree is stored for GD2E
+#
+# Originally written by tschuh-at-princeton.edu, 07/07/2021
+# Last modified by tschuh-at-princeton.edu, 08/18/2021
+
+# currently doesnt tell the difference between
+# prepos and postpos (done in post-script in MATLAB)
+
+set files = $1
+
+mkdir temp
+
+unalias cd
+
+foreach file ($files[*])
+	set nrh = `rnx2hdr $file`
+        set mark = `head -$nrh $file | awk '/MARKER NAME/ {print $1}'`
+
+	# we want offsets of 0,1,2,...,n
+        # where n is the file length-duration
+        set epc = `rnx2epc $file`
+        set duration = 1201
+        set lim = `echo "$epc-$duration" | bc`
+        set offsets  = `seq 0 $lim`
+
+        cd temp
+
+        # copy $file into temp
+        # do this outside loop to save time
+        /usr/bin/cp ../$file .
+
+	foreach offset ($offsets[*])
+            # run rnx2rnx to get desired segment of $file
+	    rnx2rnx $file $offset $duration
+            # run GipsyX on newly created .rnx file
+ 	    gd2e.py -rnxFile $file:r_{$offset}_{$duration}.rnx -treeSequenceDir ~/Trees/
+            # run rnx2pos to get preprocessed position
+            set prepos = `rnx2pos $file:r_{$offset}_{$duration}.rnx`
+            # save the XYZ and LLH solutions of the GipsyX run
+ 	    set x = `awk '/'"$mark"'/ {print $2}' Summary`
+ 	    set y = `awk '/'"$mark"'/ {print $3}' Summary`
+ 	    set z = `awk '/'"$mark"'/ {print $4}' Summary`
+            set llh = `xyz2llh.py -xyz $x $y $z -standard WGS84`           
+            # add leading zeros to $offset
+            set offset = `printf "%5.5i" $offset`
+            # save everything to data.ppp
+	    # if x is empty, then something went wrong so make x,y,z,llh NaNs
+	    # otherwise print everything as is
+	    if ($x == ) then
+	       echo $prepos NaN NaN NaN NaN NaN NaN $offset $duration >>! ../data.ppp
+            else
+	       echo $prepos $x $y $z $llh $offset $duration >>! ../data.ppp
+	    endif            
+	    # remove everything in temp, except $file
+            rm -rf ^*.obs
+        end 
+    cd ..
+end
+
+rm -rf temp
+
+# columnize data.ppp
+column -t -o ' ' data.ppp > col
+rm -f data.ppp
+mv col data.ppp

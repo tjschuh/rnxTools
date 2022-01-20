@@ -1,0 +1,18 @@
+#!/bin/tcsh
+#
+# Add antenna NOV702GG to RINEX
+# file currently without an antenna
+#
+# INPUT:
+#
+# $1      RINEX file
+#
+# OUTPUT:
+#
+# Modifed RINEX file
+#
+# Originally written by tschuh-at-princeton.edu, 07/02/2021
+
+set ant = `awk '/ANT #/ {print NR}' $1`
+
+sed -i ''"$ant"' s/                                                            /                    NOV702GG        NONE                    /' $1

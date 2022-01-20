@@ -1,9 +1,65 @@
 #!/bin/tcsh
+#
+# Let it report min, max, median, mean, stdev block size
+# nawk
+# bc
+# sort
+#
+# Let it report first and the last block size
+#
+# INPUT:
+#
+# $1     RINEX file
+#
+# OUTPUT:
+#
+# Last modified by tschuh-at-princeton.edu, 06/17/2021
 
-set hdrl = `./rinex2hdr $1`
+set infile = $1
 
-# print line numbers of the start of each block
-awk '/[A-z]/ && NR>'"$hdrl"' && $1!~/[A-z]/ {print NR}' $1
+# compute header length of $infile using rnx2hdr
+set hdrl = `rnx2hdr $infile`
+
+# print line numbers of the start of each data block and write to lnums
+awk '/[A-z]/ && NR>'"$hdrl"' && $1!~/[A-z]/ {print NR}' $infile >! lnums
+# copy line number of very last line of $infile to $lnums
+set last = `wc $infile | awk '{print $1}'` 
+echo "$last+1" | bc >> lnums
+# compute length of each block by subtracting consecutive block header line numbers
+# then sort the block lengths from shortest to longest
+awk 'NR > 1 { print $0 - prev} {prev = $0 }' lnums >! diff
+awk 'NR > 1 { print $0 - prev} {prev = $0 }' lnums | sort >! sdiff
+
+# compute first and last block size
+set first = `head -1 diff`
+set last = `tail -1 diff`
+
+# compute min/max
+set min = `head -1 sdiff`
+set max = `tail -1 sdiff`
+
+# compute mean
+set sum = `awk '{ sum += $1 } END { print sum}' sdiff`
+set totln = `wc diff | awk '{print $1}'`
+set mean = `echo "scale=4; $sum/$totln" | bc -l`
+
+# compute median
+#set mid = `echo "scale=1; $totln/2" | bc -l`
+# need to add if statements for if mid is .0 or .5
+#if ($mid == *.0) then
+#    echo "Hello"
+#else if ($mid == *.5) then
+#    echo "Bye"
+#else
+#    echo "BLAH"
+#endif
+#sed -n ''"$mid"'p' sdiff
+
+echo "First block size: $first lines\nLast block size: $last lines\nMin block size: $min lines\nMax block size: $max lines\nMean block size: $mean lines"
+
+rm lnums
+rm diff
+rm sdiff
 
 # print date at the start of each block in yyyy-mm-dd hh:mm:ss format
-# awk '/[A-z]/ && NR>'"$hdrl"' && $1!~/[A-z]/ {printf "20%2.2i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i\n",$1,$2,$3,$4,$5,$6}' $1
+# awk '/[A-z]/ && NR>'"$hdrl"' && $1!~/[A-z]/ {printf "20%2.2i-%2.2i-%2.2i %2.2i:%2.2i:%2.2i\n",$1,$2,$3,$4,$5,$6}' $infile

@@ -1,0 +1,35 @@
+#!/bin/tcsh
+#
+# takes a RINEX file and outputs to screen the number of satellites used
+#
+# INPUT:
+#
+# $1      RINEX file
+#
+# OUTPUT:
+#
+# number of satellites to screen
+#
+# Last modified by tschuh-at-princeton.edu, 06/15/2021
+#
+# blocks in a RINEX file can fit up to 5 data observations per line
+# sat <= 5 --> 1 line of data
+# 5 < sat <= 10 --> 2 lines of data
+# sat > 10 --> 3 lines of data
+
+# need to saomehow save $multiplier and call it in rnx2rnx
+
+set infile = $1
+
+set sat = `awk '/TYPES OF OBSERV/ {print $1; exit}' $infile`
+
+if ($sat <= 5) then
+    set multiplier = 1
+    printf "There are %.0f satellites used in $infile.\nThere is $multiplier line per data entry.\n" $sat
+else if (5 < $sat && $sat <= 10) then
+    set multiplier = 2
+    printf "There are %.0f satellites used in $infile.\nThere are $multiplier lines per data entry.\n" $sat
+else
+    set multiplier = 3
+    printf "There are %.0f satellites used in $infile.\nThere are $multiplier lines per data entry.\n" $sat
+endif
