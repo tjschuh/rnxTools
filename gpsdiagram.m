@@ -59,7 +59,7 @@ offset = [1.5 0.75];
 % Special box strings
 ts={'bow','stern','port','starboard'};
 % Offset for these boxes
-os=[0 3 ; 0 -4 ; -1.5 0 ; 1.5 0];
+os=[0 3 ; 0 -5 ; -1.5 0 ; 1.25 0];
 % Alignment for these boxes
 as={'center','center','right','left'};
 
