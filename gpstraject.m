@@ -7,8 +7,7 @@ function gpstraject
 %
 % OUTPUT:
 %
-% 
-% Last modified by fjsimons-at-princeton.edu, 01/21/2022
+% Last modified by fjsimons-at-princeton.edu, 01/22/2022
 
 % Top topo map in [0 360] and [-90 90]
 xels=[278 296];
