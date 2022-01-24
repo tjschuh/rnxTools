@@ -28,14 +28,23 @@ function pppvrtk(pppfile1,pppfile2,pppfile3,pppfile4,rtkfile1,rtkfile2,rtkfile3,
 % pppvrtk('0001-05340.mat','0002-05340.mat','0003-05340.mat','0004-05340.mat','0001-F089.mat','0002-F089.mat','0003-F089.mat','0004-F089.mat')
 %
 % Originally written by tschuh-at-princeton.edu, 01/17/2022
-% Last modified by tschuh-at-princeton.edu, 01/21/2022
+% Last modified by tschuh-at-princeton.edu, 01/24/2022
 
 % To-do:
 % make ppp and rtk have same # of bars
-% fix placement of text on histograms
-% add qq plots as figure 3
-% add time series figure showing who is better ppp or rtk
-% reorder creation of fgiures --> histo then std then qq then comparison
+% add time series figure showing which is better ppp or rtk as figure 4
+
+% make it so you dont need to be in directory with data
+% this works, but it's commented out for now
+% diro = '/home/tschuh/pppvsrtk/camp/';
+% pppfile1 = strcat(diro,pppfile1);
+% pppfile2 = strcat(diro,pppfile2);
+% pppfile3 = strcat(diro,pppfile3);
+% pppfile4 = strcat(diro,pppfile4);
+% rtkfile1 = strcat(diro,rtkfile1);
+% rtkfile2 = strcat(diro,rtkfile2);
+% rtkfile3 = strcat(diro,rtkfile3);
+% rtkfile4 = strcat(diro,rtkfile4);
 
 % (i=1) go through all 4 ppp datasets and compute pvar datasets
 % which are the residuals from the GPS receiver distances, then
@@ -266,64 +275,11 @@ maxstd = max([pvar12(1,2) pvar13(1,2) pvar14(1,2) pvar23(1,2) pvar24(1,2) pvar34
               rvar12(1,2) rvar13(1,2) rvar14(1,2) rvar23(1,2) rvar24(1,2) rvar34(1,2)]);
 
 % plotting
-% plot the std curves first
+% plotting histograms first
 f=figure;
 f.Position = [250 500 1100 800];
 
-lblue = [0.4 0.6667 0.8431];
-lgreen = [0.466 0.674 0.188];
-
 ah1(1) = subplot(3,2,1);
-plot(pvar12(:,1),pvar12(:,2),'Color',lblue,'LineWidth',2)
-hold on
-plot(rvar12(:,1),rvar12(:,2),'Color',lgreen,'LineWidth',2)
-cosmo1(gca,'GPS Pair 1-2','# of Data Points','Std [mm]',e12,d1.t,maxstd)
-
-ah1(2) = subplot(3,2,2);
-plot(pvar13(:,1),pvar13(:,2),'Color',lblue,'LineWidth',2)
-hold on
-plot(rvar13(:,1),rvar13(:,2),'Color',lgreen,'LineWidth',2)
-cosmo1(gca,'GPS Pair 1-3','# of Data Points','Std [mm]',e13,d1.t,maxstd)
-
-ah1(3) = subplot(3,2,3);
-plot(pvar14(:,1),pvar14(:,2),'Color',lblue,'LineWidth',2)
-hold on
-plot(rvar14(:,1),rvar14(:,2),'Color',lgreen,'LineWidth',2)
-cosmo1(gca,'GPS Pair 1-4','# of Data Points','Std [mm]',e14,d1.t,maxstd)
-
-ah1(4) = subplot(3,2,4);
-plot(pvar23(:,1),pvar23(:,2),'Color',lblue,'LineWidth',2)
-hold on
-plot(rvar23(:,1),rvar23(:,2),'Color',lgreen,'LineWidth',2)
-cosmo1(gca,'GPS Pair 2-3','# of Data Points','Std [mm]',e23,d1.t,maxstd)
-
-ah1(5) = subplot(3,2,5);
-plot(pvar24(:,1),pvar24(:,2),'Color',lblue,'LineWidth',2)
-hold on
-plot(rvar24(:,1),rvar24(:,2),'Color',lgreen,'LineWidth',2)
-cosmo1(gca,'GPS Pair 2-4','# of Data Points','Std [mm]',e24,d1.t,maxstd)
-
-ah1(6) = subplot(3,2,6);
-plot(pvar34(:,1),pvar34(:,2),'Color',lblue,'LineWidth',2)
-hold on
-plot(rvar34(:,1),rvar34(:,2),'Color',lgreen,'LineWidth',2)
-cosmo1(gca,'GPS Pair 3-4','# of Data Points','Std [mm]',e34,d1.t,maxstd)
-
-% finishing touches
-tt=supertit(ah1([1 2]),sprintf('Std vs # of Data Points (Ship Data from %s to %s)',datestr(rtime(1)),datestr(rtime(end))));
-movev(tt,0.3)
-a = annotation('textbox',[0.465 0.085 0 0],'String',['leg2'],'FitBoxToText','on');
-a.FontSize = 12;
-
-%figdisp(sprintf('std-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
-
-%close
-
-% plotting histograms second
-g=figure;
-g.Position = [250 500 1100 800];
-
-ah2(1) = subplot(3,2,1);
 % remove outliers to get better results
 try
     pee12 = rmoutliers(pe12,'gesd');
@@ -345,9 +301,9 @@ hold on
 [ryvals12,redges12] = histcounts(ree12,rnbins12);
 rbarc12 = 0.5*(redges12(1:end-1) + redges12(2:end));
 rbar12 = bar(rbarc12,ryvals12,'BarWidth',1);
-[pline12,rline12] = cosmo2(gca,ah2(1),sprintf('PPP = %i/%i, GPS Pair 1-2, RTK = %i/%i',length(pee12),length(ptime),length(ree12),length(rtime)),'Residuals [mm]','Counts',pee12,pbar12,pgof12,ree12,rbar12,rgof12);
+[pline12,rline12] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 1-2, RTK = %i/%i',length(pee12),length(ptime),length(ree12),length(rtime)),'Residuals [mm]','Counts',pee12,pbar12,pgof12,ree12,rbar12,rgof12);
 
-ah2(2) = subplot(3,2,2);
+ah1(2) = subplot(3,2,2);
 % remove outliers to get better results
 try
     pee13 = rmoutliers(pe13,'gesd');
@@ -369,9 +325,9 @@ hold on
 [ryvals13,redges13] = histcounts(ree13,rnbins13);
 rbarc13 = 0.5*(redges13(1:end-1) + redges13(2:end));
 rbar13 = bar(rbarc13,ryvals13,'BarWidth',1);
-[pline13,rline13] = cosmo2(gca,ah2(1),sprintf('PPP = %i/%i, GPS Pair 1-2, RTK = %i/%i',length(pee13),length(ptime),length(ree13),length(rtime)),'Residuals [mm]','Counts',pee13,pbar13,pgof13,ree13,rbar13,rgof13);
+[pline13,rline13] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 1-3, RTK = %i/%i',length(pee13),length(ptime),length(ree13),length(rtime)),'Residuals [mm]','Counts',pee13,pbar13,pgof13,ree13,rbar13,rgof13);
 
-ah2(3) = subplot(3,2,3);
+ah1(3) = subplot(3,2,3);
 % remove outliers to get better results
 try
     pee14 = rmoutliers(pe14,'gesd');
@@ -393,9 +349,9 @@ hold on
 [ryvals14,redges14] = histcounts(ree14,rnbins14);
 rbarc14 = 0.5*(redges14(1:end-1) + redges14(2:end));
 rbar14 = bar(rbarc14,ryvals14,'BarWidth',1);
-[pline14,rline14] = cosmo2(gca,ah2(1),sprintf('PPP = %i/%i, GPS Pair 1-2, RTK = %i/%i',length(pee14),length(ptime),length(ree14),length(rtime)),'Residuals [mm]','Counts',pee14,pbar14,pgof14,ree14,rbar14,rgof14);
+[pline14,rline14] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 1-4, RTK = %i/%i',length(pee14),length(ptime),length(ree14),length(rtime)),'Residuals [mm]','Counts',pee14,pbar14,pgof14,ree14,rbar14,rgof14);
 
-ah2(4) = subplot(3,2,4);
+ah1(4) = subplot(3,2,4);
 % remove outliers to get better results
 try
     pee23 = rmoutliers(pe23,'gesd');
@@ -417,9 +373,9 @@ hold on
 [ryvals23,redges23] = histcounts(ree23,rnbins23);
 rbarc23 = 0.5*(redges23(1:end-1) + redges23(2:end));
 rbar23 = bar(rbarc23,ryvals23,'BarWidth',1);
-[pline23,rline23] = cosmo2(gca,ah2(1),sprintf('PPP = %i/%i, GPS Pair 1-2, RTK = %i/%i',length(pee23),length(ptime),length(ree23),length(rtime)),'Residuals [mm]','Counts',pee23,pbar23,pgof23,ree23,rbar23,rgof23);
+[pline23,rline23] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 2-3, RTK = %i/%i',length(pee23),length(ptime),length(ree23),length(rtime)),'Residuals [mm]','Counts',pee23,pbar23,pgof23,ree23,rbar23,rgof23);
 
-ah2(5) = subplot(3,2,5);
+ah1(5) = subplot(3,2,5);
 % remove outliers to get better results
 try
     pee24 = rmoutliers(pe24,'gesd');
@@ -441,9 +397,9 @@ hold on
 [ryvals24,redges24] = histcounts(ree24,rnbins24);
 rbarc24 = 0.5*(redges24(1:end-1) + redges24(2:end));
 rbar24 = bar(rbarc24,ryvals24,'BarWidth',1);
-[pline24,rline24] = cosmo2(gca,ah2(1),sprintf('PPP = %i/%i, GPS Pair 1-2, RTK = %i/%i',length(pee24),length(ptime),length(ree24),length(rtime)),'Residuals [mm]','Counts',pee24,pbar24,pgof24,ree24,rbar24,rgof24);
+[pline24,rline24] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 2-4, RTK = %i/%i',length(pee24),length(ptime),length(ree24),length(rtime)),'Residuals [mm]','Counts',pee24,pbar24,pgof24,ree24,rbar24,rgof24);
 
-ah2(6) = subplot(3,2,6);
+ah1(6) = subplot(3,2,6);
 % remove outliers to get better results
 try
     pee34 = rmoutliers(pe34,'gesd');
@@ -465,10 +421,10 @@ hold on
 [ryvals34,redges34] = histcounts(ree34,rnbins34);
 rbarc34 = 0.5*(redges34(1:end-1) + redges34(2:end));
 rbar34 = bar(rbarc34,ryvals34,'BarWidth',1);
-[pline34,rline34] = cosmo2(gca,ah2(1),sprintf('PPP = %i/%i, GPS Pair 1-2, RTK = %i/%i',length(pee34),length(ptime),length(ree34),length(rtime)),'Residuals [mm]','Counts',pee34,pbar34,pgof34,ree34,rbar34,rgof34);
+[pline34,rline34] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 3-4, RTK = %i/%i',length(pee34),length(ptime),length(ree34),length(rtime)),'Residuals [mm]','Counts',pee34,pbar34,pgof34,ree34,rbar34,rgof34);
 
 % finishing touches
-tt=supertit(ah2([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(rtime(1)),datestr(rtime(end))));
+tt=supertit(ah1([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(rtime(1)),datestr(rtime(end))));
 movev(tt,0.3)
 b = annotation('textbox',[0.465 0.085 0 0],'String',['camp'],'FitBoxToText','on');
 b.FontSize = 12;
@@ -477,20 +433,140 @@ b.FontSize = 12;
 
 %close
 
-% cosmetics for std plots
-function cosmo1(ax,titl,xlab,ylab,minlen,maxlen,maxstd)
-set(ax,'XDir','reverse')
-title(titl)
-xlabel(xlab)
-ylabel(ylab)
-xlim([length(minlen) length(maxlen)])
-ylim([0 maxstd+0.05*maxstd])
-legend('PPP','RTK')
-grid on
-longticks
+% plot the qq plots second
+g=figure;
+g.Position = [250 500 1100 800];
+
+ah2(1) = subplot(3,2,1);
+pqq12 = qqplot(pee12);
+hold on
+rqq12 = qqplot(ree12);
+cosmo2('GPS Pair 1-2',pqq12,rqq12)
+
+ah2(2) = subplot(3,2,2);
+pqq13 = qqplot(pee13);
+hold on
+rqq13 = qqplot(ree13);
+cosmo2('GPS Pair 1-3',pqq13,rqq13)
+
+ah2(3) = subplot(3,2,3);
+pqq14 = qqplot(pee14);
+hold on
+rqq14 = qqplot(ree14);
+cosmo2('GPS Pair 1-4',pqq14,rqq14)
+
+ah2(4) = subplot(3,2,4);
+pqq23 = qqplot(pee23);
+hold on
+rqq23 = qqplot(ree23);
+cosmo2('GPS Pair 2-3',pqq23,rqq23)
+
+ah2(5) = subplot(3,2,5);
+pqq24 = qqplot(pee24);
+hold on
+rqq24 = qqplot(ree12);
+cosmo2('GPS Pair 2-4',pqq24,rqq24)
+
+ah2(6) = subplot(3,2,6);
+pqq34 = qqplot(pee34);
+hold on
+rqq34 = qqplot(ree34);
+cosmo2('GPS Pair 3-4',pqq34,rqq34)
+
+% finishing touches
+tt=supertit(ah2([1 2]),sprintf('QQ Plots of Residuals vs Standard Normals (%s to %s)',datestr(d1.t(1)),datestr(d1.t(end))));
+movev(tt,0.3)
+
+%figdisp(sprintf('qqplot-%s',fname),[],'',2,[],'epstopdf')
+
+%close
+
+% plot the std curves third
+h=figure;
+h.Position = [250 500 1100 800];
+
+lblue = [0.4 0.6667 0.8431];
+lgreen = [0.466 0.674 0.188];
+
+ah3(1) = subplot(3,2,1);
+plot(pvar12(:,1),pvar12(:,2),'Color',lblue,'LineWidth',2)
+hold on
+plot(rvar12(:,1),rvar12(:,2),'Color',lgreen,'LineWidth',2)
+cosmo3(gca,'GPS Pair 1-2','# of Data Points','Std [mm]',e12,d1.t,maxstd)
+
+ah3(2) = subplot(3,2,2);
+plot(pvar13(:,1),pvar13(:,2),'Color',lblue,'LineWidth',2)
+hold on
+plot(rvar13(:,1),rvar13(:,2),'Color',lgreen,'LineWidth',2)
+cosmo3(gca,'GPS Pair 1-3','# of Data Points','Std [mm]',e13,d1.t,maxstd)
+
+ah3(3) = subplot(3,2,3);
+plot(pvar14(:,1),pvar14(:,2),'Color',lblue,'LineWidth',2)
+hold on
+plot(rvar14(:,1),rvar14(:,2),'Color',lgreen,'LineWidth',2)
+cosmo3(gca,'GPS Pair 1-4','# of Data Points','Std [mm]',e14,d1.t,maxstd)
+
+ah3(4) = subplot(3,2,4);
+plot(pvar23(:,1),pvar23(:,2),'Color',lblue,'LineWidth',2)
+hold on
+plot(rvar23(:,1),rvar23(:,2),'Color',lgreen,'LineWidth',2)
+cosmo3(gca,'GPS Pair 2-3','# of Data Points','Std [mm]',e23,d1.t,maxstd)
+
+ah3(5) = subplot(3,2,5);
+plot(pvar24(:,1),pvar24(:,2),'Color',lblue,'LineWidth',2)
+hold on
+plot(rvar24(:,1),rvar24(:,2),'Color',lgreen,'LineWidth',2)
+cosmo3(gca,'GPS Pair 2-4','# of Data Points','Std [mm]',e24,d1.t,maxstd)
+
+ah3(6) = subplot(3,2,6);
+plot(pvar34(:,1),pvar34(:,2),'Color',lblue,'LineWidth',2)
+hold on
+plot(rvar34(:,1),rvar34(:,2),'Color',lgreen,'LineWidth',2)
+cosmo3(gca,'GPS Pair 3-4','# of Data Points','Std [mm]',e34,d1.t,maxstd)
+
+% finishing touches
+tt=supertit(ah3([1 2]),sprintf('Std vs # of Data Points (Ship Data from %s to %s)',datestr(rtime(1)),datestr(rtime(end))));
+movev(tt,0.3)
+a = annotation('textbox',[0.465 0.085 0 0],'String',['leg2'],'FitBoxToText','on');
+a.FontSize = 12;
+
+%figdisp(sprintf('std-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
+
+%close
+
+% plot the ppp vs rtk 2 grpah fourth
+% take difference between rvar and pvar values
+% + --> PPP better, - --> RTK better
+% can make this better
+k=figure;
+k.Position = [250 500 1100 800];
+
+subplot(3,2,1)
+diff12 = rvar12(:,2)-pvar12(:,2);
+plot(pvar12(:,1),diff12)
+
+subplot(3,2,2)
+diff13 = rvar13(:,2)-pvar13(:,2);
+plot(pvar13(:,1),diff13)
+
+subplot(3,2,3)
+diff13 = rvar13(:,2)-pvar13(:,2);
+plot(pvar13(:,1),diff13)
+
+subplot(3,2,4)
+diff23 = rvar23(:,2)-pvar23(:,2);
+plot(pvar23(:,1),diff23)
+
+subplot(3,2,5)
+diff24 = rvar24(:,2)-pvar24(:,2);
+plot(pvar24(:,1),diff24)
+
+subplot(3,2,6)
+diff34 = rvar34(:,2)-pvar34(:,2);
+plot(pvar34(:,1),diff34)
 
 % cosmetics for histogram plots
-function [pline,rline] = cosmo2(ax,ah,titl,xlab,ylab,pdata,pbar,pgof,rdata,rbar,rgof)
+function [pline,rline] = cosmo1(ax,ah,titl,xlab,ylab,pdata,pbar,pgof,rdata,rbar,rgof)
 % plot rtk histogram below x-axis
 rbar.YData = -1*rbar.YData;
 ax.XGrid = 'on';
@@ -499,32 +575,32 @@ ax.GridColor = [0 0 0];
 ax.TickLength = [0 0];
 title(titl)
 xlabel(xlab)
-if std(pdata)>=std(rdata)
-    xlim([round(-3*std(pdata),2) round(3*std(pdata),2)])
-    xticks([round(-3*std(pdata),2) round(-2*std(pdata),2) round(-std(pdata),2) 0 round(std(pdata),2) round(2*std(pdata),2) round(3*std(pdata),2)])
-    xticklabels({round(-3*std(pdata),0),round(-2*std(pdata),0),round(-std(pdata),0),0,round(std(pdata),0),round(2*std(pdata),0),round(3*std(pdata),0)})
-    text(1.55*std(pdata),7.25*ah.YLim(2)/10,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(pdata),median(pdata),mean(pdata),pgof),'FontSize',9)
-    text(1.55*std(pdata),7.25*ah.YLim(1)/10,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(rdata),median(rdata),mean(rdata),rgof),'FontSize',9)
-    ppct = (length(pdata(pdata<=round(3*std(pdata)) & pdata>=round(-3*std(pdata))))/length(pdata))*100;
-    text(-2.9*std(pdata),8*ah.YLim(2)/10,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',ppct,min(pdata),max(pdata)),'FontSize',9)
-    rpct = (length(rdata(rdata<=round(3*std(rdata)) & rdata>=round(-3*std(rdata))))/length(rdata))*100;
-    text(-2.9*std(pdata),8*ah.YLim(1)/10,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',rpct,min(rdata),max(rdata)),'FontSize',9)
-elseif std(pdata)<std(rdata)
-    xlim([round(-3*std(rdata),2) round(3*std(rdata),2)])
-    xticks([round(-3*std(rdata),2) round(-2*std(rdata),2) round(-std(rdata),2) 0 round(std(rdata),2) round(2*std(rdata),2) round(3*std(rdata),2)])
-    xticklabels({round(-3*std(rdata),0),round(-2*std(rdata),0),round(-std(rdata),0),0,round(std(rdata),0),round(2*std(rdata),0),round(3*std(rdata),0)})
-    text(1.55*std(rdata),7.25*ah.YLim(2)/10,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(pdata),median(pdata),mean(pdata),pgof),'FontSize',9)
-    text(1.55*std(rdata),7.25*ah.YLim(1)/10,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(rdata),median(rdata),mean(rdata),rgof),'FontSize',9)
-    ppct = (length(pdata(pdata<=round(3*std(pdata)) & pdata>=round(-3*std(pdata))))/length(pdata))*100;
-    text(-2.9*std(rdata),8*ah.YLim(2)/10,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',ppct,min(pdata),max(pdata)),'FontSize',9)
-    rpct = (length(rdata(rdata<=round(3*std(rdata)) & rdata>=round(-3*std(rdata))))/length(rdata))*100;
-    text(-2.9*std(rdata),8*ah.YLim(1)/10,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',rpct,min(rdata),max(rdata)),'FontSize',9)
-end
 ylabel(ylab)
 if abs(max(pbar.YData)) >= abs(min(rbar.YData))
     ylim([-max(pbar.YData)-0.1*max(pbar.YData) max(pbar.YData)+0.1*max(pbar.YData)])
 elseif abs(max(pbar.YData)) < abs(min(rbar.YData))
     ylim([min(rbar.YData)+0.1*min(rbar.YData) -min(rbar.YData)-0.1*min(rbar.YData)])
+end
+if std(pdata)>=std(rdata)
+    xlim([round(-3*std(pdata),2) round(3*std(pdata),2)])
+    xticks([round(-3*std(pdata),2) round(-2*std(pdata),2) round(-std(pdata),2) 0 round(std(pdata),2) round(2*std(pdata),2) round(3*std(pdata),2)])
+    xticklabels({round(-3*std(pdata),0),round(-2*std(pdata),0),round(-std(pdata),0),0,round(std(pdata),0),round(2*std(pdata),0),round(3*std(pdata),0)})
+    text(1.9*std(pdata),ah.YLim(2)-0.45*ah.YLim(2),sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(pdata),median(pdata),mean(pdata),pgof),'FontSize',9)
+    text(1.9*std(pdata),ah.YLim(1)-0.45*ah.YLim(1),sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(rdata),median(rdata),mean(rdata),rgof),'FontSize',9)
+    ppct = (length(pdata(pdata<=round(3*std(pdata)) & pdata>=round(-3*std(pdata))))/length(pdata))*100;
+    text(-2.9*std(pdata),ah.YLim(2)-0.4*ah.YLim(2),sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',ppct,min(pdata),max(pdata)),'FontSize',9)
+    rpct = (length(rdata(rdata<=round(3*std(rdata)) & rdata>=round(-3*std(rdata))))/length(rdata))*100;
+    text(-2.9*std(pdata),ah.YLim(1)-0.4*ah.YLim(1),sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',rpct,min(rdata),max(rdata)),'FontSize',9)
+elseif std(pdata)<std(rdata)
+    xlim([round(-3*std(rdata),2) round(3*std(rdata),2)])
+    xticks([round(-3*std(rdata),2) round(-2*std(rdata),2) round(-std(rdata),2) 0 round(std(rdata),2) round(2*std(rdata),2) round(3*std(rdata),2)])
+    xticklabels({round(-3*std(rdata),0),round(-2*std(rdata),0),round(-std(rdata),0),0,round(std(rdata),0),round(2*std(rdata),0),round(3*std(rdata),0)})
+    text(1.9*std(rdata),ah.YLim(2)-0.45*ah.YLim(2),sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(pdata),median(pdata),mean(pdata),pgof),'FontSize',9)
+    text(1.9*std(rdata),ah.YLim(1)-0.45*ah.YLim(1),sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(rdata),median(rdata),mean(rdata),rgof),'FontSize',9)
+    ppct = (length(pdata(pdata<=round(3*std(pdata)) & pdata>=round(-3*std(pdata))))/length(pdata))*100;
+    text(-2.9*std(rdata),ah.YLim(2)-0.4*ah.YLim(2),sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',ppct,min(pdata),max(pdata)),'FontSize',9)
+    rpct = (length(rdata(rdata<=round(3*std(rdata)) & rdata>=round(-3*std(rdata))))/length(rdata))*100;
+    text(-2.9*std(rdata),ah.YLim(1)-0.4*ah.YLim(1),sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',rpct,min(rdata),max(rdata)),'FontSize',9)
 end
 longticks([],2)
 pbar.FaceColor = [0.4 0.6667 0.8431]; %light blue bars
@@ -553,3 +629,43 @@ rline = plot(rxvals,ryvals*rarea,'r','LineWidth',2);
 if rgof > 4
     rline.LineStyle = '--';
 end
+
+% cosmetics for qq plots
+function cosmo2(titl,pqq,rqq)
+grid on
+longticks([],2)
+title(titl)
+ylabel("Residual Quantiles")
+pqq(1).Marker = '.';
+pqq(1).MarkerSize = 8;
+pqq(1).MarkerEdgeColor = [0 0 1];
+pqq(2).LineWidth = 2;
+pqq(2).LineStyle = '--';
+pqq(2).Color = [0 0.447 0.741];
+pqq(3).Color = [0 0.447 0.741];
+pqq(3).LineWidth = 2;
+pqq(3).LineStyle = '--';
+rqq(1).Marker = '.';
+rqq(1).MarkerSize = 8;
+rqq(1).MarkerEdgeColor = [0 0.5 0];
+rqq(2).LineWidth = 2;
+rqq(2).LineStyle = '--';
+rqq(2).Color = [0.466 0.647 0.188];
+rqq(3).Color = [0.466 0.647 0.188];
+rqq(3).LineWidth = 2;
+rqq(3).LineStyle = '--';
+legend([pqq(1) rqq(1)],{'PPP','RTK'},'Location','northwest')
+
+% cosmetics for std plots
+function cosmo3(ax,titl,xlab,ylab,minlen,maxlen,maxstd)
+set(ax,'XDir','reverse')
+title(titl)
+xlabel(xlab)
+ylabel(ylab)
+xlim([length(minlen) length(maxlen)])
+ylim([0 maxstd+0.05*maxstd])
+legend('PPP','RTK')
+grid on
+longticks
+
+% cosmetics for ppp vs rtk plots
