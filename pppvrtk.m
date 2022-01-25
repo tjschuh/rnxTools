@@ -3,9 +3,12 @@ function pppvrtk(pppfile1,pppfile2,pppfile3,pppfile4,rtkfile1,rtkfile2,rtkfile3,
 %
 % compare PPP and RTK by taking post-processed datasets from both methods
 % across the same time spans of the the residuals of the distances between
-% the 4 GPS receivers on-board R/V Atlantic Explorer and (1) plotting the
-% standard deviation of each dataset as a function of the number of points
-% in the datasets and (2) plotting the histograms back-to-back of the residuals
+% the 4 GPS receivers on-board R/V Atlantic Explorer and (1) plotting the 
+% histograms back-to-back of the residuals, (2) plotting q-q plots showing 
+% how close to a normal distribution each dataset is, (3) plotting the 
+% standard deviation of each dataset as a function of the number of points 
+% in the datasets, and (4) plotting the difference in standard deviation 
+% as a function of number of points in the datasets to compapre PPP and RTK  
 %
 % INPUT:
 %
@@ -20,19 +23,17 @@ function pppvrtk(pppfile1,pppfile2,pppfile3,pppfile4,rtkfile1,rtkfile2,rtkfile3,
 %
 % OUTPUT:
 %
-% subplot of standard deviation vs number of points in both datasets
 % subplot of histograms back-to-back of both datasets
+% subplot of q-q plots for visual inspection of goodness of fit
+% subplot of standard deviation vs number of points in both datasets
+% subplot of PPP vs RTK using change in std from previous plot
 %
 % EXAMPLE:
 %
 % pppvrtk('0001-05340.mat','0002-05340.mat','0003-05340.mat','0004-05340.mat','0001-F089.mat','0002-F089.mat','0003-F089.mat','0004-F089.mat')
 %
 % Originally written by tschuh-at-princeton.edu, 01/17/2022
-% Last modified by tschuh-at-princeton.edu, 01/24/2022
-
-% To-do:
-% make ppp and rtk have same # of bars
-% add time series figure showing which is better ppp or rtk as figure 4
+% Last modified by tschuh-at-princeton.edu, 01/25/2022
 
 % make it so you dont need to be in directory with data
 % this works, but it's commented out for now
@@ -45,6 +46,9 @@ function pppvrtk(pppfile1,pppfile2,pppfile3,pppfile4,rtkfile1,rtkfile2,rtkfile3,
 % rtkfile2 = strcat(diro,rtkfile2);
 % rtkfile3 = strcat(diro,rtkfile3);
 % rtkfile4 = strcat(diro,rtkfile4);
+
+% which leg is this hour from
+trip = ['leg2'];
 
 % (i=1) go through all 4 ppp datasets and compute pvar datasets
 % which are the residuals from the GPS receiver distances, then
@@ -119,7 +123,7 @@ for i = 1:2
         counter = 2;
         while length(e12) > length(d1.t)/3
             e12 = rmoutliers(e12,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd12 = fitdist(e12,'Normal');
             pvar12(counter,1) = length(e12); pvar12(counter,2) = pd12.sigma;
             counter = counter + 1;
@@ -132,7 +136,7 @@ for i = 1:2
         counter = 2;
         while length(e13) > length(d1.t)/3
             e13 = rmoutliers(e13,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd13 = fitdist(e13,'Normal');
             pvar13(counter,1) = length(e13); pvar13(counter,2) = pd13.sigma;
             counter = counter + 1;
@@ -145,7 +149,7 @@ for i = 1:2
         counter = 2;
         while length(e14) > length(d1.t)/3
             e14 = rmoutliers(e14,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd14 = fitdist(e14,'Normal');
             pvar14(counter,1) = length(e14); pvar14(counter,2) = pd14.sigma;
             counter = counter + 1;
@@ -158,7 +162,7 @@ for i = 1:2
         counter = 2;
         while length(e23) > length(d1.t)/3
             e23 = rmoutliers(e23,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd23 = fitdist(e23,'Normal');
             pvar23(counter,1) = length(e23); pvar23(counter,2) = pd23.sigma;
             counter = counter + 1;
@@ -171,7 +175,7 @@ for i = 1:2
         counter = 2;
         while length(e24) > length(d1.t)/3
             e24 = rmoutliers(e24,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd24 = fitdist(e24,'Normal');
             pvar24(counter,1) = length(e24); pvar24(counter,2) = pd24.sigma;
             counter = counter + 1;
@@ -184,7 +188,7 @@ for i = 1:2
         counter = 2;
         while length(e34) > length(d1.t)/3
             e34 = rmoutliers(e34,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd34 = fitdist(e34,'Normal');
             pvar34(counter,1) = length(e34); pvar34(counter,2) = pd34.sigma;
             counter = counter + 1;
@@ -198,7 +202,7 @@ for i = 1:2
         counter = 2;
         while length(e12) > length(d1.t)/3
             e12 = rmoutliers(e12,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd12 = fitdist(e12,'Normal');
             rvar12(counter,1) = length(e12); rvar12(counter,2) = pd12.sigma;
             counter = counter + 1;
@@ -211,7 +215,7 @@ for i = 1:2
         counter = 2;
         while length(e13) > length(d1.t)/3
             e13 = rmoutliers(e13,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd13 = fitdist(e13,'Normal');
             rvar13(counter,1) = length(e13); rvar13(counter,2) = pd13.sigma;
             counter = counter + 1;
@@ -224,7 +228,7 @@ for i = 1:2
         counter = 2;
         while length(e14) > length(d1.t)/3
             e14 = rmoutliers(e14,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd14 = fitdist(e14,'Normal');
             rvar14(counter,1) = length(e14); rvar14(counter,2) = pd14.sigma;
             counter = counter + 1;
@@ -237,7 +241,7 @@ for i = 1:2
         counter = 2;
         while length(e23) > length(d1.t)/3
             e23 = rmoutliers(e23,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd23 = fitdist(e23,'Normal');
             rvar23(counter,1) = length(e23); rvar23(counter,2) = pd23.sigma;
             counter = counter + 1;
@@ -250,7 +254,7 @@ for i = 1:2
         counter = 2;
         while length(e24) > length(d1.t)/3
             e24 = rmoutliers(e24,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd24 = fitdist(e24,'Normal');
             rvar24(counter,1) = length(e24); rvar24(counter,2) = pd24.sigma;
             counter = counter + 1;
@@ -263,7 +267,7 @@ for i = 1:2
         counter = 2;
         while length(e34) > length(d1.t)/3
             e34 = rmoutliers(e34,'percentiles',[thresh 100-thresh]);
-            thresh = thresh + 2.5;
+            thresh = thresh + 1;
             pd34 = fitdist(e34,'Normal');
             rvar34(counter,1) = length(e34); rvar34(counter,2) = pd34.sigma;
             counter = counter + 1;
@@ -288,12 +292,21 @@ catch
     pee12 = rmoutliers(pe12,'percentiles',[5 95]);
     ree12 = rmoutliers(re12,'percentiles',[5 95]);
 end
+% calculate nbins using Freedman-Diaconis Method
 pnbins12 = round((max(pee12) - min(pee12))/(2*iqr(pee12)*(length(pee12))^(-1/3)));
 rnbins12 = round((max(ree12) - min(ree12))/(2*iqr(ree12)*(length(ree12))^(-1/3)));
+% force both histograms to have same number of bins/std (bpstd)
+pbpstd12 = pnbins12/std(pee12);
+rbpstd12 = rnbins12/std(ree12);
+% use mean of bpstd to find new nbins
+pnbins12 = round(std(pee12)*(pbpstd12+rbpstd12)/2);
+rnbins12 = round(std(ree12)*(pbpstd12+rbpstd12)/2);
+% calculate goodness of fit compared to normal distribution (gof)
 [~,~,pstats12] = chi2gof(pee12,'NBins',pnbins12);
 [~,~,rstats12] = chi2gof(ree12,'NBins',rnbins12);
 pgof12 = pstats12.chi2stat/pstats12.df;
 rgof12 = rstats12.chi2stat/rstats12.df;
+% make histograms and overlaid curves using histcounts, bar, and plot
 [pyvals12,pedges12] = histcounts(pee12,pnbins12);
 pbarc12 = 0.5*(pedges12(1:end-1) + pedges12(2:end));
 pbar12 = bar(pbarc12,pyvals12,'BarWidth',1);
@@ -314,6 +327,10 @@ catch
 end
 pnbins13 = round((max(pee13) - min(pee13))/(2*iqr(pee13)*(length(pee13))^(-1/3)));
 rnbins13 = round((max(ree13) - min(ree13))/(2*iqr(ree13)*(length(ree13))^(-1/3)));
+pbpstd13 = pnbins13/std(pee13);
+rbpstd13 = rnbins13/std(ree13);
+pnbins13 = round(std(pee13)*(pbpstd13+rbpstd13)/2);
+rnbins13 = round(std(ree13)*(pbpstd13+rbpstd13)/2);
 [~,~,pstats13] = chi2gof(pee13,'NBins',pnbins13);
 [~,~,rstats13] = chi2gof(ree13,'NBins',rnbins13);
 pgof13 = pstats13.chi2stat/pstats13.df;
@@ -325,7 +342,7 @@ hold on
 [ryvals13,redges13] = histcounts(ree13,rnbins13);
 rbarc13 = 0.5*(redges13(1:end-1) + redges13(2:end));
 rbar13 = bar(rbarc13,ryvals13,'BarWidth',1);
-[pline13,rline13] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 1-3, RTK = %i/%i',length(pee13),length(ptime),length(ree13),length(rtime)),'Residuals [mm]','Counts',pee13,pbar13,pgof13,ree13,rbar13,rgof13);
+[pline13,rline13] = cosmo1(gca,ah1(2),sprintf('PPP = %i/%i, GPS Pair 1-3, RTK = %i/%i',length(pee13),length(ptime),length(ree13),length(rtime)),'Residuals [mm]','Counts',pee13,pbar13,pgof13,ree13,rbar13,rgof13);
 
 ah1(3) = subplot(3,2,3);
 % remove outliers to get better results
@@ -338,6 +355,10 @@ catch
 end
 pnbins14 = round((max(pee14) - min(pee14))/(2*iqr(pee14)*(length(pee14))^(-1/3)));
 rnbins14 = round((max(ree14) - min(ree14))/(2*iqr(ree14)*(length(ree14))^(-1/3)));
+pbpstd14 = pnbins14/std(pee14);
+rbpstd14 = rnbins14/std(ree14);
+pnbins14 = round(std(pee14)*(pbpstd14+rbpstd14)/2);
+rnbins14 = round(std(ree14)*(pbpstd14+rbpstd14)/2);
 [~,~,pstats14] = chi2gof(pee14,'NBins',pnbins14);
 [~,~,rstats14] = chi2gof(ree14,'NBins',rnbins14);
 pgof14 = pstats14.chi2stat/pstats14.df;
@@ -349,7 +370,7 @@ hold on
 [ryvals14,redges14] = histcounts(ree14,rnbins14);
 rbarc14 = 0.5*(redges14(1:end-1) + redges14(2:end));
 rbar14 = bar(rbarc14,ryvals14,'BarWidth',1);
-[pline14,rline14] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 1-4, RTK = %i/%i',length(pee14),length(ptime),length(ree14),length(rtime)),'Residuals [mm]','Counts',pee14,pbar14,pgof14,ree14,rbar14,rgof14);
+[pline14,rline14] = cosmo1(gca,ah1(3),sprintf('PPP = %i/%i, GPS Pair 1-4, RTK = %i/%i',length(pee14),length(ptime),length(ree14),length(rtime)),'Residuals [mm]','Counts',pee14,pbar14,pgof14,ree14,rbar14,rgof14);
 
 ah1(4) = subplot(3,2,4);
 % remove outliers to get better results
@@ -362,6 +383,10 @@ catch
 end
 pnbins23 = round((max(pee23) - min(pee23))/(2*iqr(pee23)*(length(pee23))^(-1/3)));
 rnbins23 = round((max(ree23) - min(ree23))/(2*iqr(ree23)*(length(ree23))^(-1/3)));
+pbpstd23 = pnbins23/std(pee23);
+rbpstd23 = rnbins23/std(ree23);
+pnbins23 = round(std(pee23)*(pbpstd23+rbpstd23)/2);
+rnbins23 = round(std(ree23)*(pbpstd23+rbpstd23)/2);
 [~,~,pstats23] = chi2gof(pee23,'NBins',pnbins23);
 [~,~,rstats23] = chi2gof(ree23,'NBins',rnbins23);
 pgof23 = pstats23.chi2stat/pstats23.df;
@@ -373,7 +398,7 @@ hold on
 [ryvals23,redges23] = histcounts(ree23,rnbins23);
 rbarc23 = 0.5*(redges23(1:end-1) + redges23(2:end));
 rbar23 = bar(rbarc23,ryvals23,'BarWidth',1);
-[pline23,rline23] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 2-3, RTK = %i/%i',length(pee23),length(ptime),length(ree23),length(rtime)),'Residuals [mm]','Counts',pee23,pbar23,pgof23,ree23,rbar23,rgof23);
+[pline23,rline23] = cosmo1(gca,ah1(4),sprintf('PPP = %i/%i, GPS Pair 2-3, RTK = %i/%i',length(pee23),length(ptime),length(ree23),length(rtime)),'Residuals [mm]','Counts',pee23,pbar23,pgof23,ree23,rbar23,rgof23);
 
 ah1(5) = subplot(3,2,5);
 % remove outliers to get better results
@@ -386,6 +411,10 @@ catch
 end
 pnbins24 = round((max(pee24) - min(pee24))/(2*iqr(pee24)*(length(pee24))^(-1/3)));
 rnbins24 = round((max(ree24) - min(ree24))/(2*iqr(ree24)*(length(ree24))^(-1/3)));
+pbpstd24 = pnbins24/std(pee24);
+rbpstd24 = rnbins24/std(ree24);
+pnbins24 = round(std(pee24)*(pbpstd24+rbpstd24)/2);
+rnbins24 = round(std(ree24)*(pbpstd24+rbpstd24)/2);
 [~,~,pstats24] = chi2gof(pee24,'NBins',pnbins24);
 [~,~,rstats24] = chi2gof(ree24,'NBins',rnbins24);
 pgof24 = pstats24.chi2stat/pstats24.df;
@@ -397,7 +426,7 @@ hold on
 [ryvals24,redges24] = histcounts(ree24,rnbins24);
 rbarc24 = 0.5*(redges24(1:end-1) + redges24(2:end));
 rbar24 = bar(rbarc24,ryvals24,'BarWidth',1);
-[pline24,rline24] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 2-4, RTK = %i/%i',length(pee24),length(ptime),length(ree24),length(rtime)),'Residuals [mm]','Counts',pee24,pbar24,pgof24,ree24,rbar24,rgof24);
+[pline24,rline24] = cosmo1(gca,ah1(5),sprintf('PPP = %i/%i, GPS Pair 2-4, RTK = %i/%i',length(pee24),length(ptime),length(ree24),length(rtime)),'Residuals [mm]','Counts',pee24,pbar24,pgof24,ree24,rbar24,rgof24);
 
 ah1(6) = subplot(3,2,6);
 % remove outliers to get better results
@@ -410,6 +439,10 @@ catch
 end
 pnbins34 = round((max(pee34) - min(pee34))/(2*iqr(pee34)*(length(pee34))^(-1/3)));
 rnbins34 = round((max(ree34) - min(ree34))/(2*iqr(ree34)*(length(ree34))^(-1/3)));
+pbpstd34 = pnbins34/std(pee34);
+rbpstd34 = rnbins34/std(ree34);
+pnbins34 = round(std(pee34)*(pbpstd34+rbpstd34)/2);
+rnbins34 = round(std(ree34)*(pbpstd34+rbpstd34)/2);
 [~,~,pstats34] = chi2gof(pee34,'NBins',pnbins34);
 [~,~,rstats34] = chi2gof(ree34,'NBins',rnbins34);
 pgof34 = pstats34.chi2stat/pstats34.df;
@@ -421,17 +454,17 @@ hold on
 [ryvals34,redges34] = histcounts(ree34,rnbins34);
 rbarc34 = 0.5*(redges34(1:end-1) + redges34(2:end));
 rbar34 = bar(rbarc34,ryvals34,'BarWidth',1);
-[pline34,rline34] = cosmo1(gca,ah1(1),sprintf('PPP = %i/%i, GPS Pair 3-4, RTK = %i/%i',length(pee34),length(ptime),length(ree34),length(rtime)),'Residuals [mm]','Counts',pee34,pbar34,pgof34,ree34,rbar34,rgof34);
+[pline34,rline34] = cosmo1(gca,ah1(6),sprintf('PPP = %i/%i, GPS Pair 3-4, RTK = %i/%i',length(pee34),length(ptime),length(ree34),length(rtime)),'Residuals [mm]','Counts',pee34,pbar34,pgof34,ree34,rbar34,rgof34);
 
 % finishing touches
 tt=supertit(ah1([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(rtime(1)),datestr(rtime(end))));
 movev(tt,0.3)
-b = annotation('textbox',[0.465 0.085 0 0],'String',['camp'],'FitBoxToText','on');
+b = annotation('textbox',[0.485 0.075 0 0],'String',trip,'FitBoxToText','on');
 b.FontSize = 12;
 
-%figdisp(sprintf('histo-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
+figdisp(sprintf('histo-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
 
-%close
+close
 
 % plot the qq plots second
 g=figure;
@@ -476,10 +509,12 @@ cosmo2('GPS Pair 3-4',pqq34,rqq34)
 % finishing touches
 tt=supertit(ah2([1 2]),sprintf('QQ Plots of Residuals vs Standard Normals (%s to %s)',datestr(d1.t(1)),datestr(d1.t(end))));
 movev(tt,0.3)
+b = annotation('textbox',[0.485 0.075 0 0],'String',trip,'FitBoxToText','on');
+b.FontSize = 12;
 
-%figdisp(sprintf('qqplot-%s',fname),[],'',2,[],'epstopdf')
+figdisp(sprintf('qq-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
 
-%close
+close
 
 % plot the std curves third
 h=figure;
@@ -527,43 +562,67 @@ cosmo3(gca,'GPS Pair 3-4','# of Data Points','Std [mm]',e34,d1.t,maxstd)
 % finishing touches
 tt=supertit(ah3([1 2]),sprintf('Std vs # of Data Points (Ship Data from %s to %s)',datestr(rtime(1)),datestr(rtime(end))));
 movev(tt,0.3)
-a = annotation('textbox',[0.465 0.085 0 0],'String',['leg2'],'FitBoxToText','on');
-a.FontSize = 12;
+b = annotation('textbox',[0.485 0.075 0 0],'String',trip,'FitBoxToText','on');
+b.FontSize = 12;
 
-%figdisp(sprintf('std-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
+figdisp(sprintf('std-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
 
-%close
+close
 
-% plot the ppp vs rtk 2 grpah fourth
-% take difference between rvar and pvar values
+% plot the ppp vs rtk 2 graph fourth
 % + --> PPP better, - --> RTK better
-% can make this better
+% this works sometimes, it depends on lengths of pvar and rvar
+% take difference between rvar and pvar values
+try
+diff12 = rvar12(:,2)-pvar12(:,2);
+diff13 = rvar13(:,2)-pvar13(:,2);
+diff14 = rvar14(:,2)-pvar14(:,2);
+diff23 = rvar23(:,2)-pvar23(:,2);
+diff24 = rvar24(:,2)-pvar24(:,2);
+diff34 = rvar34(:,2)-pvar34(:,2);
+
+% find global max and min
+maxdiff = max([diff12 diff13 diff14 diff23 diff24 diff34],[],'all');
+mindiff = min([diff12 diff13 diff14 diff23 diff24 diff34],[],'all');
+
 k=figure;
 k.Position = [250 500 1100 800];
 
-subplot(3,2,1)
-diff12 = rvar12(:,2)-pvar12(:,2);
-plot(pvar12(:,1),diff12)
+ah4(1) = subplot(3,2,1);
+plot((pvar12(:,1)+rvar12(:,1))./2,diff12,'LineWidth',2)
+cosmo4(gca,'GPS Pair 1-2, Positive --> PPP, Negative --> RTK','# of Data Points','Change in Std',e12,d1.t,mindiff,maxdiff)
 
-subplot(3,2,2)
-diff13 = rvar13(:,2)-pvar13(:,2);
-plot(pvar13(:,1),diff13)
+ah4(2) = subplot(3,2,2);
+plot((pvar13(:,1)+rvar13(:,1))./2,diff13,'LineWidth',2)
+cosmo4(gca,'GPS Pair 1-3, Positive --> PPP, Negative --> RTK','# of Data Points','Change in Std',e13,d1.t,mindiff,maxdiff)
 
-subplot(3,2,3)
-diff13 = rvar13(:,2)-pvar13(:,2);
-plot(pvar13(:,1),diff13)
+ah4(3) = subplot(3,2,3);
+plot((pvar14(:,1)+rvar14(:,1))./2,diff14,'LineWidth',2)
+cosmo4(gca,'GPS Pair 1-4, Positive --> PPP, Negative --> RTK','# of Data Points','Change in Std',e14,d1.t,mindiff,maxdiff)
 
-subplot(3,2,4)
-diff23 = rvar23(:,2)-pvar23(:,2);
-plot(pvar23(:,1),diff23)
+ah4(4) = subplot(3,2,4);
+plot((pvar23(:,1)+rvar23(:,1))./2,diff23,'LineWidth',2)
+cosmo4(gca,'GPS Pair 2-3, Positive --> PPP, Negative --> RTK','# of Data Points','Change in Std',e23,d1.t,mindiff,maxdiff)
 
-subplot(3,2,5)
-diff24 = rvar24(:,2)-pvar24(:,2);
-plot(pvar24(:,1),diff24)
+ah4(5) = subplot(3,2,5);
+plot((pvar24(:,1)+rvar24(:,1))./2,diff24,'LineWidth',2)
+cosmo4(gca,'GPS Pair 2-4, Positive --> PPP, Negative --> RTK','# of Data Points','Change in Std',e24,d1.t,mindiff,maxdiff)
 
-subplot(3,2,6)
-diff34 = rvar34(:,2)-pvar34(:,2);
-plot(pvar34(:,1),diff34)
+ah4(6) = subplot(3,2,6);
+plot((pvar34(:,1)+rvar34(:,1))./2,diff34,'LineWidth',2)
+cosmo4(gca,'GPS Pair 3-4, Positive --> PPP, Negative --> RTK','# of Data Points','Change in Std',e34,d1.t,mindiff,maxdiff)
+
+% finishing touches
+tt=supertit(ah4([1 2]),sprintf('PPP vs RTK (Ship Data from %s to %s)',datestr(rtime(1)),datestr(rtime(end))));
+movev(tt,0.3)
+b = annotation('textbox',[0.485 0.075 0 0],'String',trip,'FitBoxToText','on');
+b.FontSize = 12;
+
+figdisp(sprintf('comp-%s-%s',pfname,rfname),[],'',2,[],'epstopdf')
+
+close
+catch
+end
 
 % cosmetics for histogram plots
 function [pline,rline] = cosmo1(ax,ah,titl,xlab,ylab,pdata,pbar,pgof,rdata,rbar,rgof)
@@ -666,6 +725,21 @@ xlim([length(minlen) length(maxlen)])
 ylim([0 maxstd+0.05*maxstd])
 legend('PPP','RTK')
 grid on
-longticks
+longticks([],2)
 
 % cosmetics for ppp vs rtk plots
+function cosmo4(ax,titl,xlab,ylab,minlen,maxlen,mindiff,maxdiff)
+set(ax,'XDir','reverse')
+title(titl)
+xlabel(xlab)
+ylabel(ylab)
+xlim([length(minlen) length(maxlen)])
+if mindiff >= 0
+    ylim([0 maxdiff+0.1*maxdiff])
+elseif maxdiff <= 0
+    ylim([mindiff-0.1*mindiff 0])
+else
+    ylim([mindiff+0.1*mindiff maxdiff+0.1*maxdiff])
+end
+grid on
+longticks([],2)
