@@ -1,27 +1,25 @@
-function dis2his(unit1file,unit2file,unit3file,unit4file)
-% DIS2HIS(unit1file,unit2file,unit3file,unit4file)
+function dis2his(files)
+% DIS2HIS(files)
 %
 % Given Precise Point Position time series of four different units, computes
 % their pairwise distances, calculates a least-squares regression line and
 % produces histograms of residuals with quantile-quantile plots.
 %
 % INPUT:
+% 
+% files        cell with MAT-filename strings containing data structures
 %
-% unit1file     MAT-filename string containing data collected by unit 1
-% unit2file     MAT-filename string containing data collected by unit 2
-% unit3file     MAT-filename string containing data collected by unit 3
-% unit4file     MAT-filename string containing data collected by unit 4
 %
 % EXAMPLE:
 %
-% dis2his('0001-05340.mat','0002-05340.mat','0003-05340.mat','0004-05340.mat')
+% dis2his({'0001-05340.mat','0002-05340.mat','0003-05340.mat','0004-05340.mat'})
 %
 % Originally written by tschuh-at-princeton.edu, 12/01/202
 % Last modified by tschuh-at-princeton.edu, 01/21/2022
 % Last modified by fjsimons-at-princeton.edu, 01/31/2022
 
 % convert data to all be same time spans with no time gaps
-d = mat2mod({unit1file,unit2file,unit3file,unit4file});
+d = mat2mod(files);
 [~,fname,~] = fileparts(unit1file);
 
 % keep rows where nsats > nthresh and pdop < pthres and pdop~=0
@@ -35,16 +33,18 @@ nk=nchoosek(1:length(d),2);
 for k=1:size(nk,1)
   i=nk(k,1); j=nk(k,2);
   dest{k} = sqrt([d(i).xyz(:,1)-d(j).xyz(:,1)].^2 + ...
-		   [d(i).xyz(:,2)-d(j).xyz(:,2)].^2 + ...
-		   [d(i).xyz(:,3)-d(j).xyz(:,3)].^2);
+		 [d(i).xyz(:,2)-d(j).xyz(:,2)].^2 + ...
+		 [d(i).xyz(:,3)-d(j).xyz(:,3)].^2);
   % find good (g) and bad (b) data so we're only working with non-greyed data
   dest{k}=dest{k}(d(i).pdop<pthresh & d(i).pdop~=0 & d(i).nsats(:,1)>nthresh & ...
-                      d(j).pdop<pthresh & d(j).pdop~=0 & d(j).nsats(:,1)>nthresh);
+		  d(j).pdop<pthresh & d(j).pdop~=0 & d(j).nsats(:,1)>nthresh);
 end
 
 % use d to find residuals (e)
 p = polyfit([1:length(d12)]',d12,1); a12 = 1000*p(1); b12 = p(2);
 x12 = (a12/1000).*[1:length(d12)]' + b12; e12 = 1000*(x12 - d12);
+
+% Save the data - 000X-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
