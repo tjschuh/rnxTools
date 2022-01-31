@@ -34,11 +34,7 @@ set thedif = $sub[1]
 # if the difference between lines is something
 # other than that one, then report this (make variable err)
 set index = 0
-<<<<<<< HEAD
-foreach num ($dum[*])
-=======
 foreach num ($sub[*])
->>>>>>> 4aae1db3dade5e73a324ba0304400f8ee4658ad5
     @ index +=1
     if ($num != $thedif) then
        printf "File %s Block %4.4i Increment %2.2i\n" $fname $index $num
