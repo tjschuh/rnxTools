@@ -37,7 +37,7 @@ for i=1:length(files)
     % And they appear shifted by one in the time table
     fnt=fieldnames(tt);
     % So now you put them back in the right place as a struct
-    for j=2:length(fn)
+    for j=2:length(fnd)
       d.(fnd{j})=tt.(fnt{j-1});
     end    
     % Assemble for later use
