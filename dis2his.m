@@ -24,6 +24,8 @@ function dis2his(unit1file,unit2file,unit3file,unit4file)
 d = mat2mod({unit1file,unit2file,unit3file,unit4file});
 [~,fname,~] = fileparts(unit1file);
 
+keyboard
+
 % compute distances between receivers
 dist12 = sqrt((d1.xyz(:,1)-d2.xyz(:,1)).^2 + (d1.xyz(:,2)-d2.xyz(:,2)).^2 + (d1.xyz(:,3)-d2.xyz(:,3)).^2);
 dist13 = sqrt((d1.xyz(:,1)-d3.xyz(:,1)).^2 + (d1.xyz(:,2)-d3.xyz(:,2)).^2 + (d1.xyz(:,3)-d3.xyz(:,3)).^2);
