@@ -20,7 +20,8 @@ function dis2his(files)
 
 % convert data to all be same time spans with no time gaps
 d = mat2mod(files);
-[~,fname,~] = fileparts(unit1file);
+% new out put filename made from first
+[~,fname,~] = fileparts(files{1});
 
 % keep rows where nsats > nthresh and pdop < pthres and pdop~=0
 nthresh = 4; pthresh = 15;
