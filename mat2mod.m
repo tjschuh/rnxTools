@@ -46,12 +46,21 @@ end
 % About to change this to: all files start and end with a datum, but
 % in-between their values, there could be skips, which now have been
 % fixed by setting them to NaNs. The longest common overlapping segment
-% goes from the latest start to the earliest end of any file
-
-
-      for k=1:length(fnd)
-	dmat(i).(fnd{k}) = dmat(i).(fnd{k})(ia,:);
-      end
+% goes from the latest start to the earliest end of any file.
+% Assuming you know there IS a field t.
+for i=1:length(files)
+   B(i)=dmat(i).t(1);
+   E(i)=dmat(i).t(end);
+end
+% Latest beginning, and earliest start
+B=max(B);
+E=min(E);
+% Now select only the strictly interior overlapping points
+for i=1:length(files)
+   for k=1:length(fnd)
+   	dmat(i).(fnd{k}) = dmat(i).(fnd{k})(dmat(i).t>=B & dmat(i).t<=E,:);
+   end
+end
 
 % Variable output
 varns={dmat};
