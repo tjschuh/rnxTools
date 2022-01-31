@@ -43,28 +43,15 @@ for i=1:length(files)
     dmat(i) = d;
 end
 
-% About to change this
+% About to change this to: all files start and end with a datum, but
+% in-between their values, there could be skips, which now have been
+% fixed by setting them to NaNs. The longest common overlapping segment
+% goes from the latest start to the earliest end of any file
 
-% find which d is the smallest and use that one
-% to intersect with all the others so that
-% all datasets start and end at the same time
-% we do this twice to make the start and end times match
-for j=1:2
-  for i=1:length(files)
-    lmat(i) = length(dmat(i).t);
-  end
-  col=find(lmat==min(lmat),1);
-  % intersect all the other d's with the time in dmat(col)
-  for i=1:length(files)
-    if i ~= col
-      % Do this for all field names
-      [~,ia,~] = intersect(dmat(i).t,dmat(col).t);
+
       for k=1:length(fnd)
 	dmat(i).(fnd{k}) = dmat(i).(fnd{k})(ia,:);
       end
-    end
-  end
-end
 
 % Variable output
 varns={dmat};
