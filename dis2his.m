@@ -24,54 +24,33 @@ function dis2his(unit1file,unit2file,unit3file,unit4file)
 d = mat2mod({unit1file,unit2file,unit3file,unit4file});
 [~,fname,~] = fileparts(unit1file);
 
-keyboard
-
-% compute distances between receivers
-dist12 = sqrt((d1.xyz(:,1)-d2.xyz(:,1)).^2 + (d1.xyz(:,2)-d2.xyz(:,2)).^2 + (d1.xyz(:,3)-d2.xyz(:,3)).^2);
-dist13 = sqrt((d1.xyz(:,1)-d3.xyz(:,1)).^2 + (d1.xyz(:,2)-d3.xyz(:,2)).^2 + (d1.xyz(:,3)-d3.xyz(:,3)).^2);
-dist14 = sqrt((d1.xyz(:,1)-d4.xyz(:,1)).^2 + (d1.xyz(:,2)-d4.xyz(:,2)).^2 + (d1.xyz(:,3)-d4.xyz(:,3)).^2);
-dist23 = sqrt((d2.xyz(:,1)-d3.xyz(:,1)).^2 + (d2.xyz(:,2)-d3.xyz(:,2)).^2 + (d2.xyz(:,3)-d3.xyz(:,3)).^2);
-dist24 = sqrt((d2.xyz(:,1)-d4.xyz(:,1)).^2 + (d2.xyz(:,2)-d4.xyz(:,2)).^2 + (d2.xyz(:,3)-d4.xyz(:,3)).^2);
-dist34 = sqrt((d3.xyz(:,1)-d4.xyz(:,1)).^2 + (d3.xyz(:,2)-d4.xyz(:,2)).^2 + (d3.xyz(:,3)-d4.xyz(:,3)).^2);
-
-% find rows where nsats <= 4 and/or where pdop >= 15 or = 0
+% keep rows where nsats > nthresh and pdop < pthres and pdop~=0
 nthresh = 4; pthresh = 15;
 
-% redefine pdop and nsats so they are easier to work with
-p1 = d1.pdop; p2 = d2.pdop; p3 = d3.pdop; p4 = d4.pdop;
-n1 = d1.nsats(:,1); n2 = d2.nsats(:,1); n3 = d3.nsats(:,1); n4 = d4.nsats(:,1);
+keyboard
 
-% find good (g) and bad (b) data so we're only working with non-greyed data
-% [g b] = dist
-good12 = dist12; good13 = dist13; good14 = dist14; good23 = dist23; good24 = dist24; good34 = dist34; 
-good12(p1>=pthresh | p1==0 | n1<=nthresh | p2>=pthresh | p2==0 | n2<=nthresh) = NaN;
-good13(p1>=pthresh | p1==0 | n1<=nthresh | p3>=pthresh | p3==0 | n3<=nthresh) = NaN;
-good14(p1>=pthresh | p1==0 | n1<=nthresh | p4>=pthresh | p4==0 | n4<=nthresh) = NaN;
-good23(p2>=pthresh | p2==0 | n2<=nthresh | p3>=pthresh | p3==0 | n3<=nthresh) = NaN;
-good24(p2>=pthresh | p2==0 | n2<=nthresh | p4>=pthresh | p4==0 | n4<=nthresh) = NaN;
-good34(p3>=pthresh | p3==0 | n3<=nthresh | p4>=pthresh | p4==0 | n4<=nthresh) = NaN;
+% compute pairwise Euclidean distances between receivers
+nk=nchoosek(1:length(d),2);
 
-% remove any rows containing NaNs
-d12 = rmNaNrows(good12);
-d13 = rmNaNrows(good13);
-d14 = rmNaNrows(good14);
-d23 = rmNaNrows(good23);
-d24 = rmNaNrows(good24);
-d34 = rmNaNrows(good34);
+for k=1:size(nk,1)
+  i=nk(k,1); j=nk(k,2);
+  dest{k} = sqrt([d(i).xyz(:,1)-d(j).xyz(:,1)].^2 + ...
+		   [d(i).xyz(:,2)-d(j).xyz(:,2)].^2 + ...
+		   [d(i).xyz(:,3)-d(j).xyz(:,3)].^2);
+  % find good (g) and bad (b) data so we're only working with non-greyed data
+  dest{k}=dest{k}(d(i).pdop<pthresh & d(i).pdop~=0 & d(i).nsats(:,1)>nthresh & ...
+                      d(j).pdop<pthresh & d(j).pdop~=0 & d(j).nsats(:,1)>nthresh);
+end
 
 % use d to find residuals (e)
 p = polyfit([1:length(d12)]',d12,1); a12 = 1000*p(1); b12 = p(2);
 x12 = (a12/1000).*[1:length(d12)]' + b12; e12 = 1000*(x12 - d12);
-p = polyfit([1:length(d13)]',d13,1); a13 = 1000*p(1); b13 = p(2);
-x13 = (a13/1000).*[1:length(d13)]' + b13; e13 = 1000*(x13 - d13);
-p = polyfit([1:length(d14)]',d14,1); a14 = 1000*p(1); b14 = p(2);
-x14 = (a14/1000).*[1:length(d14)]' + b14; e14 = 1000*(x14 - d14);
-p = polyfit([1:length(d23)]',d23,1); a23 = 1000*p(1); b23 = p(2);
-x23 = (a23/1000).*[1:length(d23)]' + b23; e23 = 1000*(x23 - d23);
-p = polyfit([1:length(d24)]',d24,1); a24 = 1000*p(1); b24 = p(2);
-x24 = (a24/1000).*[1:length(d24)]' + b24; e24 = 1000*(x24 - d24);
-p = polyfit([1:length(d34)]',d34,1); a34 = 1000*p(1); b34 = p(2);
-x34 = (a34/1000).*[1:length(d34)]' + b34; e34 = 1000*(x34 - d34);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 
 % plotting
 % plot histograms with normal curves over top
