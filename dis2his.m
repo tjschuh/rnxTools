@@ -20,32 +20,33 @@ function dis2his(files)
 
 % convert data to all be same time spans with no time gaps
 d = mat2mod(files);
-% new out put filename made from first
+% new out put filename made from first, you'll save the full info
 [~,fname,~] = fileparts(files{1});
+fname=sprintf('000X-%s',suf(fname,'-'));
 
 % keep rows where nsats > nthresh and pdop < pthres and pdop~=0
 nthresh = 4; pthresh = 15;
-
-keyboard
 
 % compute pairwise Euclidean distances between receivers
 nk=nchoosek(1:length(d),2);
 
 for k=1:size(nk,1)
   i=nk(k,1); j=nk(k,2);
+  % Remember the times etc were prematched
   dest{k} = sqrt([d(i).xyz(:,1)-d(j).xyz(:,1)].^2 + ...
 		 [d(i).xyz(:,2)-d(j).xyz(:,2)].^2 + ...
 		 [d(i).xyz(:,3)-d(j).xyz(:,3)].^2);
-  % find good (g) and bad (b) data so we're only working with non-greyed data
-  dest{k}=dest{k}(d(i).pdop<pthresh & d(i).pdop~=0 & d(i).nsats(:,1)>nthresh & ...
-		  d(j).pdop<pthresh & d(j).pdop~=0 & d(j).nsats(:,1)>nthresh);
+  % find the good data condition
+  cond=d(i).pdop<pthresh & d(i).pdop~=0 & d(i).nsats(:,1)>nthresh & ...
+       d(j).pdop<pthresh & d(j).pdop~=0 & d(j).nsats(:,1)>nthresh;
+  % Calculate the residuals of the linear fit, applying condition
+  thetimes=seconds(d(i).t(cond)-d(i).t(cond(1)));
+  p{k}=polyfit(thetimes,dest{k}(cond),1);
+  % Calculate residuals
+  e=dest{k}(cond)-polyval(p{k},thetimes);
 end
 
-% use d to find residuals (e)
-p = polyfit([1:length(d12)]',d12,1); a12 = 1000*p(1); b12 = p(2);
-x12 = (a12/1000).*[1:length(d12)]' + b12; e12 = 1000*(x12 - d12);
-
-% Save the data - 000X-
+% Save the data -000X-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
