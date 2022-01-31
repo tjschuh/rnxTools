@@ -15,9 +15,10 @@ function dis2his(unit1file,unit2file,unit3file,unit4file)
 % EXAMPLE:
 %
 % dis2his('0001-05340.mat','0002-05340.mat','0003-05340.mat','0004-05340.mat')
-%
-% Originally written by tschuh-at-princeton.edu, 12/01/2021
+
+%% Originally written by tschuh-at-princeton.edu, 12/01/202
 % Last modified by tschuh-at-princeton.edu, 01/21/2022
+% Last modified by fjsimons-at-princeton.edu, 01/31/2022
 
 % use mat2mod to convert data to all be same time spans with no time gaps
 [d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
