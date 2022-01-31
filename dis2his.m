@@ -1,27 +1,27 @@
 function dis2his(unit1file,unit2file,unit3file,unit4file)
 % DIS2HIS(unit1file,unit2file,unit3file,unit4file)
 %
-% compute distances between 6 sets of receiver pairs
-% calculate linear polyfit and residuals
-% produce histogram of residuals with qq plots
+% Given Precise Point Position time series of four different units, computes
+% their pairwise distances, calculates a least-squares regression line and
+% produces histograms of residuals with quantile-quantile plots.
 %
 % INPUT:
 %
-% unit1file     mat file containing data collected by unit 1
-% unit2file     mat file containing data collected by unit 2
-% unit3file     mat file containing data collected by unit 3
-% unit4file     mat file containing data collected by unit 4
+% unit1file     MAT-filename string containing data collected by unit 1
+% unit2file     MAT-filename string containing data collected by unit 2
+% unit3file     MAT-filename string containing data collected by unit 3
+% unit4file     MAT-filename string containing data collected by unit 4
 %
 % EXAMPLE:
 %
 % dis2his('0001-05340.mat','0002-05340.mat','0003-05340.mat','0004-05340.mat')
-
-%% Originally written by tschuh-at-princeton.edu, 12/01/202
+%
+% Originally written by tschuh-at-princeton.edu, 12/01/202
 % Last modified by tschuh-at-princeton.edu, 01/21/2022
 % Last modified by fjsimons-at-princeton.edu, 01/31/2022
 
-% use mat2mod to convert data to all be same time spans with no time gaps
-[d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
+% convert data to all be same time spans with no time gaps
+d = mat2mod({unit1file,unit2file,unit3file,unit4file});
 [~,fname,~] = fileparts(unit1file);
 
 % compute distances between receivers
@@ -251,7 +251,7 @@ function cosmo2(titl,qq)
 grid on
 longticks([],2)
 title(titl)
-ylabel("Residual Quantiles")
+ylabel('Residual Quantiles')
 %xlim([-4 4])
 %ylim([-100 100])
 qq(1).Marker = '.';
