@@ -43,6 +43,8 @@ for i=1:length(files)
     dmat(i) = d;
 end
 
+% About to change this
+
 % find which d is the smallest and use that one
 % to intersect with all the others so that
 % all datasets start and end at the same time
