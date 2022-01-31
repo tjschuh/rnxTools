@@ -25,6 +25,7 @@ function [d1,d2,d3,d4]=mat2mod(unit1file,unit2file,unit3file,unit4file)
 % load in all 4 mat files corresponding to different units
 files = {unit1file,unit2file,unit3file,unit4file};
 for i=1:length(files)
+keyboard
     load(files{i});
     % use timetable to fill in time skips/data gaps
     tt = timetable(d.t,d.xyz,d.lat,d.lon,d.utmeasting,d.utmnorthing,d.utmzone,d.height,d.nsats,d.pdop);
