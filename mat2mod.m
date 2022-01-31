@@ -7,16 +7,15 @@ function varargout=mat2mod(files)
 %
 % INPUT:
 % 
-% files        cell with MAT-filename strings containing data
+% files        cell with MAT-filename strings containing data structures
 %
 % OUTPUT:
 %
-% dmat         cell with modified versions of data structure
+% dmat         higher-dimensional structure with modified input structures
 %
 % EXAMPLE:
 %
-% files = {unit1file,unit2file,unit3file,unit4file};
-% d=mat2mod(files);
+% dmat=mat2mod(files);
 % 
 % Originally written by tschuh-at-princeton.edu, 11/12/2021
 % Last modified by tschuh-at-princeton.edu, 11/15/2021
@@ -46,14 +45,14 @@ end
 
 % find which d is the smallest and use that one
 % to intersect with all the others so that
-% all 4 datasets start and end at the same time
+% all datasets start and end at the same time
 % we do this twice to make the start and end times match
 for j=1:2
   for i=1:length(files)
     lmat(i) = length(dmat(i).t);
   end
   col=find(lmat==min(lmat),1);
-  % intersect all the other d's with smalld
+  % intersect all the other d's with the time in dmat(col)
   for i=1:length(files)
     if i ~= col
       % Do this for all field names
