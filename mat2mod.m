@@ -38,7 +38,7 @@ for i=1:length(files)
     fnt=fieldnames(tt);
     % So now you put them back in the right place as a struct
     for j=2:length(fn)
-      d.(fn{j})=tt.(fnt{j-1});
+      d.(fnd{j})=tt.(fnt{j-1});
     end    
     % Assemble for later use
     dmat(i) = d;
@@ -58,8 +58,8 @@ for j=1:2
     if i ~= col
       % Do this for all field names
       [~,ia,~] = intersect(dmat(i).t,dmat(col).t);
-      for k=1:length(fn)
-	dmat(i).(fn{k}) = dmat(i).(fn{k})(ia,:);
+      for k=1:length(fnd)
+	dmat(i).(fnd{k}) = dmat(i).(fnd{k})(ia,:);
       end
     end
   end
