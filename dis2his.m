@@ -23,7 +23,7 @@ function dis2his(files)
 fname=sprintf('000X-%s.mat',suf(fname,'-'));
 
 % keep rows where nsats > nthresh and pdop < pthres and pdop~=0
-nthresh = 4; pthresh = 15;
+nthrensh = 4; pthresh = 15;
 % outlier removal by percentile
 percs=[10 90];
 
@@ -39,6 +39,8 @@ if exist(fname)~=2
     dest{k} = sqrt([d(i).xyz(:,1)-d(j).xyz(:,1)].^2 + ...
 		   [d(i).xyz(:,2)-d(j).xyz(:,2)].^2 + ...
 		   [d(i).xyz(:,3)-d(j).xyz(:,3)].^2);
+    % keep the original length
+    dn(k)=length(dest{k});
     % find the good data condition
     cond=d(i).pdop<pthresh & d(i).pdop~=0 & d(i).nsats(:,1)>nthresh & ...
 	 d(j).pdop<pthresh & d(j).pdop~=0 & d(j).nsats(:,1)>nthresh;
@@ -52,12 +54,12 @@ if exist(fname)~=2
       ee{k}=rmoutliers(e{k},'gesd');
       em{k}='gesd';
     catch
-      ee{k} = rmoutliers(e{k},'percentiles',percs);
+      ee{k}=rmoutliers(e{k},'percentiles',percs);
       em{k}='percentiles';
     end
   end
   % Save whatever you need, all still in standard units
-  save(fname,'e','p','ee','em','percs','nthresh','pthresh','nk','tmax')
+  save(fname,'e','p','ee','em','percs','nthresh','pthresh','nk','tmax','dn')
 else
   load(fname)
 end
@@ -70,42 +72,50 @@ end
 % make curves by using fitdist and pdf
 f=figure(1); clf
 [ah,ha]=krijetem(subnum(3,2));
+f.Position=[250 500 1100 600];
 
-% Convert to from SI m  to mm
+% Convert to from SI in m to mm
 ucon=1000;
 
 for k=1:length(ah)
   % Unit conversion
-  ee{k}=ee{k}*ucon;
   e{k}=e{k}*ucon;
+  ee{k}=ee{k}*ucon;
+
   axes(ah(k))
   % nbins is computed for each dataset using Freedman-Diaconis' Rule
   % this is a personal choice over other methods including Sturges' Rule
   % experimented with other methods and this was my preference
   nbins=round((max(ee{k})-min(ee{k}))/(2*iqr(ee{k})*(length(ee{k}))^(-1/3)));
+
   % calculate goodness of fit (gof) compared to a normal distribution
   [~,~,stats]=chi2gof(ee{k},'NBins',nbins);
+
   % divide chi squared by degrees of freedom to reduce to 1 DoF
   % with 1 Dof, chi squared <= 4 signifies ~90% chance data are normal
   % will make red curve dotted if gof > 4
   gof=stats.chi2stat/stats.df;
+  % Calculate histogram
   [yvals,edges]=histcounts(ee{k},nbins);
+  % Calculate bin centers 
   barc{k}=0.5*(edges(1:end-1)+edges(2:end));
+  % Plot the histogram
   b{k}=bar(barc{k},yvals,'BarWidth',1);
   % Cosmetics
-  [lain{k},xl(k),yl(k)]=cosmo1(ah(k),ah(k),...
-		 sprintf('GPS Pair %i-%i, # of Points = %i/%i',nk(k,1),nk(k,2),...
-			 length(ee{k}),length(e{k})),...
-		 'Residuals [mm]','Counts',e{k},gof,b{k});
+  [lain{k},xl(k),yl(k)]=cosmo1(ah(k),...
+		 sprintf('GPS Pair %i-%i, # of Points = %i/%i/%i',nk(k,1),nk(k,2),...
+			 length(ee{k}),length(e{k}),dn(k)),...
+		 'Residuals [mm]','Counts',ee{k},gof,b{k});
 end
 
 % finishing touches - you should keep minmax times from before
 tt=supertit(ah([1 2]),sprintf('Residuals of ship data from %s to %s',...
 			       datestr(tmax(1)),datestr(tmax(2))));
 movev(tt,0.3)
-
 delete(xl(1:4))
 delete(yl([2 4 6]))
+
+moveh(ah([1 3 5]),.05)
 
 % It is smart enough to strip the extension
 figdisp([],fname,[],2)
@@ -131,7 +141,8 @@ movev(tt,0.3)
 %close
 
 % cosmetics for histogram and pdf plots
-function [lain,xl,yl] = cosmo1(ax,ah,titl,xlab,ylab,data,gof,b)
+function [lain,xl,yl] = cosmo1(ax,titl,xlab,ylab,data,gof,b)
+% 
 ax.XGrid = 'on';
 ax.YGrid = 'off';
 ax.GridColor = [0 0 0];
@@ -147,13 +158,23 @@ ylim([0 max(b.YData)+0.1*max(b.YData)])
 longticks(ax,2)
 
 % Quote data stats
-text(1.85*std(data),7.5*ah.YLim(2)/10,...
-     sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',...
-	     std(data),median(data),mean(data),gof),'FontSize',9)
-pct = (length(data(data<=round(3*std(data)) & data>=round(-3*std(data))))/length(data))*100;
-text(-2.9*std(data),8*ah.YLim(2)/10,...
+mrg1=0.95;
+mrg2=0.995;
+mrg3=0.95;
+fs=9;
+t(1)=text(mrg2*3*std(data),mrg3*ax.YLim(2),...
+     sprintf('std = %3.0f\nmed = %3.0f\nmean = %3.0f\ngof = %3.0f',...
+	     std(data),median(data),mean(data),gof));
+
+% This is calculating the percent of the data not shown due to axis limitation
+pct=(length(data(data<=round(3*std(data)) & data>=round(-3*std(data))))/length(data))*100;
+
+t(2)=text(-mrg1*3*std(data),mrg3*ax.YLim(2),...
      sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',...
-	     pct,min(data),max(data)),'FontSize',9)
+	     pct,min(data),max(data)));
+
+set(t(1),'HorizontalAlignment','right')
+set(t,'VerticalAlignment','top','FontSize',fs);
 
 % Overlayes
 % light blue bars
