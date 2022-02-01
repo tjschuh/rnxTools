@@ -26,7 +26,7 @@ fname=sprintf('000X-%s.mat',suf(fname,'-'));
 nthresh = 4; pthresh = 15;
 % outlier removal by percentile
 percs=[10 90];
-keyboard
+
 if exist(fname)~=2
   % convert data to all be same time spans with no time gaps
   d = mat2mod(files);
@@ -47,14 +47,14 @@ if exist(fname)~=2
     p{k}=polyfit(thetimes,dest{k}(cond),1);
     % Calculate residuals
     e{k}=dest{k}(cond)-polyval(p{k},thetimes);
-  end
-  % remove outliers to get better results
-  try
-    ee{k}=rmoutliers(e{k},'gesd');
-    em{k}='gesd';
-  catch
-    ee{k} = rmoutliers(e{k},'percentiles',percs);
-    em{k}='percentiles';
+    % remove outliers to get better results
+    try
+      ee{k}=rmoutliers(e{k},'gesd');
+      em{k}='gesd';
+    catch
+      ee{k} = rmoutliers(e{k},'percentiles',percs);
+      em{k}='percentiles';
+    end
   end
   % Save whatever you need 
   save(fname,'e','p','ee','em','percs','nthresh','pthresh')
