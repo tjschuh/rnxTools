@@ -49,7 +49,7 @@ if ~exist(fname)==2
   end
 else
   % Save whatever you need 
-  save(sprintf('000X-%s',fname,e,p)
+  save(sprintf('000X-%s',fname),'e','p')
 end
 
 % Save the data -000X-
