@@ -23,7 +23,7 @@ function dis2his(files)
 fname=sprintf('000X-%s.mat',suf(fname,'-'));
 
 % keep rows where nsats > nthresh and pdop < pthres and pdop~=0
-nthrensh = 4; pthresh = 15;
+nthresh = 4; pthresh = 15;
 % outlier removal by percentile
 percs=[10 90];
 
