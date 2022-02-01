@@ -27,7 +27,7 @@ nthresh = 4; pthresh = 15;
 % outlier removal by percentile
 percs=[10 90];
 
-if exist(fname)~=3
+if exist(fname)~=2
   % convert data to all be same time spans with no time gaps
   [d,tmax] = mat2mod(files);
   % compute pairwise Euclidean distances between receivers
@@ -47,7 +47,6 @@ if exist(fname)~=3
     p{k}=polyfit(thetimes,dest{k}(cond),1);
     % Calculate residuals
     e{k}=dest{k}(cond)-polyval(p{k},thetimes);
-    keyboard
     % remove outliers to get better results
     try
       ee{k}=rmoutliers(e{k},'gesd');
@@ -72,7 +71,7 @@ end
 f=figure(1); clf
 [ah,ha]=krijetem(subnum(3,2));
 
-% Convert to mm
+% Convert to from SI m  to mm
 ucon=1000;
 
 for k=1:length(ah)
@@ -94,20 +93,24 @@ for k=1:length(ah)
   barc{k}=0.5*(edges(1:end-1)+edges(2:end));
   b{k}=bar(barc{k},yvals,'BarWidth',1);
   % Cosmetics
-  lain{k}=cosmo1(ah(k),ah(k),...
+  [lain{k},xl(k),yl(k)]=cosmo1(ah(k),ah(k),...
 		 sprintf('GPS Pair %i-%i, # of Points = %i/%i',nk(k,1),nk(k,2),...
 			 length(ee{k}),length(e{k})),...
 		 'Residuals [mm]','Counts',e{k},gof,b{k});
 end
 
 % finishing touches - you should keep minmax times from before
-tt=supertit(ah([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',...
+tt=supertit(ah([1 2]),sprintf('Residuals of ship data from %s to %s',...
 			       datestr(tmax(1)),datestr(tmax(2))));
 movev(tt,0.3)
 
-keyboard
+delete(xl(1:4))
+delete(yl([2 4 6]))
 
-%figdisp(sprintf('histo-%s',fname),[],'',2,[],'epstopdf')
+% It is smart enough to strip the extension
+figdisp([],fname,[],2)
+
+keyboard
 
 %close
 
@@ -128,23 +131,23 @@ movev(tt,0.3)
 %close
 
 % cosmetics for histogram and pdf plots
-function lain = cosmo1(ax,ah,titl,xlab,ylab,data,gof,b)
+function [lain,xl,yl] = cosmo1(ax,ah,titl,xlab,ylab,data,gof,b)
 ax.XGrid = 'on';
 ax.YGrid = 'off';
 ax.GridColor = [0 0 0];
 ax.TickLength = [0 0];
 title(titl)
-xlabel(xlab)
+xl=xlabel(xlab);
 % later versions could use XTICKS and XLABELS 
          xlim(round([-3 3]*std(data),2))
      ax.XTick=round([-3:3]*std(data),2);
 ax.XTickLabel=round([-3:3]*std(data),0);
-ylabel(ylab)
+yl=ylabel(ylab);
 ylim([0 max(b.YData)+0.1*max(b.YData)])
 longticks(ax,2)
 
 % Quote data stats
-text(1.55*std(data),7.25*ah.YLim(2)/10,...
+text(1.85*std(data),7.5*ah.YLim(2)/10,...
      sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',...
 	     std(data),median(data),mean(data),gof),'FontSize',9)
 pct = (length(data(data<=round(3*std(data)) & data>=round(-3*std(data))))/length(data))*100;
