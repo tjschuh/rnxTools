@@ -28,7 +28,7 @@ fname=sprintf('000X-%s',suf(fname,'-'));
 nthresh = 4; pthresh = 15;
 
 keyboard
-if ~exist(fname)==2
+if exist(fname)~=2
     % compute pairwise Euclidean distances between receivers
   nk=nchoosek(1:length(d),2);
 
@@ -49,7 +49,7 @@ if ~exist(fname)==2
   end
 else
   % Save whatever you need 
-  save(sprintf('000X-%s',fname),'e','p')
+  save(fname,'e','p')
 end
 
 % Save the data -000X-
