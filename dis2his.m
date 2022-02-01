@@ -18,18 +18,19 @@ function dis2his(files)
 % Last modified by tschuh-at-princeton.edu, 01/21/2022
 % Last modified by fjsimons-at-princeton.edu, 01/31/2022
 
-% convert data to all be same time spans with no time gaps
-d = mat2mod(files);
-% new out put filename made from first, you'll save the full info
+% new output filename made from first, you'll save the full info
 [~,fname,~] = fileparts(files{1});
-fname=sprintf('000X-%s',suf(fname,'-'));
+fname=sprintf('000X-%s.mat',suf(fname,'-'));
 
 % keep rows where nsats > nthresh and pdop < pthres and pdop~=0
 nthresh = 4; pthresh = 15;
+% outlier removal by percentile
+percs=[10 90];
 
-keyboard
 if exist(fname)~=2
-    % compute pairwise Euclidean distances between receivers
+  % convert data to all be same time spans with no time gaps
+  d = mat2mod(files);
+  % compute pairwise Euclidean distances between receivers
   nk=nchoosek(1:length(d),2);
 
   for k=1:size(nk,1)
@@ -47,17 +48,20 @@ if exist(fname)~=2
     % Calculate residuals
     e{k}=dest{k}(cond)-polyval(p{k},thetimes);
   end
-else
+  % remove outliers to get better results
+  try
+    ee{k} = rmoutliers(e{k},'gesd');
+  catch
+    ee{k} = rmoutliers(e{k},'percentiles',percs);
+  end
   % Save whatever you need 
   save(fname,'e','p')
+else
+  load(fname)
 end
-
-% Save the data -000X-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 
 
 % plotting
@@ -68,12 +72,6 @@ f=figure;
 f.Position = [250 500 1100 600];
 
 ah1(1) = subplot(3,2,1);
-% remove outliers to get better results
-try
-    ee12 = rmoutliers(e12,'gesd');
-catch
-    ee12 = rmoutliers(e12,'percentiles',[10 90]);
-end
 % nbins is computed for each dataset using Freedman-Diaconis' Rule
 % this is a personal choice over other methods including Sturges' Rule
 % experimented with other methods and this was my preference
@@ -89,75 +87,6 @@ barc12 = 0.5*(edges12(1:end-1) + edges12(2:end));
 bar12 = bar(barc12,yvals12,'BarWidth',1);
 line12 = cosmo1(gca,ah1(1),sprintf('GPS Pair 1-2, # of Points = %i/%i',length(ee12),length(d1.t)),'Residuals [mm]','Counts',ee12,gof12,bar12);
 
-ah1(2) = subplot(3,2,2);
-try
-    ee13 = rmoutliers(e13,'gesd');
-catch
-    ee13 = rmoutliers(e13,'percentiles',[10 90]);
-end
-nbins13 = round((max(ee13) - min(ee13))/(2*iqr(ee13)*(length(ee13))^(-1/3)));
-[~,~,stats13] = chi2gof(ee13,'NBins',nbins13);
-gof13 = stats13.chi2stat/stats13.df;
-[yvals13,edges13] = histcounts(ee13,nbins13);
-barc13 = 0.5*(edges13(1:end-1) + edges13(2:end));
-bar13 = bar(barc13,yvals13,'BarWidth',1);
-line13 = cosmo1(gca,ah1(2),sprintf('GPS Pair 1-3, # of Points = %i/%i',length(ee13),length(d1.t)),'Residuals [mm]','Counts',ee13,gof13,bar13);
-
-ah1(3) = subplot(3,2,3);
-try
-    ee14 = rmoutliers(e14,'gesd');
-catch
-    ee14 = rmoutliers(e14,'percentiles',[10 90]);
-end
-nbins14 = round((max(ee14) - min(ee14))/(2*iqr(ee14)*(length(ee14))^(-1/3)));
-[~,~,stats14] = chi2gof(ee14,'NBins',nbins14);
-gof14 = stats14.chi2stat/stats14.df;
-[yvals14,edges14] = histcounts(ee14,nbins14);
-barc14 = 0.5*(edges14(1:end-1) + edges14(2:end));
-bar14 = bar(barc14,yvals14,'BarWidth',1);
-line14 = cosmo1(gca,ah1(3),sprintf('GPS Pair 1-4, # of Points = %i/%i',length(ee14),length(d1.t)),'Residuals [mm]','Counts',ee14,gof14,bar14);
-
-ah1(4) = subplot(3,2,4);
-try
-    ee23 = rmoutliers(e23,'gesd');
-catch
-    ee23 = rmoutliers(e23,'percentiles',[10 90]);
-end
-nbins23 = round((max(ee23) - min(ee23))/(2*iqr(ee23)*(length(ee23))^(-1/3)));
-[~,~,stats23] = chi2gof(ee23,'NBins',nbins23);
-gof23 = stats23.chi2stat/stats23.df;
-[yvals23,edges23] = histcounts(ee23,nbins23);
-barc23 = 0.5*(edges23(1:end-1) + edges23(2:end));
-bar23 = bar(barc23,yvals23,'BarWidth',1);
-line23 = cosmo1(gca,ah1(4),sprintf('GPS Pair 2-3, # of Points = %i/%i',length(ee23),length(d1.t)),'Residuals [mm]','Counts',ee23,gof23,bar23);
-
-ah1(5) = subplot(3,2,5);
-try
-    ee24 = rmoutliers(e24,'gesd');
-catch
-    ee24 = rmoutliers(e24,'percentiles',[10 90]);
-end
-nbins24 = round((max(ee24) - min(ee24))/(2*iqr(ee24)*(length(ee24))^(-1/3)));
-[~,~,stats24] = chi2gof(ee24,'NBins',nbins24);
-gof24 = stats24.chi2stat/stats24.df;
-[yvals24,edges24] = histcounts(ee24,nbins24);
-barc24 = 0.5*(edges24(1:end-1) + edges24(2:end));
-bar24 = bar(barc24,yvals24,'BarWidth',1);
-line24 = cosmo1(gca,ah1(5),sprintf('GPS Pair 2-4, # of Points = %i/%i',length(ee24),length(d1.t)),'Residuals [mm]','Counts',ee24,gof24,bar24);
-
-ah1(6) = subplot(3,2,6);
-try
-    ee34 = rmoutliers(e34,'gesd');
-catch
-    ee34 = rmoutliers(e34,'percentiles',[10 90]);
-end
-nbins34 = round((max(ee34) - min(ee34))/(2*iqr(ee34)*(length(ee34))^(-1/3)));
-[~,~,stats34] = chi2gof(ee34,'NBins',nbins34);
-gof34 = stats34.chi2stat/stats34.df;
-[yvals34,edges34] = histcounts(ee34,nbins34);
-barc34 = 0.5*(edges34(1:end-1) + edges34(2:end));
-bar34 = bar(barc34,yvals34,'BarWidth',1);
-line34 = cosmo1(gca,ah1(6),sprintf('GPS Pair 3-4, # of Points = %i/%i',length(ee34),length(d1.t)),'Residuals [mm]','Counts',ee34,gof34,bar34);
 
 % finishing touches
 tt=supertit(ah1([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(d1.t(1)),datestr(d1.t(end))));
