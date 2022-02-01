@@ -29,7 +29,7 @@ percs=[10 90];
 
 if exist(fname)~=2
   % convert data to all be same time spans with no time gaps
-  d = mat2mod(files);
+  [d,tmax] = mat2mod(files);
   % compute pairwise Euclidean distances between receivers
   nk=nchoosek(1:length(d),2);
 
@@ -56,43 +56,54 @@ if exist(fname)~=2
       em{k}='percentiles';
     end
   end
-  % Save whatever you need 
-  save(fname,'e','p','ee','em','percs','nthresh','pthresh','nk')
+  % Save whatever you need, all still in standard units
+  save(fname,'e','p','ee','em','percs','nthresh','pthresh','nk','tmax')
 else
   load(fname)
 end
 
-keyboard
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-% plotting
+% plotting in case you have exactly 4 files, hence 6 distances
 % plot histograms with normal curves over top
 % make histograms by using histcounts and bar
 % make curves by using fitdist and pdf
-f=figure;
-f.Position = [250 500 1100 600];
+f=figure(1); clf
+[ah,ha]=krijetem(subnum(3,2));
 
-ah1(1) = subplot(3,2,1);
-% nbins is computed for each dataset using Freedman-Diaconis' Rule
-% this is a personal choice over other methods including Sturges' Rule
-% experimented with other methods and this was my preference
-nbins12 = round((max(ee12) - min(ee12))/(2*iqr(ee12)*(length(ee12))^(-1/3)));
-% calculate goodness of fit (gof) compared to a normal distribution
-[~,~,stats12] = chi2gof(ee12,'NBins',nbins12);
-% divide chi squared by degrees of freedom to reduce to 1 DoF
-% with 1 Dof, chi squared <= 4 signifies ~90% chance data is normal
-% make red curve dotted if gof > 4
-gof12 = stats12.chi2stat/stats12.df;
-[yvals12,edges12] = histcounts(ee12,nbins12);
-barc12 = 0.5*(edges12(1:end-1) + edges12(2:end));
-bar12 = bar(barc12,yvals12,'BarWidth',1);
-line12 = cosmo1(gca,ah1(1),sprintf('GPS Pair 1-2, # of Points = %i/%i',length(ee12),length(d1.t)),'Residuals [mm]','Counts',ee12,gof12,bar12);
+% Convert to mm
+ucon=1000;
 
+for k=1:length(ah)
+  % Unit conversion
+  ee{k}=ee{k}*ucon;
+  e{k}=e{k}*ucon;
+  axes(ah(k))
+  % nbins is computed for each dataset using Freedman-Diaconis' Rule
+  % this is a personal choice over other methods including Sturges' Rule
+  % experimented with other methods and this was my preference
+  nbins=round((max(ee{k})-min(ee{k}))/(2*iqr(ee{k})*(length(ee{k}))^(-1/3)));
+  % calculate goodness of fit (gof) compared to a normal distribution
+  [~,~,stats]=chi2gof(ee{k},'NBins',nbins);
+  % divide chi squared by degrees of freedom to reduce to 1 DoF
+  % with 1 Dof, chi squared <= 4 signifies ~90% chance data are normal
+  % will make red curve dotted if gof > 4
+  gof=stats.chi2stat/stats.df;
+  [yvals,edges]=histcounts(ee{k},nbins);
+  barc{k}=0.5*(edges(1:end-1)+edges(2:end));
+  b{k}=bar(barc{k},yvals,'BarWidth',1);
+  % Cosmetics
+  lain{k}=cosmo1(ah(k),ah(k),...
+		 sprintf('GPS Pair %i-%i, # of Points = %i/%i',nk(k,1),nk(k,2),...
+			 length(ee{k}),length(e{k})),...
+		 'Residuals [mm]','Counts',e{k},gof,b{k});
+end
 
-% finishing touches
-tt=supertit(ah1([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',datestr(d1.t(1)),datestr(d1.t(end))));
+keyboard
+
+% finishing touches - you should keep minmax times from before
+tt=supertit(ah([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',...
+			       datestr(d1.t(1)),datestr(d1.t(end))));
 movev(tt,0.3)
 
 %figdisp(sprintf('histo-%s',fname),[],'',2,[],'epstopdf')
@@ -104,28 +115,8 @@ g=figure;
 g.Position = [250 500 1100 600];
 
 ah2(1) = subplot(3,2,1);
-qq12 = qqplot(ee12);
+qq{k} = qqplot(ee12);
 cosmo2('GPS Pair 1-2',qq12)
-
-ah2(2) = subplot(3,2,2);
-qq13 = qqplot(ee13);
-cosmo2('GPS Pair 1-3',qq13)
-
-ah2(3) = subplot(3,2,3);
-qq14 = qqplot(ee14);
-cosmo2('GPS Pair 1-4',qq14)
-
-ah2(4) = subplot(3,2,4);
-qq23 = qqplot(ee23);
-cosmo2('GPS Pair 2-3',qq23)
-
-ah2(5) = subplot(3,2,5);
-qq24 = qqplot(ee24);
-cosmo2('GPS Pair 2-4',qq24)
-
-ah2(6) = subplot(3,2,6);
-qq34 = qqplot(ee34);
-cosmo2('GPS Pair 3-4',qq34)
 
 % finishing touches
 tt=supertit(ah1([1 2]),sprintf('QQ Plots of Residuals vs Standard Normals (%s to %s)',datestr(d1.t(1)),datestr(d1.t(end))));
@@ -136,36 +127,49 @@ movev(tt,0.3)
 %close
 
 % cosmetics for histogram and pdf plots
-function line = cosmo1(ax,ah,titl,xlab,ylab,data,gof,bar)
+function lain = cosmo1(ax,ah,titl,xlab,ylab,data,gof,b)
 ax.XGrid = 'on';
 ax.YGrid = 'off';
 ax.GridColor = [0 0 0];
 ax.TickLength = [0 0];
 title(titl)
 xlabel(xlab)
-xlim([round(-3*std(data),2) round(3*std(data),2)])
-xticks([round(-3*std(data),2) round(-2*std(data),2) round(-std(data),2) 0 round(std(data),2) round(2*std(data),2) round(3*std(data),2)])
-xticklabels({round(-3*std(data),0),round(-2*std(data),0),round(-std(data),0),0,round(std(data),0),round(2*std(data),0),round(3*std(data),0)})
+% later versions could use XTICKS and XLABELS 
+         xlim(round([-3 3]*std(data),2))
+     ax.XTick=round([-3:3]*std(data),2);
+ax.XTickLabel=round([-3:3]*std(data),0);
 ylabel(ylab)
-ylim([0 max(bar.YData)+0.1*max(bar.YData)])
-longticks([],2)
-text(1.55*std(data),7.25*ah.YLim(2)/10,sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',std(data),median(data),mean(data),gof),'FontSize',9)
+ylim([0 max(b.YData)+0.1*max(b.YData)])
+longticks(ax,2)
+
+% Quote data stats
+text(1.55*std(data),7.25*ah.YLim(2)/10,...
+     sprintf('std = %.0f\nmed = %.0f\nmean = %.0f\ngof = %.0f',...
+	     std(data),median(data),mean(data),gof),'FontSize',9)
 pct = (length(data(data<=round(3*std(data)) & data>=round(-3*std(data))))/length(data))*100;
-text(-2.9*std(data),8*ah.YLim(2)/10,sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',pct,min(data),max(data)),'FontSize',9)
-bar.FaceColor = [0.4 0.6667 0.8431]; %light blue bars
+text(-2.9*std(data),8*ah.YLim(2)/10,...
+     sprintf('%05.2f%%\nmin = %.0f\nmax = %.0f',...
+	     pct,min(data),max(data)),'FontSize',9)
+
+% Overlayes
+% light blue bars
+b.FaceColor = [0.4 0.6667 0.8431]; 
 % plot vertical line at median
 hold on
-xline(median(data),'k--','LineWidth',2);
-% plot pd curve on top of histogram
+% later versions could use XLINE
+plot([1 1]*median(data),ylim,'k--','LineWidth',2);
+
+% plot pdf on top of histogram
 pd = fitdist(data,'Normal');
 xvals = [-3*std(data):3*std(data)];
 yvals = pdf(pd,xvals);
-area = sum(bar.YData)*diff(bar.XData(1:2));
-line = plot(xvals,yvals*area,'r','LineWidth',2);
+area = sum(b.YData)*diff(b.XData(1:2));
+lain = plot(xvals,yvals*area,'r','LineWidth',2);
 % if gof > 4 make red curve dotted b/c data is not normal
 if gof > 4
-    line.LineStyle = '--';
+  lain.LineStyle = '--';
 end
+hold off
 
 % cosmetics for qq plots
 function cosmo2(titl,qq)
