@@ -1,9 +1,9 @@
 function varargout=mat2mod(files)
-% dmat=MAT2MOD(files)
+% [dmat,tmax]=MAT2MOD(files)
 %
 % Given Precise Point Position time series of (four) different units, makes
 % them all start and end at the same time and inserts NaNs for times where
-% no data were processed
+% no data were processed.
 %
 % INPUT:
 % 
@@ -12,6 +12,7 @@ function varargout=mat2mod(files)
 % OUTPUT:
 %
 % dmat         higher-dimensional structure with modified input structures
+% tmax         two time strings with the inclusive range
 %
 % EXAMPLE:
 %
@@ -52,16 +53,19 @@ for i=1:length(files)
    B(i)=dmat(i).t(1);
    E(i)=dmat(i).t(end);
 end
-% Latest beginning, and earliest start
+% Latest beginning, and earliest end
 B=max(B);
 E=min(E);
+% Earliest beginning, and latest end
+tmax=[min(B) max(E)];
+
 % Now select only the strictly interior overlapping points
 for i=1:length(files)
-   for k=1:length(fnd)
-   	dmat(i).(fnd{k}) = dmat(i).(fnd{k})(dmat(i).t>=B & dmat(i).t<=E,:);
-   end
+  for k=1:length(fnd)
+    dmat(i).(fnd{k}) = dmat(i).(fnd{k})(dmat(i).t>=B & dmat(i).t<=E,:);
+  end
 end
 
 % Variable output
-varns={dmat};
+varns={dmat,tmax};
 varargout=varns(1:nargout);
