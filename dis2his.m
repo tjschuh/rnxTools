@@ -26,7 +26,7 @@ fname=sprintf('000X-%s.mat',suf(fname,'-'));
 nthresh = 4; pthresh = 15;
 % outlier removal by percentile
 percs=[10 90];
-
+keyboard
 if exist(fname)~=2
   % convert data to all be same time spans with no time gaps
   d = mat2mod(files);
@@ -61,6 +61,8 @@ if exist(fname)~=2
 else
   load(fname)
 end
+
+keyboard
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
