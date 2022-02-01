@@ -50,16 +50,17 @@ if exist(fname)~=2
   end
   % remove outliers to get better results
   try
-    ee{k} = rmoutliers(e{k},'gesd');
+    ee{k}=rmoutliers(e{k},'gesd');
+    em{k}='gesd';
   catch
     ee{k} = rmoutliers(e{k},'percentiles',percs);
+    em{k}='percentiles';
   end
   % Save whatever you need 
-  save(fname,'e','p')
+  save(fname,'e','p','ee','em','percs','nthresh','pthresh')
 else
   load(fname)
 end
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
