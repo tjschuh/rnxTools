@@ -27,7 +27,7 @@ nthresh = 4; pthresh = 15;
 % outlier removal by percentile
 percs=[10 90];
 
-if exist(fname)~=2
+if exist(fname)~=3
   % convert data to all be same time spans with no time gaps
   [d,tmax] = mat2mod(files);
   % compute pairwise Euclidean distances between receivers
@@ -47,6 +47,7 @@ if exist(fname)~=2
     p{k}=polyfit(thetimes,dest{k}(cond),1);
     % Calculate residuals
     e{k}=dest{k}(cond)-polyval(p{k},thetimes);
+    keyboard
     % remove outliers to get better results
     try
       ee{k}=rmoutliers(e{k},'gesd');
@@ -99,12 +100,12 @@ for k=1:length(ah)
 		 'Residuals [mm]','Counts',e{k},gof,b{k});
 end
 
-keyboard
-
 % finishing touches - you should keep minmax times from before
 tt=supertit(ah([1 2]),sprintf('Demeaned Residuals of Ship Data from %s to %s',...
-			       datestr(d1.t(1)),datestr(d1.t(end))));
+			       datestr(tmax(1)),datestr(tmax(2))));
 movev(tt,0.3)
+
+keyboard
 
 %figdisp(sprintf('histo-%s',fname),[],'',2,[],'epstopdf')
 
