@@ -53,16 +53,18 @@ for i=1:length(files)
    B(i)=dmat(i).t(1);
    E(i)=dmat(i).t(end);
 end
-% Latest beginning, and earliest end
-B=max(B);
-E=min(E);
 % Earliest beginning, and latest end
 tmax=[min(B) max(E)];
 
+% Latest beginning, and earliest end
+B=max(B);
+E=min(E);
+
 % Now select only the strictly interior overlapping points
 for i=1:length(files)
-  for k=1:length(fnd)
-    dmat(i).(fnd{k}) = dmat(i).(fnd{k})(dmat(i).t>=B & dmat(i).t<=E,:);
+  % Update the NON-TIME fields! Time is first, use it last
+  for k=length(fnd):-1:1
+    dmat(i).(fnd{k})=dmat(i).(fnd{k})([dmat(i).t>=B & dmat(i).t<=E],:);
   end
 end
 
