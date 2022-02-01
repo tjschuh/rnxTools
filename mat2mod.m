@@ -20,10 +20,11 @@ function varargout=mat2mod(files)
 % 
 % Originally written by tschuh-at-princeton.edu, 11/12/2021
 % Last modified by tschuh-at-princeton.edu, 11/15/2021
-% Last modified by fjsimons-at-alum.mit.edu, 01/31/2022
+% Last modified by fjsimons-at-alum.mit.edu, 02/01/2022
 
 % Non-array variables to exclude from the tabling procedure
 drem={'xyzunit','lonlatunit','utmunit','heightunit','satlabels'};
+drem={'xyzunit','latlonunit','utmunit','heightunit','satlabels'};
 
 for i=1:length(files)
     load(files{i});
