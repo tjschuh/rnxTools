@@ -18,7 +18,7 @@ function dis2his(files,col)
 %
 % Originally written by tschuh-at-princeton.edu, 12/01/202
 % Last modified by tschuh-at-princeton.edu, 01/21/2022
-% Last modified by fjsimons-at-princeton.edu, 01/31/2022
+% Last modified by fjsimons-at-princeton.edu, 02/01/2022
 
 % new output filename made from first, you'll save the full info
 [~,fname,~] = fileparts(files{1});
