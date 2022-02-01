@@ -27,7 +27,7 @@ nthresh = 4; pthresh = 15;
 % outlier removal by percentile
 percs=[10 90];
 
-if exist(fname)~=2
+if exist(fname)~=3
   % convert data to all be same time spans with no time gaps
   [d,tmax] = mat2mod(files);
   % compute pairwise Euclidean distances between receivers
