@@ -27,23 +27,29 @@ fname=sprintf('000X-%s',suf(fname,'-'));
 % keep rows where nsats > nthresh and pdop < pthres and pdop~=0
 nthresh = 4; pthresh = 15;
 
-% compute pairwise Euclidean distances between receivers
-nk=nchoosek(1:length(d),2);
+keyboard
+if ~exist(fname)==2
+    % compute pairwise Euclidean distances between receivers
+  nk=nchoosek(1:length(d),2);
 
-for k=1:size(nk,1)
-  i=nk(k,1); j=nk(k,2);
-  % Remember the times etc were prematched
-  dest{k} = sqrt([d(i).xyz(:,1)-d(j).xyz(:,1)].^2 + ...
-		 [d(i).xyz(:,2)-d(j).xyz(:,2)].^2 + ...
-		 [d(i).xyz(:,3)-d(j).xyz(:,3)].^2);
-  % find the good data condition
-  cond=d(i).pdop<pthresh & d(i).pdop~=0 & d(i).nsats(:,1)>nthresh & ...
-       d(j).pdop<pthresh & d(j).pdop~=0 & d(j).nsats(:,1)>nthresh;
-  % Calculate the residuals of the linear fit, applying condition
-  thetimes=seconds(d(i).t(cond)-d(i).t(cond(1)));
-  p{k}=polyfit(thetimes,dest{k}(cond),1);
-  % Calculate residuals
-  e=dest{k}(cond)-polyval(p{k},thetimes);
+  for k=1:size(nk,1)
+    i=nk(k,1); j=nk(k,2);
+    % Remember the times etc were prematched
+    dest{k} = sqrt([d(i).xyz(:,1)-d(j).xyz(:,1)].^2 + ...
+		   [d(i).xyz(:,2)-d(j).xyz(:,2)].^2 + ...
+		   [d(i).xyz(:,3)-d(j).xyz(:,3)].^2);
+    % find the good data condition
+    cond=d(i).pdop<pthresh & d(i).pdop~=0 & d(i).nsats(:,1)>nthresh & ...
+	 d(j).pdop<pthresh & d(j).pdop~=0 & d(j).nsats(:,1)>nthresh;
+    % Calculate the residuals of the linear fit, applying condition
+    thetimes=seconds(d(i).t(cond)-d(i).t(cond(1)));
+    p{k}=polyfit(thetimes,dest{k}(cond),1);
+    % Calculate residuals
+    e{k}=dest{k}(cond)-polyval(p{k},thetimes);
+  end
+else
+  % Save whatever you need 
+  save(sprintf('000X-%s',fname,e,p)
 end
 
 % Save the data -000X-
