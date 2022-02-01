@@ -57,7 +57,7 @@ if exist(fname)~=2
     end
   end
   % Save whatever you need 
-  save(fname,'e','p','ee','em','percs','nthresh','pthresh')
+  save(fname,'e','p','ee','em','percs','nthresh','pthresh','nk')
 else
   load(fname)
 end
