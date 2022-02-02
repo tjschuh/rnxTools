@@ -1,19 +1,21 @@
-function com2dep(unit1file,unit2file,unit3file,unit4file)
-% COM2DEP(unit1file,unit2file,unit3file,unit4file)
+function com2dep(files)
+% COM2DEP(files)
 %
+% Given Precise Point Position time series of four different units, compute
+% a new average ship position time series from the four units and then
+% compute the slant range to a fixed, imaginary beacon on the seafloor
 %
 % INPUT:
 %
-% unit1file     mat file containing data collected by unit 1
-% unit2file     mat file containing data collected by unit 2
-% unit3file     mat file containing data collected by unit 3
-% unit4file     mat file containing data collected by unit 4
+% files        cell with MAT-filename strings containing data structures
 %
-% OUTPUT:
+% EXAMPLE:
 %
+% com2dep({'0001-05340.mat','0002-05340.mat','0003-05340.mat','0004-05340.mat'})
+% com2dep({'Unit1-camp.mat','Unit2-camp.mat','Unit3-camp.mat','Unit4-camp.mat'})
 %
 % Originally written by tschuh-at-princeton.edu, 11/24/2021
-% Last modified by tschuh-at-princeton.edum 11/30/2021
+% Last modified by tschuh-at-princeton.edum 02/02/2022
 
 % set beacon location on seafloor
 % these come from file 05040 first xyz positions, but z-5km
@@ -24,8 +26,10 @@ dogy = -5.074e6;
 dogz = 3.30385e6; %~5 km below surface
 
 % combine all datasets into 1 with no plotting
-d = mat2com(unit1file,unit2file,unit3file,unit4file,0);
-[~,fname,~] = fileparts(unit1file);
+[~,fname,~] = fileparts(files{1});
+fname = sprintf('slantrange-%s',suf(fname,'-'));
+
+d = mat2com(files,0);
 
 % calculate slant range between ship and beacon for each second in meters
 sr = sqrt((d.x(:) - dogx).^2 + (d.y(:) - dogy).^2 + (d.z(:) - dogz).^2);
@@ -46,10 +50,10 @@ ylim([min(sr*1e-3)-buff*min(sr*1e-3) max(sr*1e-3)+buff*max(sr*1e-3)])
 ylabel('Slant Range [km]')
 title(sprintf('Raw Slant Range Measurements: %s',datestr(d.t(1))))
 grid on
-longticks
-keyboard
+longticks([],2)
+
 % save figure as pdf
-%figdisp(fname,[],'',2,[],'epstopdf')
+figdisp(fname,[],'',2,[],'epstopdf')
 
 % close figure
-%close
+close
