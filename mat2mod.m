@@ -25,7 +25,7 @@ function varargout=mat2mod(files)
 % Non-array variables to exclude from the tabling procedure
 drem={'xyzunit','lonlatunit','utmunit','heightunit','satlabels'};
 % need to fix prd2mat.m for rtk: latlonunit --> lonlatunit
-drem={'xyzunit','latlonunit','utmunit','heightunit','satlabels'};
+%drem={'xyzunit','latlonunit','utmunit','heightunit','satlabels'};
 
 for i=1:length(files)
     load(files{i});
