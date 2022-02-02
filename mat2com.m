@@ -1,5 +1,5 @@
-function varargout=mat2com(unit1file,unit2file,unit3file,unit4file,plt)
-% d=MAT2COM(unit1file,unit2file,unit3file,unit4file,plt)
+function varargout=mat2com(files,plt)
+% d=MAT2COM(files,plt)
 %
 % take in all 4 GPS datasets and combine them into one dataset
 % via averaging (eventually will be center of mass (com)) and
@@ -7,48 +7,51 @@ function varargout=mat2com(unit1file,unit2file,unit3file,unit4file,plt)
 %
 % INPUT:
 %
-% unit1file     mat file containing data collected by unit 1
-% unit2file     mat file containing data collected by unit 2
-% unit3file     mat file containing data collected by unit 3
-% unit4file     mat file containing data collected by unit 4
+% files         cell with MAT-filename strings containing data structures
 % plt           0 for no plot, 1 for plot (default: 1)
 %
 % OUTPUT:
 %
-% d             actual data struct
+% dd             actual data struct
+%
+% EXAMPLE:
+%
+% dd = mat2com({'0001-05340.mat','0002-05340.mat','0003-05340.mat','0004-05340.mat'},1)
 %
 % Originally written by tschuh-at-princeton.edu, 11/23/2021
-% Last modified by tschuh-at-princeton.edu, 12/08/2021
+% Last modified by tschuh-at-princeton.edu, 02/02/2022
 
-[d1,d2,d3,d4] = mat2mod(unit1file,unit2file,unit3file,unit4file);
-[~,fname,~] = fileparts(unit1file);
+[d,~] = mat2mod(files);
+
+[~,fname,~] = fileparts(files{1});
+fname = sprintf('000Z-%s.mat',suf(fname,'-'));
 
 % combine all data into 1 dataset
 % simply by taking the average of the data
 % maybe will eventually use a different scheme
 % ignoring d4 for now because bad data
-d.t = d1.t;
-alldx = [d1.xyz(:,1) d2.xyz(:,1) d3.xyz(:,1)];% d4.xyz(:,1)];
-d.x = nanmean(alldx,2);
-alldy = [d1.xyz(:,2) d2.xyz(:,2) d3.xyz(:,2)];% d4.xyz(:,2)];
-d.y = nanmean(alldy,2);
-alldz = [d1.xyz(:,3) d2.xyz(:,3) d3.xyz(:,3)];% d4.xyz(:,3)];
-d.z = nanmean(alldz,2);
-alldlat = [d1.lat d2.lat d3.lat];% d4.lat];
-d.lat = nanmean(alldlat,2);
-alldlon = [d1.lon d2.lon d3.lon];% d4.lon];
-d.lon = nanmean(alldlon,2);
-alldutme = [d1.utmeasting d2.utmeasting d3.utmeasting];% d4.utmeasting];
-d.utme = nanmean(alldutme,2);
-alldutmn = [d1.utmnorthing d2.utmnorthing d3.utmnorthing];% d4.utmnorthing];
-d.utmn = nanmean(alldutmn,2);
-d.utmz = d1.utmzone;
-alldht = [d1.height d2.height d3.height];% d4.height];
-d.ht = nanmean(alldht,2);
-alldnsats = [d1.nsats(:,1) d2.nsats(:,1) d3.nsats(:,1)];% d4.nsats(:,1)];
-d.nsats = nanmean(alldnsats,2);
-alldpdop = [d1.pdop d2.pdop d3.pdop];% d4.pdop];
-d.pdop = nanmean(alldpdop,2);
+dd.t = d(1).t;
+alldx = [d(1).xyz(:,1) d(2).xyz(:,1) d(3).xyz(:,1)];% d(4).xyz(:,1)];
+dd.x = nanmean(alldx,2);
+alldy = [d(1).xyz(:,2) d(2).xyz(:,2) d(3).xyz(:,2)];% d(4).xyz(:,2)];
+dd.y = nanmean(alldy,2);
+alldz = [d(1).xyz(:,3) d(2).xyz(:,3) d(3).xyz(:,3)];% d(4).xyz(:,3)];
+dd.z = nanmean(alldz,2);
+alldlat = [d(1).lat d(2).lat d(3).lat];% d(4).lat];
+dd.lat = nanmean(alldlat,2);
+alldlon = [d(1).lon d(2).lon d(3).lon];% d(4).lon];
+dd.lon = nanmean(alldlon,2);
+alldutme = [d(1).utmeasting d(2).utmeasting d(3).utmeasting];% d(4).utmeasting];
+dd.utme = nanmean(alldutme,2);
+alldutmn = [d(1).utmnorthing d(2).utmnorthing d(3).utmnorthing];% d(4).utmnorthing];
+dd.utmn = nanmean(alldutmn,2);
+dd.utmz = d(1).utmzone;
+alldht = [d(1).height d(2).height d(3).height];% d(4).height];
+dd.ht = nanmean(alldht,2);
+alldnsats = [d(1).nsats(:,1) d(2).nsats(:,1) d(3).nsats(:,1)];% d(4).nsats(:,1)];
+dd.nsats = nanmean(alldnsats,2);
+alldpdop = [d(1).pdop d(2).pdop d(3).pdop];% d(4).pdop];
+dd.pdop = nanmean(alldpdop,2);
 
 % plotting
 defval('plt',1)
@@ -59,21 +62,21 @@ if plt == 1
 
     % find rows where nsats <= 4
     nthresh = 4;
-    n = d.nsats;
+    n = dd.nsats;
 
     % also should find rows where pdop is >= 10 or = 0
     % this doesnt always coincide with low nsats
     pthresh = 15;
-    p = d.pdop;
+    p = dd.pdop;
 
     % plotting interval
     int = 5;
 
     % plot utm coordinates
     % set the zero for the UTM coordinates based on the min and max of data
-    x = d.utme-(min(d.utme)-.05*(max(d.utme)-min(d.utme)));
-    y = d.utmn-(min(d.utmn)-.05*(max(d.utmn)-min(d.utmn)));
-    tc = datetime(d.t,'Format','HH:mm:ss'); 
+    x = dd.utme-(min(dd.utme)-.05*(max(dd.utme)-min(dd.utme)));
+    y = dd.utmn-(min(dd.utmn)-.05*(max(dd.utmn)-min(dd.utmn)));
+    tc = datetime(dd.t,'Format','HH:mm:ss'); 
 
     % find good (g) and bad (b) data
     % [gx bx] = x
@@ -104,20 +107,20 @@ if plt == 1
     title(sprintf('Ship Location (Every %dth point)',int))
 
     % plot heights relative to WGS84
-    gh = d.ht; bh = d.ht;
+    gh = dd.ht; bh = dd.ht;
     gh(p>=pthresh | p==0 | n<=nthresh) = NaN;
     bh(p<pthresh & n>nthresh) = NaN;
 
     ah(2)=subplot(2,2,2);
-    plot(d.t(1:int:end),gh(1:int:end),'color',[0.4660 0.6740 0.1880])
+    plot(dd.t(1:int:end),gh(1:int:end),'color',[0.4660 0.6740 0.1880])
     hold on
     % grey out "bad" data where nsats is too low or pdop is too high or 0
-    plot(d.t(1:int:end),bh(1:int:end),'color',[0.7 0.7 0.7])
-    xlim([d.t(1) d.t(end)])
+    plot(dd.t(1:int:end),bh(1:int:end),'color',[0.7 0.7 0.7])
+    xlim([dd.t(1) dd.t(end)])
     xticklabels([])
     % remove outliers so plotting looks better
-    htout = rmoutliers(d.ht,'mean');
-    outpct = (length(d.ht)-length(htout))*100/length(d.ht);
+    htout = rmoutliers(dd.ht,'mean');
+    outpct = (length(dd.ht)-length(htout))*100/length(dd.ht);
     ylim([min(htout,[],'all')-0.005*abs(min(htout,[],'all')) max(htout,[],'all')+0.005*abs(max(htout,[],'all'))])
     a=annotation('textbox',[0.78 0.57 0 0],'String',[sprintf('%05.2f%% Outliers',outpct)],'FitBoxToText','on');
     a.FontSize = 8;
@@ -129,21 +132,21 @@ if plt == 1
     % plot nsats and pdop on same plot
     ah(3)=subplot(2,2,4);
     yyaxis left
-    plot(d.t,d.nsats(:,1),'b','LineWidth',1)
-    yticks([min(d.nsats(:,1))-1:max(d.nsats(:,1))+1])
-    ylim([min(d.nsats(:,1))-0.5 max(d.nsats(:,1))+0.5])
+    plot(dd.t,dd.nsats(:,1),'b','LineWidth',1)
+    yticks([min(dd.nsats(:,1))-1:max(dd.nsats(:,1))+1])
+    ylim([min(dd.nsats(:,1))-0.5 max(dd.nsats(:,1))+0.5])
     ylabel('Number of Observed Satellites') 
     yyaxis right
-    plot(d.t,d.pdop,'r','LineWidth',1)
-    ylim([min(d.pdop)-0.25 max(d.pdop)+0.25])
-    xlim([d.t(1) d.t(end)])
+    plot(dd.t,dd.pdop,'r','LineWidth',1)
+    ylim([min(dd.pdop)-0.25 max(dd.pdop)+0.25])
+    xlim([dd.t(1) dd.t(end)])
     ylabel('Position Dilution Of Precision')
     % can only turn grid on for left axis
     grid on
     longticks
     title('Total Number of Satellites and PDOP')
 
-    tt=supertit(ah([1 2]),sprintf('1 Hour of Averaged Ship Data Starting from %s',datestr(d.t(1))));
+    tt=supertit(ah([1 2]),sprintf('1 Hour of Averaged Ship Data Starting from %s',datestr(dd.t(1))));
     movev(tt,0.3)
 
     a = annotation('textbox',[0.23 0.1 0 0],'String',['camp'],'FitBoxToText','on');
@@ -155,5 +158,5 @@ if plt == 1
 end
 
 % optional output
-varns={d};
+varns={dd};
 varargout=varns(1:nargout);
