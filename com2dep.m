@@ -42,13 +42,16 @@ st = sr./v;
 
 % plot the distance [km] vs time
 % would be nice to eventually add error bars
+f=figure(1); clf
+f.Position=[250 500 1100 600];
+
 plot(d.t,sr*1e-3,'LineWidth',2)
 %set(gca,'YDir','reverse')
 xlim([d.t(1) d.t(end)])
 buff = 0.01;
 ylim([min(sr*1e-3)-buff*min(sr*1e-3) max(sr*1e-3)+buff*max(sr*1e-3)])
 ylabel('Slant Range [km]')
-title(sprintf('Raw Slant Range Measurements: %s',datestr(d.t(1))))
+title(sprintf('Raw Slant Range Measurements: %s-%s',datestr(d.t(1)),datestr(d.t(end))))
 grid on
 longticks([],2)
 
