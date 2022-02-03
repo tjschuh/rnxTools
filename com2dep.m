@@ -15,7 +15,7 @@ function com2dep(files)
 % com2dep({'Unit1-camp.mat','Unit2-camp.mat','Unit3-camp.mat','Unit4-camp.mat'})
 %
 % Originally written by tschuh-at-princeton.edu, 11/24/2021
-% Last modified by tschuh-at-princeton.edum 02/02/2022
+% Last modified by tschuh-at-princeton.edu 02/02/2022
 
 % set beacon location on seafloor
 % these come from file 05040 first xyz positions, but z-5km
