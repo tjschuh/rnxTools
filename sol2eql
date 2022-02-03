@@ -16,6 +16,7 @@
 # modified solution file 2
 #
 # Originally written by tschuh-at-princeton.edu, 09/29/2021
+# Last modified by tschuh-at-princeton.edu, 02/03/2022
 
 # might still have some bugs
 
@@ -31,14 +32,29 @@ comm -13 times1 times2 >! remove2
 set del1 = `awk '{print}' remove1`
 set del2 = `awk '{print}' remove2`
 
-foreach blah ($del1[*])
-    set linenum = `awk '/'"$blah"'/ {print NR}' $file1`
-    sed -i ''"$linenum"'d' $file1
-end
-
-foreach bleh ($del2[*])
-    set linenum = `awk '/'"$bleh"'/ {print NR}' $file2`
-    sed -i ''"$linenum"'d' $file2
-end
+if ($OSTYPE == 'linux') then
+  foreach blah ($del1[*])
+      set linenum = `awk '/'"$blah"'/ {print NR}' $file1`
+      sed -i ''"$linenum"'d' $file1
+  end
+  
+  foreach bleh ($del2[*])
+      set linenum = `awk '/'"$bleh"'/ {print NR}' $file2`
+      sed -i ''"$linenum"'d' $file2
+  end
+else if ($OSTYPE == 'darwin') then
+  # on MacOS need to add '' in beginning for creation of output file
+  foreach blah ($del1[*])
+      set linenum = `awk '/'"$blah"'/ {print NR}' $file1`
+      sed -i '' ''"$linenum"'d' $file1
+  end
+  
+  foreach bleh ($del2[*])
+      set linenum = `awk '/'"$bleh"'/ {print NR}' $file2`
+      sed -i '' ''"$linenum"'d' $file2
+  end
+else
+  echo "Code did not run"
+endif
 
 rm -rf times* remove*
