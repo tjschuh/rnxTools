@@ -12,7 +12,15 @@
 # Modifed RINEX file
 #
 # Originally written by tschuh-at-princeton.edu, 07/02/2021
+# Last modified by tschuh-at-princeton.edu, 02/03/2022
 
 set ant = `awk '/ANT #/ {print NR}' $1`
 
-sed -i ''"$ant"' s/                                                            /                    NOV702GG        NONE                    /' $1
+if ($OSTYPE == 'linux') then
+  sed -i ''"$ant"' s/                                                            /                    NOV702GG        NONE                    /' $1
+else if ($OSTYPE == 'darwin') then
+  # on MacOS need to add '' in beginning for creation of output file
+  sed -i '' ''"$ant"' s/                                                            /                    NOV702GG        NONE                    /' $1
+else
+  echo "Code did not run"
+endif
