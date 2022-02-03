@@ -13,7 +13,7 @@
 # Modified RINEX file
 #
 # Originally written by tschuh-at-princeton.edu, 06/18/2021
-# Last modified by tschuh-at-princeton.edu, 07/08/2021
+# Last modified by tschuh-at-princeton.edu, 02/03/2022
 
 set warnin = 0
 if($#argv < 2)then
@@ -33,11 +33,11 @@ set mark = `awk '/MARKER NAME/ {print NR; exit}' $1`
 
 if ($OSTYPE == 'linux') then
   sed -i ''"$mark"' s/                                                            /'"$2"'                                                        /' $1
-  echo "LINUX"
 else if ($OSTYPE == 'darwin') then
   # on MacOS need to add '' in beginning for creation of output file
   sed -i '' ''"$mark"' s/                                                            /'"$2"'                                                        /' $1
-  echo "MacOS"
+else
+  echo "Code did not run"
 endif
 
 ################################################################################
