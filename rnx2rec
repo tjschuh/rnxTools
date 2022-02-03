@@ -12,7 +12,15 @@
 # Modifed RINEX file
 #
 # Originally written by tschuh-at-princeton.edu, 07/02/2021
+# Last modified by tschuh-at-princeton.edu, 02/03/2022
 
 set rec = `awk '/REC #/ {print NR}' $1`
 
-sed -i ''"$rec"' s/                                                            /                    NOV OEMV3                               /' $1
+if ($OSTYPE == 'linux') then
+  sed -i ''"$rec"' s/                                                            /                    NOV OEMV3                               /' $1
+else if ($OSTYPE == 'darwin') then
+  # on MacOS need to add '' in beginning for creation of output file
+  sed -i '' ''"$rec"' s/                                                            /                    NOV OEMV3                               /' $1
+else
+  echo "Code did not run"
+endif
