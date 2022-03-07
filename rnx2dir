@@ -4,10 +4,30 @@
 # create equal number of directories called file001, file002, ...
 # and move *.obs files into respective directories
 #
+# INPUT:
+#
+# $1      the file extension of your RINEX files i.e. what follows .
+#
 # Originally written by tschuh-at-princeton.edu, 09/29/2021
-# Last modified by tschuh-at-princeton.edu, 01/30/2022
+# Last modified by tschuh-at-princeton.edu, 03/07/2022
 
-set numfiles = `/bin/ls *.obs | wc -l`
+set warnin = 0
+if($#argv < 1)then
+  echo ' '
+  echo 'RNX2PRD: One input argument expected:'
+  echo ' '
+  echo '----------> RNX2DIR extension'
+  echo '----------> where extension is RINEX file extension'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+################################################################################
+
+set ext = $1
+
+set numfiles = `/bin/ls *.{$ext} | wc -l`
 
 set num = `seq 1 $numfiles`
 
@@ -16,7 +36,7 @@ foreach time ($num[*])
     mkdir $name
 end
 
-set files = `/bin/ls *.obs`
+set files = `/bin/ls *.{$ext}`
 
 set index = 0
 foreach file ($files[*])
@@ -24,3 +44,13 @@ foreach file ($files[*])
     set name = `printf "file%3.3i" $index`
     mv $file $name
 end
+
+################################################################################
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNX2DIR stopped, $warnin warning message generated"
+else
+    echo "Script RNX2DIR finished, $warnin warning messages generated"
+endif
+echo ' '
