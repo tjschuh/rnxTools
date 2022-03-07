@@ -2,16 +2,48 @@
 #
 # automatically process rinex files with PRIDE-PPPAR
 # no inputs, just run function in a directory full of .obs files
+# only works with data from 2020 and beyond
+#
+# INPUT:
+#
+# $1      the file extension of your RINEX files i.e. what follows .
+# $2      the marker name of your station (marker name in RINEX file)
+# $3      config file type i.e. daily, hourly, mobile, or seismic
 #
 # OUTPUT:
 #
 # sorted directories with processed data in each
 #
+# EXAMPLES:
+#
+# rnx2prd 20o pton daily
+#
 # Originally written by tschuh-at-princeton.edu, 10/12/2021
-# Last modified by tschuh-at-princeton.edu, 11/09/2021
+# Last modified by tschuh-at-princeton.edu, 03/07/2022
+
+set warnin = 0
+if($#argv < 3)then
+  echo ' '
+  echo 'RNX2PRD: Three input arguments expected:'
+  echo ' '
+  echo '----------> RNX2PRD extension markername configtype'
+  echo '----------> where extension is RINEX file extension'
+  echo '----------> where markername is 4 characters'
+  echo '----------> where configtype is either daily, hourly, mobile, or seismic'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+################################################################################
+
+# redefine inputs for convenience
+set ext = $1
+set mkr = $2
+set cfgtype = $3
 
 # put all obs files into appropriate directories called "file####"
-rnx2dir
+rnx2dir $ext
 
 # count number of directories named hour*
 set max = `find file* -maxdepth 0 -type d -print | wc -l`
@@ -23,30 +55,31 @@ foreach num ($range[*])
     cd $name
 
     # get name of *.obs file
-    set outfile = `/bin/ls -1 *.obs | xargs -n1 basename`
+    set outfile = `/bin/ls -1 *.{$ext} | xargs -n1 basename`
 
     # copy and edit config file for right rinex path
-    cp ~/Configs/config_template_mobile .
-    set oldpath = `awk '/Rinex directory/ {print $4}' config_template_mobile`
+    cp ~/Configs/config_template_{$cfgtype} .
+    set oldpath = `awk '/Rinex directory/ {print $4}' config_template_{$cfgtype}`
     set newpath = `pwd`
-    sed -i 's@'"$oldpath"'@'"$newpath"'@' config_template_mobile
+    sed -i 's@'"$oldpath"'@'"$newpath"'@' config_template_{$cfgtype}
 
     # compute the day number of the current year
     # and the corresponding date string from obs file
-    set fYYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.obs`
+    set fYYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.{$ext}`
     set fYYYY = `printf "%4.4i" $fYYYY`
-    set fMM = `awk '/TIME OF FIRST OBS/ {print $2}' *.obs`
+    set fMM = `awk '/TIME OF FIRST OBS/ {print $2}' *.{$ext}`
     set fMM = `printf "%2.2i" $fMM`
-    set fDD = `awk '/TIME OF FIRST OBS/ {print $3}' *.obs`
+    set fDD = `awk '/TIME OF FIRST OBS/ {print $3}' *.{$ext}`
     set fDD = `printf "%2.2i" $fDD`
     set fdate = `printf $fYYYY$fMM$fDD`
+    # this command seems to only work on linux machines
     set fdoy = `date +%j --date=$fdate`
 
-    set lYYYY = `awk '/TIME OF LAST OBS/ {print $1}' *.obs`
+    set lYYYY = `awk '/TIME OF LAST OBS/ {print $1}' *.{$ext}`
     set lYYYY = `printf "%4.4i" $lYYYY`
-    set lMM = `awk '/TIME OF LAST OBS/ {print $2}' *.obs`
+    set lMM = `awk '/TIME OF LAST OBS/ {print $2}' *.{$ext}`
     set lMM = `printf "%2.2i" $lMM`
-    set lDD = `awk '/TIME OF LAST OBS/ {print $3}' *.obs`
+    set lDD = `awk '/TIME OF LAST OBS/ {print $3}' *.{$ext}`
     set lDD = `printf "%2.2i" $lDD`
     set ldate = `printf $lYYYY$lMM$lDD`
     set ldoy = `date +%j --date=$ldate`
@@ -55,10 +88,10 @@ foreach num ($range[*])
     # if equal then we need 1 file
     if ($fdate == $ldate) then
 	# change name of rnx file to correct name
-	mv *.obs bios{$fdoy}0.20o
+	mv *.{$ext} {$mkr}{$fdoy}0.20o
 
 	# run pdp3 and output to cfg file 
-	pdp3 config_template_mobile $fdate $ldate bios k 1 y >! $outfile:r.cfg
+	pdp3_Mac config_template_{$cfgtype} $fdate $ldate $mkr k 1 y >! $outfile:r.cfg
 
 	# run kin2prd to get .prd and .hdr files
 	kin2prd $fYYYY/$fdoy/kin_*
@@ -173,3 +206,13 @@ foreach num ($range[*])
 
     endif
 end
+
+################################################################################
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNX2PRD stopped, $warnin warning message generated"
+else
+    echo "Script RNX2PRD finished, $warnin warning messages generated"
+endif
+echo ' '
