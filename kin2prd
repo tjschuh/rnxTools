@@ -14,8 +14,7 @@
 # kinfile.prd          file only containing solution information from input kin file
 #
 # Originally written by tschuh-at-princeton.edu, 10/06/2021
-# Last modified by tschuh-at-princeton.edu, 03/04/2022
-
+# Last modified by tschuh-at-princeton.edu, 03/07/2022
 
 set infile = $1
 # set outfile to be og filename which is 2 directories back
@@ -25,9 +24,17 @@ set infile = $1
 
 set hdrend = `rnx2hdr $infile`
 set hdrend = `echo "$hdrend+1" | bc`
+
 # create hdr and prd files from original file
 awk 'NR<='"$hdrend"' {print}' $infile >! $infile:r.hdr
 awk 'NR>'"$hdrend"' {print}' $infile >! $infile:r.prd
+
 # remove any stray asterisks (*) in the prd file
-# otherwise matlab wont be able to load data
-sed -i '' 's/\*/ /g' $infile:r.prd
+if ($OSTYPE == 'linux') then
+    sed -i 's/\*/ /g' $infile:r.prd
+else if ($OSTYPE == 'darwin') then
+    # on MacOS need to add '' in beginning for creation of output file
+    sed -i '' 's/\*/ /g' $infile:r.prd
+else
+    echo "Code did not run"
+endif
