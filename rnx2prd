@@ -14,12 +14,16 @@
 #
 # sorted directories with processed data in each
 #
+# PREREQUISITES:
+#
+# ~/Configs/config_template_*
+#
 # EXAMPLES:
 #
-# rnx2prd 20o pton daily
+# rnx2prd 20O pton daily
 #
 # Originally written by tschuh-at-princeton.edu, 10/12/2021
-# Last modified by tschuh-at-princeton.edu, 03/07/2022
+# Last modified by tschuh-at-princeton.edu, 03/08/2022
 
 set warnin = 0
 if($#argv < 3)then
@@ -91,7 +95,7 @@ foreach num ($range[*])
 	mv *.{$ext} {$mkr}{$fdoy}0.20o
 
 	# run pdp3 and output to cfg file 
-	pdp3_Mac config_template_{$cfgtype} $fdate $ldate $mkr k 1 y >! $outfile:r.cfg
+	pdp3 config_template_{$cfgtype} $fdate $ldate $mkr k 1 y >! $outfile:r.cfg
 
 	# run kin2prd to get .prd and .hdr files
 	kin2prd $fYYYY/$fdoy/kin_*
