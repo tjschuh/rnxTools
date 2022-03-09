@@ -20,7 +20,7 @@
 #
 # EXAMPLES:
 #
-# rnx2prd 20O pton daily
+# ppp2prd 20O pton daily
 #
 # Originally written by tschuh-at-princeton.edu, 10/12/2021
 # Last modified by tschuh-at-princeton.edu, 03/08/2022
@@ -28,9 +28,9 @@
 set warnin = 0
 if($#argv < 3)then
   echo ' '
-  echo 'RNX2PRD: Three input arguments expected:'
+  echo 'PPP2PRD: Three input arguments expected:'
   echo ' '
-  echo '----------> RNX2PRD extension markername configtype'
+  echo '----------> PPP2PRD extension markername configtype'
   echo '----------> where extension is RINEX file extension'
   echo '----------> where markername is 4 characters'
   echo '----------> where configtype is either daily, hourly, mobile, or seismic'
@@ -215,8 +215,8 @@ end
 label999:
 echo ' '
 if ($warnin == 1) then
-    echo "Script RNX2PRD stopped, $warnin warning message generated"
+    echo "Script PPP2PRD stopped, $warnin warning message generated"
 else
-    echo "Script RNX2PRD finished, $warnin warning messages generated"
+    echo "Script PPP2PRD finished, $warnin warning messages generated"
 endif
 echo ' '
