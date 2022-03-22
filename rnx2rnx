@@ -15,7 +15,13 @@
 # *.rnx   RINEX file with new start and end times, newly named *.rnx
 #
 # Originally written by tschuh-at-princeton.edu, 06/11/2021 
-# Last modified by tschuh-at-princeton.edu, 08/09/2021
+# Last modified by tschuh-at-princeton.edu, 03/21/2022
+
+# TO-DO:
+# add example
+# write new code that can add a "TIME OF LAST OBS" line
+# by simply taking last data block timestamp and appending
+# to header in correct format (maybe use RNX2BLK)
 
 set warnin = 0
 if($#argv < 3)then
