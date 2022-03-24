@@ -1,0 +1,64 @@
+#!/bin/tcsh
+#
+# check to see if a RINEX file has TIME OF FIRST OBS
+# and TIME OF LAST OBS lines in header
+#
+# INPUT:
+#
+# $1      RINEX file
+#
+# OUTPUT:
+#
+# standard output to screen with result
+#
+# Originally written by tschuh-at-princeton.edu, 03/24/2022
+
+set warnin = 0
+if ($#argv != 1) then
+  echo ' '
+  echo 'RNX2ROBS: Only 1 input argument expected.'
+  echo ' '
+  echo '----------> RNX2OBS file'
+  echo '----------> where file is RINEX file'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+#######################################################################
+
+# for convenience
+set infile = $1
+
+# count number of lines in header
+set hdr = `rnx2hdr $infile`
+
+# awk "TIME OF FIRST/LAST OBS" in header lines only
+set fobs = `awk '/TIME OF FIRST OBS/ && NR<'"$hdr"' {print}' $infile`
+set lobs = `awk '/TIME OF LAST OBS/ && NR<'"$hdr"' {print}' $infile`
+
+# print message to screen depending on awk outcome 
+if ("$fobs" == "" && "$lobs" == "") then
+  echo "TIME OF FIRST OBS does not exist"
+  echo "TIME OF LAST OBS does not exist"
+else if ("$fobs" == "") then
+  echo "TIME OF FIRST OBS does not exist"
+  echo "TIME OF LAST OBS does exist\n--> $lobs"
+else if ("$lobs" == "") then
+  echo "TIME OF FIRST OBS does exist\n--> $fobs"
+  echo "TIME OF LAST OBS does not exist"
+else
+  echo "TIME OF FIRST OBS does exist\n--> $fobs"
+  echo "TIME OF LAST OBS does exist\n--> $lobs"
+endif
+
+################################################################################
+
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNX2OBS stopped, $warnin warning message generated"
+else
+    echo "Script RNX2OBS finished, $warnin warning messages generated"
+endif
+echo ' '
