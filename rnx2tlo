@@ -1,0 +1,72 @@
+#!/bin/tcsh
+#
+# compute TIME OF LAST OBS and append it to RINEX file
+# (maybe change name of this code)
+# (maybe incorporate rnx2obs into beginning of this code)
+#
+# INPUT:
+#
+# $1        RINEX file
+#
+# OUTPUT:
+#
+# RINEX file with appended TIME OF LAST OBS
+#
+# Originally written by tschuh-at-princeton.edu, 03/24/2022
+
+set warnin = 0
+if ($#argv != 1) then
+  echo ' '
+  echo 'RNX2ROBS: Only 1 input argument expected.'
+  echo ' '
+  echo '----------> RNX2OBS file'
+  echo '----------> where file is RINEX file'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+#######################################################################
+
+# for convenience
+set infile = $1
+
+# awk last match of "0000000  0"
+# format each component properly with leading zeros
+set yr = `awk '/0000000  0/ {print $1}' bios1670.20o | tail -1`
+set yr = `printf 20$yr`
+set mon = `awk '/0000000  0/ {print $2}' bios1670.20o | tail -1`
+set mon = `printf "%02.0f" $mon`
+set day = `awk '/0000000  0/ {print $3}' bios1670.20o | tail -1`
+set day = `printf "%02.0f" $day`
+set hr = `awk '/0000000  0/ {print $4}' bios1670.20o | tail -1`
+set hr = `printf "%02.0f" $hr`
+set min = `awk '/0000000  0/ {print $5}' bios1670.20o | tail -1`
+set min = `printf "%02.0f" $min`
+set sec = `awk '/0000000  0/ {print $6}' bios1670.20o | tail -1`
+set sec = `printf "%02.0f" $sec`
+
+# find line number of TIME OF FIRST OBS b/c 
+# TIME OF LAST OBS will become the following line
+set fobs = `awk '/TIME OF FIRST OBS/ {print NR; exit}' $infile`
+
+# append TIME OF LAST OBS to line after TIME OF FIRST OBS
+if ($OSTYPE  == 'linux') then
+    sed -i ''"$fobs"' a\  '"$yr"'    '"$mon"'    '"$day"'    '"$hr"'    '"$min"'   '"$sec"'.0000000     GPS         TIME OF LAST OBS' $infile
+else if ($OSTYPE == 'darwin') then
+    # on MacOS sed needs '' in beginning of line
+    sed -i '' ''"$fobs"' a\  '"$yr"'    '"$mon"'    '"$day"'    '"$hr"'    '"$min"'   '"$sec"'.0000000     GPS         TIME OF LAST OBS' $infile
+else
+    echo "Code did not run"
+endif
+
+################################################################################
+
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNX2TLO stopped, $warnin warning message generated"
+else
+    echo "Script RNX2TLO finished, $warnin warning messages generated"
+endif
+echo ' '
