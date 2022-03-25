@@ -13,11 +13,12 @@
 # RINEX file with appended TIME OF LAST OBS
 #
 # Originally written by tschuh-at-princeton.edu, 03/24/2022
+# Last modified by tschuh-at-princeton.edu, 03/25/2022
 
 set warnin = 0
 if ($#argv != 1) then
   echo ' '
-  echo 'RNX2ROBS: Only 1 input argument expected.'
+  echo 'RNX2TLO: Only 1 input argument expected.'
   echo ' '
   echo '----------> RNX2OBS file'
   echo '----------> where file is RINEX file'
@@ -33,17 +34,17 @@ set infile = $1
 
 # awk last match of "0000000  0"
 # format each component properly with leading zeros
-set yr = `awk '/0000000  0/ {print $1}' bios1670.20o | tail -1`
+set yr = `awk '/0000000  0/ {print $1}' $infile | tail -1`
 set yr = `printf 20$yr`
-set mon = `awk '/0000000  0/ {print $2}' bios1670.20o | tail -1`
+set mon = `awk '/0000000  0/ {print $2}' $infile | tail -1`
 set mon = `printf "%02.0f" $mon`
-set day = `awk '/0000000  0/ {print $3}' bios1670.20o | tail -1`
+set day = `awk '/0000000  0/ {print $3}' $infile | tail -1`
 set day = `printf "%02.0f" $day`
-set hr = `awk '/0000000  0/ {print $4}' bios1670.20o | tail -1`
+set hr = `awk '/0000000  0/ {print $4}' $infile | tail -1`
 set hr = `printf "%02.0f" $hr`
-set min = `awk '/0000000  0/ {print $5}' bios1670.20o | tail -1`
+set min = `awk '/0000000  0/ {print $5}' $infile | tail -1`
 set min = `printf "%02.0f" $min`
-set sec = `awk '/0000000  0/ {print $6}' bios1670.20o | tail -1`
+set sec = `awk '/0000000  0/ {print $6}' $infile | tail -1`
 set sec = `printf "%02.0f" $sec`
 
 # find line number of TIME OF FIRST OBS b/c 
