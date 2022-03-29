@@ -9,6 +9,7 @@
 # $1      the file extension of your RINEX files i.e. what follows .
 # $2      the marker name of your station (marker name in RINEX file)
 # $3      config file type i.e. daily, hourly, mobile, or seismic
+# $4      directory path to config file
 #
 # OUTPUT:
 #
@@ -20,10 +21,10 @@
 #
 # EXAMPLES:
 #
-# ppp2prd 20O pton daily
+# ppp2prd 20O pton daily ~/Configs
 #
 # Originally written by tschuh-at-princeton.edu, 10/12/2021
-# Last modified by tschuh-at-princeton.edu, 03/21/2022
+# Last modified by tschuh-at-princeton.edu, 03/29/2022
 
 set warnin = 0
 if($#argv < 3)then
@@ -45,6 +46,7 @@ endif
 set ext = $1
 set mkr = $2
 set cfgtype = $3
+set cfgpath = $4
 
 # put all obs files into appropriate directories called "file####"
 rnx2dir $ext
@@ -62,7 +64,7 @@ foreach num ($range[*])
     set outfile = `/bin/ls -1 *.{$ext} | xargs -n1 basename`
 
     # copy and edit config file for right rinex path
-    cp ~/Configs/config_template_{$cfgtype} .
+    cp $cfgpath/config_template_{$cfgtype} .
     set oldpath = `awk '/Rinex directory/ {print $4}' config_template_{$cfgtype}`
     set newpath = `pwd`
     sed -i 's@'"$oldpath"'@'"$newpath"'@' config_template_{$cfgtype}
