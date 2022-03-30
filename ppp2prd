@@ -7,34 +7,33 @@
 # INPUT:
 #
 # $1      the file extension of your RINEX files i.e. what follows .
-# $2      the marker name of your station (marker name in RINEX file)
-# $3      config file type i.e. daily, hourly, mobile, or seismic
-# $4      directory path to config file
+# $2      data sampling rate (eventually get this value automatically from another function)
+# $3      the marker name of your station (marker name in RINEX file)
+# $4      config file type i.e. daily, hourly, mobile, or seismic
+# $5      directory path to config file
 #
 # OUTPUT:
 #
 # sorted directories with processed data in each
 #
-# PREREQUISITES:
-#
-# ~/Configs/config_template_*
-#
 # EXAMPLES:
 #
-# ppp2prd 20O pton daily ~/Configs
+# ppp2prd 20o 15 pton daily ~/Configs
 #
 # Originally written by tschuh-at-princeton.edu, 10/12/2021
 # Last modified by tschuh-at-princeton.edu, 03/29/2022
 
 set warnin = 0
-if($#argv < 3)then
+if($#argv < 5)then
   echo ' '
-  echo 'PPP2PRD: Three input arguments expected:'
+  echo 'PPP2PRD: Five input arguments expected:'
   echo ' '
-  echo '----------> PPP2PRD extension markername configtype'
+  echo '----------> PPP2PRD extension int markername configtype configpath'
   echo '----------> where extension is RINEX file extension'
+  echo '----------> where int is data sampling rate'
   echo '----------> where markername is 4 characters'
   echo '----------> where configtype is either daily, hourly, mobile, or seismic'
+  echo '----------> where configpath is path/to/Configs/directory'
   echo ' '
   @ warnin +=1
   goto label999
@@ -44,9 +43,10 @@ endif
 
 # redefine inputs for convenience
 set ext = $1
-set mkr = $2
-set cfgtype = $3
-set cfgpath = $4
+set int = $2
+set mkr = $3
+set cfgtype = $4
+set cfgpath = $5
 
 # put all obs files into appropriate directories called "file####"
 rnx2dir $ext
@@ -94,10 +94,11 @@ foreach num ($range[*])
     # if equal then we need 1 file
     if ($fdate == $ldate) then
 	# change name of rnx file to correct name
-	mv *.{$ext} {$mkr}{$fdoy}0.20o
+	# not sure if need this line
+	#mv *.{$ext} {$mkr}{$fdoy}0.{$ext}
 
 	# run pdp3 and output to cfg file 
-	pdp3 config_template_{$cfgtype} $fdate $ldate $mkr k 1 y >! $outfile:r.cfg
+	pdp3 config_template_{$cfgtype} $fdate $ldate $mkr k $int y >! $outfile:r.cfg
 
 	# run kin2prd to get .prd and .hdr files
 	kin2prd $fYYYY/$fdoy/kin_*
