@@ -74,9 +74,9 @@ foreach num ($range[*])
     set fYYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.{$ext}`
     set fYYYY = `printf "%4.4i" $fYYYY`
     set fMM = `awk '/TIME OF FIRST OBS/ {print $2}' *.{$ext}`
-    set fMM = `printf "%2.2i" $fMM`
+    set fMM = `printf "%02.0f" $fMM`
     set fDD = `awk '/TIME OF FIRST OBS/ {print $3}' *.{$ext}`
-    set fDD = `printf "%2.2i" $fDD`
+    set fDD = `printf "%02.0f" $fDD`
     set fdate = `printf $fYYYY$fMM$fDD`
     # this command seems to only work on linux machines
     set fdoy = `date +%j --date=$fdate`
@@ -84,9 +84,9 @@ foreach num ($range[*])
     set lYYYY = `awk '/TIME OF LAST OBS/ {print $1}' *.{$ext}`
     set lYYYY = `printf "%4.4i" $lYYYY`
     set lMM = `awk '/TIME OF LAST OBS/ {print $2}' *.{$ext}`
-    set lMM = `printf "%2.2i" $lMM`
+    set lMM = `printf "%02.0f" $lMM`
     set lDD = `awk '/TIME OF LAST OBS/ {print $3}' *.{$ext}`
-    set lDD = `printf "%2.2i" $lDD`
+    set lDD = `printf "%02.0f" $lDD`
     set ldate = `printf $lYYYY$lMM$lDD`
     set ldoy = `date +%j --date=$ldate`
 
