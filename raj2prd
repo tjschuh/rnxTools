@@ -23,11 +23,11 @@
 # Originally written by tschuh-at-princeton.edu, 04/25/2022
 
 set warnin = 0
-if($#argv > 1)then
+if($#argv != 1)then
   echo ' '
-  echo 'PPP2PRD: One input argument expected:'
+  echo 'RAJ2PRD: One input argument expected:'
   echo ' '
-  echo '----------> PPP2PRD extension'
+  echo '----------> RAJ2PRD extension'
   echo '----------> where extension is RINEX file extension'
   echo ' '
   @ warnin +=1
