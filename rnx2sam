@@ -1,0 +1,15 @@
+#!/bin/tcsh
+#
+# determine sampling rate of RINEX file
+#
+# Originally written by tschuh-at-princeton.edu, 04/25/2022
+
+set infile = $1
+
+# run rnx2hdr on $infile
+set hdr = `rnx2hdr $infile`
+
+# find the first 2 lines of date strings in the data blocks after the header and print only date strings
+awk '/[A-z]/ && NR>'"$hdr"' && $1!~/[A-z]/ {print $1,$2,$3,$4,$5,$6; count++; if (count>1) exit}' $infile
+
+# need to figure out how to convert date string to single number for subtraction
