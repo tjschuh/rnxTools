@@ -3,14 +3,21 @@
 #
 # Originally written by tschuh-at-princeton.edu, 04/25/2022
 
-# add break code
+set warnin = 0
+if($#argv > 1)then
+  echo ' '
+  echo 'PPP2PRD: One input argument expected:'
+  echo ' '
+  echo '----------> PPP2PRD extension'
+  echo '----------> where extension is RINEX file extension'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
 
 # redefine inputs for convenience
 set ext = $1
-set int = $2
-set mkr = $3
-set cfgtype = $4
-set cfgpath = $5
+#set int = $2
 
 # put all obs files into appropriate directories called "file####"
 rnx2dir $ext
@@ -19,7 +26,6 @@ rnx2dir $ext
 set max = `find file* -maxdepth 0 -type d -print | wc -l`
 set range = `seq 1 $max`
 
-# need to copy config file from working directory to all sub-directories
 # need to copy nav file from working directory to all sub-directories
 
 foreach num ($range[*])
@@ -32,4 +38,50 @@ foreach num ($range[*])
     set oldpath = `awk '/Rinex directory/ {print $4}' config_template_*`
     set newpath = `pwd`
     sed -i 's@'"$oldpath"'@'"$newpath"'@' config_template_*
+
+    # get marker name from 2 directories up
+    # get DOY from 1 directory up
+    set mkr = `echo $PWD | awk -F "/" '{print $(NF-2)}'`
+    set doy = `echo $PWD | awk -F "/" '{print $(NF-1)}'`
+
+    # build date from RINEX file using awk
+    set YYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.{$ext}`
+    set YYYY = `printf "%4.4i" $YYYY`
+    set MM = `awk '/TIME OF FIRST OBS/ {print $2}' *.{$ext}`
+    set MM = `printf "%02.0f" $MM`
+    set DD = `awk '/TIME OF FIRST OBS/ {print $3}' *.{$ext}`
+    set DD = `printf "%02.0f" $DD`
+    set dat = `printf $YYYY$MM$DD`
+
+    # extract last 2 digits of year from $YYYY
+    set YY = `echo $YYYY | cut -c 3,4`
+
+    # strip file extension from RINEX .obs file
+    set outfile = `/bin/ls -1 *.{$ext} | xargs -n1 basename`
+
+    # change name of RINEX .obs file appropriately
+    mv *.{$ext} {$mkr}{$doy}0.{$YY}o
+
+    # copy RINEX .nav file to working directory and change name
+    cp ../{$mkr}{$doy}0.{$YY}n .
+    mv {$mkr}{$doy}0.{$YY}n brdm{$doy}0.{$YY}p
+    
+    # run PRIDE (hard-coded sampling rate at 1)
+    pdp3 config_* $dat $dat $mkr k 1 n >! $outfile:r.cfg
+
+    # run kin2prd to get .prd and .hdr files
+    kin2prd $YYYY/$doy/kin_*
+
+    # go back to parent directory and prepare to run again
+    cd ..
 end
+
+################################################################################
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script PROCESS stopped, $warnin warning message generated"
+else
+    echo "Script PROCESS finished, $warnin warning messages generated"
+endif
+echo ' '
