@@ -99,7 +99,7 @@ foreach num ($range[*])
     pdp3 config_* $fdate $ldate $mkr k 1 n >! $outfile:r.cfg
 
     # run kin2prd to get .prd and .hdr files
-    kin2prd $YYYY/$doy/kin_*
+    kin2prd $fYYYY/$doy/kin_*
 
     # go back to parent directory and prepare to run again
     cd ..
