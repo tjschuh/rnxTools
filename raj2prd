@@ -17,7 +17,8 @@
 # all RINEX .obs files must be in standard .o format (use RNXCMP tools)
 # all RINEX .obs files must have "TIME OF FIRST OBS" and "TIME OF LAST OBS" (use rnx2tlo)
 # copy Config_template_* to working directory with appropriate edits corresponding to the day of year
-# copy and "gzip -d" appropriate RINEX .nav file into working directory 
+# copy and "gzip -d" appropriate RINEX .nav file into working directory
+# data parent directory structure must be /blah/MarkerName/DayOfYear/
 #
 # Originally written by tschuh-at-princeton.edu, 04/25/2022
 
@@ -37,7 +38,9 @@ endif
 set ext = $1
 #set int = $2
 
-# put all obs files into appropriate directories called "file####"
+unalias cd
+
+# put all .obs files into appropriate directories called "file####"
 rnx2dir $ext
 
 # count number of directories named file*
@@ -63,16 +66,24 @@ foreach num ($range[*])
     set doy = `echo $PWD | awk -F "/" '{print $(NF-1)}'`
 
     # build date from RINEX file using awk
-    set YYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.{$ext}`
-    set YYYY = `printf "%4.4i" $YYYY`
-    set MM = `awk '/TIME OF FIRST OBS/ {print $2}' *.{$ext}`
-    set MM = `printf "%02.0f" $MM`
-    set DD = `awk '/TIME OF FIRST OBS/ {print $3}' *.{$ext}`
-    set DD = `printf "%02.0f" $DD`
-    set dat = `printf $YYYY$MM$DD`
+    set fYYYY = `awk '/TIME OF FIRST OBS/ {print $1}' *.{$ext}`
+    set fYYYY = `printf "%4.4i" $fYYYY`
+    set fMM = `awk '/TIME OF FIRST OBS/ {print $2}' *.{$ext}`
+    set fMM = `printf "%02.0f" $fMM`
+    set fDD = `awk '/TIME OF FIRST OBS/ {print $3}' *.{$ext}`
+    set fDD = `printf "%02.0f" $fDD`
+    set fdate = `printf $fYYYY$fMM$fDD`
 
-    # extract last 2 digits of year from $YYYY
-    set YY = `echo $YYYY | cut -c 3,4`
+    set lYYYY = `awk '/TIME OF LAST OBS/ {print $1}' *.{$ext}`
+    set lYYYY = `printf "%4.4i" $lYYYY`
+    set lMM = `awk '/TIME OF LAST OBS/ {print $2}' *.{$ext}`
+    set lMM = `printf "%02.0f" $lMM`
+    set lDD = `awk '/TIME OF LAST OBS/ {print $3}' *.{$ext}`
+    set lDD = `printf "%02.0f" $lDD`
+    set ldate = `printf $lYYYY$lMM$lDD`
+
+    # extract last 2 digits of year from $fYYYY
+    set YY = `echo $fYYYY | cut -c 3,4`
 
     # strip file extension from RINEX .obs file
     set outfile = `/bin/ls -1 *.{$ext} | xargs -n1 basename`
@@ -85,7 +96,7 @@ foreach num ($range[*])
     mv {$mkr}{$doy}0.{$YY}n brdm{$doy}0.{$YY}p
     
     # run PRIDE (hard-coded sampling rate at 1)
-    pdp3 config_* $dat $dat $mkr k 1 n >! $outfile:r.cfg
+    pdp3 config_* $fdate $ldate $mkr k 1 n >! $outfile:r.cfg
 
     # run kin2prd to get .prd and .hdr files
     kin2prd $YYYY/$doy/kin_*
