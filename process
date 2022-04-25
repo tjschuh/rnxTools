@@ -1,0 +1,35 @@
+#!/bin/tcsh
+#
+#
+# Originally written by tschuh-at-princeton.edu, 04/25/2022
+
+# add break code
+
+# redefine inputs for convenience
+set ext = $1
+set int = $2
+set mkr = $3
+set cfgtype = $4
+set cfgpath = $5
+
+# put all obs files into appropriate directories called "file####"
+rnx2dir $ext
+
+# count number of directories named file*
+set max = `find file* -maxdepth 0 -type d -print | wc -l`
+set range = `seq 1 $max`
+
+# need to copy config file from working directory to all sub-directories
+# need to copy nav file from working directory to all sub-directories
+
+foreach num ($range[*])
+    # cd into file####
+    set name = `printf "file%3.3i" $num`
+    cd $name
+
+    # copy and edit config file for right rinex path
+    cp ../config_template_* .
+    set oldpath = `awk '/Rinex directory/ {print $4}' config_template_*`
+    set newpath = `pwd`
+    sed -i 's@'"$oldpath"'@'"$newpath"'@' config_template_*
+end
