@@ -23,11 +23,11 @@
 
 set infile = $1
 
-set yr = `printf "%4.4i" $2`
-set mo = `printf "%2.2i" $3`
-set dy = `printf "%2.2i" $4`
-set hr = `printf "%2.2i" $5`
-set mn = `printf "%2.2i" $6`
+set yr = `printf "%04.0f" $2`
+set mo = `printf "%02.0f" $3`
+set dy = `printf "%02.0f" $4`
+set hr = `printf "%02.0f" $5`
+set mn = `printf "%02.0f" $6`
 set sc = `printf "%010.7f" $7`
 
 # find the line number of the end time in the $infile
