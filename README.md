@@ -1,5 +1,5 @@
 # rnxTools
-RINEX processing tools
+RINEX file processing tools
 
 Some tools require installation of Wuhan University's open-source PRIDE PPP-AR
 https://github.com/PrideLab/PRIDE-PPPAR
