@@ -1,0 +1,71 @@
+#!/bin/tcsh
+#
+# take pre-processed RIENX files and process 
+# automatically with PRIDE PPP-AR v2.2
+#
+# INPUT:
+#
+# $1        4-digit station/marker code i.e. 0842
+# $2        start day of year
+# $3        end day of year
+#
+# AUXILLARY CODE NEEDED:
+#
+# PRIDE PPP-AR, gzip, bzip2, RNXCMP, rnxTools
+#
+# Originally written by tschuh-at-princeton.edu, 06/08/2022
+
+set warnin = 0
+if($#argv != 3)then
+  echo ' '
+  echo 'PRE2PRO: Three input arguments expected:'
+  echo ' '
+  echo '----------> PRE2PRO mkr sdoy edoy'
+  echo '----------> where mkr is 4-digit station/marker code'
+  echo '----------> where sdoy is start day of year'
+  echo '----------> where edoy is end day of year'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+#########################################################################
+
+# make sequence of all directory numbers and get size
+set nums = `seq -f %03g $2 $3`
+set sznums = `echo ${#nums}`
+
+# take every 4th bc PRIDE can only process max 5 days at a time
+set dirs = `seq -f %03g $2 4 $3`
+set szdirs = `echo ${#dirs}`
+
+# counter
+set i = 2
+# working path
+set pth = `pwd`
+
+# actually run PRIDE
+# I think this works
+foreach num ($dirs[*])
+    if ($szdirs == 1) then
+	pdp3 -cfg $pth/config_template_daily -m K -s 2011/$num 00:00:00 -e 2011/$nums[$sznums] 11:59:59 -n $1 -i 1 -f $pth/{$1}{$num}0.11o
+    else
+	if ($i <= $szdirs) then
+	    pdp3 -cfg $pth/config_template_daily -m K -s 2011/$num 00:00:00 -e 2011/$dirs[$i] 11:59:59 -n $1 -i 1 -f $pth/{$1}{$num}0.11o
+	else
+	    pdp3 -cfg $pth/config_template_daily -m K -s 2011/$num 00:00:00 -e 2011/$nums[$sznums] 11:59:59 -n $1 -i 1 -f $pth/{$1}{$num}0.11o
+	endif
+    endif
+    set i = `echo "$i+1" | bc`
+end
+
+##############################################################################
+
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script PRE2PRO stopped, $warnin warning message generated"
+else
+    echo "Script PRE2PRO finished, $warnin warning messages generated"
+endif
+echo ' '
