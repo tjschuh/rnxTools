@@ -1,0 +1,78 @@
+#!/bin/tcsh
+#
+# pre-process all GEONET_JAPAN/rinex1hz data to run automatically
+#
+# INPUT:
+#
+# $1        4-digit station/marker code i.e. 0842
+# $2        start day of year
+# $3        end day of year
+#
+# AUXILLARY CODE NEEDED:
+#
+# gzip, bzip2, RNXCMP, rnxTools
+#
+# Originally written by tschuh-at-princeton.edu, 06/07/2022
+# Last modified by tschuh-at-princeton.edu, 06/08/2022
+
+set warnin = 0
+if($#argv != 3)then
+  echo ' '
+  echo 'RNX2PRE: Three input arguments expected:'
+  echo ' '
+  echo '----------> RNX2PRE mkr sdoy edoy'
+  echo '----------> where mkr is 4-digit station/marker code'
+  echo '----------> where sdoy is start day of year'
+  echo '----------> where edoy is end day of year'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+#########################################################################
+
+# THIS CODE ONLY WORKS FOR THE STRUCTURE WE'VE DESIGNED ON ORTELIUS
+
+# start in directory for which you want to run PRIDE PPP-AR
+
+set nums = `seq -f %03g $2 $3`
+set sznums = `echo ${#nums}`
+
+foreach num ($nums[*])
+    # get RINEX files for all hours of DoY and corresponding nav file
+    cp ../../$num/?/$1* .
+    cp ../../../rinex/2011/$num/$1*n* .
+
+    # unzip all files
+    gzip -d *.11n.gz ; mv *.11n brdm{$num}0.11p
+    bzip2 -d *.bz2
+
+    # change obs files from compact rinex to standard
+    # also add TIME OF LAST OBS to each file so we can concatenate them
+    set files = `/usr/bin/ls *d`
+    foreach file ($files[*])
+	CRX2RNX $file
+	rnx2tlo $file:r.11o
+	rm -f $file
+    end
+
+    # now concatenate all the RINEX files for each day into 1 file
+    rnx2cat {$1}{$num}a.11o {$1}{$num}b.11o ; mv cat.rnx temp
+    set files = `/usr/bin/ls {$1}{$num}[c-x].11o`
+    foreach file ($files[*])
+	rnx2cat temp $file ; mv -f cat.rnx temp
+    end
+    rm -rf {$1}{$num}[a-x].11o
+    mv temp {$1}{$num}0.11o
+end
+
+##############################################################################
+
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNX2PRE stopped, $warnin warning message generated"
+else
+    echo "Script RNX2PRE finished, $warnin warning messages generated"
+endif
+echo ' '
