@@ -4,10 +4,9 @@
 #
 # INPUT:
 #
-# $1        starting 4-digit station/marker code i.e. 0842
-# $2        ending 4-digit station/marker code i.e. 0895
-# $3        start day of year
-# $4        end day of year
+# $1        list of 4-character station/marker code i.e. 0842
+# $2        start day of year
+# $3        end day of year
 #
 # AUXILLARY CODE NEEDED:
 #
@@ -17,15 +16,25 @@
 # Last modified by tschuh-at-princeton.edu, 06/10/2022
 
 set warnin = 0
-if($#argv != 4)then
+if($#argv == 7)then
+set rinexdir = $7
+set navdir = $7
+else if($#argv == 8)then
+set rinexdir = $7
+set navdir = $8
+else
   echo ' '
-  echo 'RNX2PRE: Four input arguments expected:'
+  echo 'RNX2PRE: fIVE input arguments expected:'
   echo ' '
-  echo '----------> RNX2PRE smkr emkr sdoy edoy'
-  echo '----------> where smkr is starting 4-digit station/marker code'
-  echo '----------> where emkr is ending 4-digit station/marker code'
+  echo '----------> RNX2PRE stlist yr sdoy edoy prideconfig rinexdir [navdir]'
+  echo '----------> where stlist is a list of 4-character station/marker code'
+  echo '----------> where yr is year'
   echo '----------> where sdoy is start day of year'
   echo '----------> where edoy is end day of year'
+  echo '----------> where sps is sampling rate in seconds'
+  echo '----------> where prideconfig is file containing PRIDE PPP-AR configuration'
+  echo '----------> where rinexdir is directory containing day/station full RINEX files'
+  echo '----------> where navdir is directory containing day/station navigation files'
   echo ' '
   @ warnin +=1
   goto label999
@@ -37,35 +46,22 @@ endif
 
 # start in directory with which the station numbers are in
 
-# define sequence marker names
-set mkrs = `seq -f %04g $1 $2`
-
 # define sequence of days
-set nums = `seq -f %03g $3 $4`
+set nums = `seq -f %03g $2 $3`
 set sznums = `echo ${#nums}`
 
-foreach mkr ($mkrs[*])
+# loop over  marker names
+foreach mkr (`cat $1`)
     mkdir $mkr
     cd $mkr
     foreach num ($nums[*])
 	# get RINEX files for all hours of DoY and corresponding nav file
 	# change cp to ln
 	# probably need to bzip2 all files in host directory before anything else
-	# ask Raj how to make links work for us
-	cp ../../../$num/?/{$mkr}* .
-	cp ../../../../rinex/2011/$num/{$mkr}*n* .
-
-	# unzip all files
-	gzip -d *.11n.gz ; mv *.11n brdm{$num}0.11p
-	bzip2 -d *.bz2
-
-	# change obs files from compact rinex to standard
-	# also add TIME OF LAST OBS to each file so we can concatenate them
-	set files = `/usr/bin/ls *d`
-	foreach file ($files[*])
-	    CRX2RNX $file
-	    rnx2tlo $file:r.11o
-	    rm -f $file
+	ls $rinexdir/$num/?/{$mkr}*o >! templist
+	ls $navdir/$num/{$mkr}*n >> templist
+	foreach file ( `cat templist` )
+		ln -s $file
 	end
 
 	# now concatenate all the RINEX files for each day into 1 file
@@ -81,7 +77,6 @@ foreach mkr ($mkrs[*])
 end
 
 #############################################################################
-
 # this will need to be new function
 # put config file in one smart sport and call it on command line
 
@@ -91,7 +86,7 @@ foreach mkr ($mkrs[*])
     # working path
     set pth = `pwd`
     # actually run PRIDE
-    pdp3 -cfg ~/path/2/config -m K -s 2011/$3 00:00:00 -e 2011/$4 11:59:59 -n $mkr -i 1 -f $pth/{$mkr}{$3}0.11o
+    pdp3 -cfg $5 -m K -s 2011/$2 -e 2011/$3 -n $mkr -i $4 -f $pth/{$mkr}{$2}0.11o
     # cd back up to base directory with all stations
     cd ..
 end
