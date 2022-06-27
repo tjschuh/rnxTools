@@ -13,10 +13,7 @@
 # RINEX file with appended TIME OF LAST OBS
 #
 # Originally written by tschuh-at-princeton.edu, 03/24/2022
-# Last modified by tschuh-at-princeton.edu, 06/25/2022
-
-# add check for "TIME OF LAST OBS"
-# pipe existence of variable to 1 or 0 and crash code if it exists
+# Last modified by tschuh-at-princeton.edu, 06/27/2022
 
 set warnin = 0
 if ($#argv != 1) then
@@ -34,6 +31,17 @@ endif
 
 # for convenience
 set infile = $1
+
+# check to see if TIME OF LAST OBS already exists
+# if so, exit code and dont do anything
+set check = `grep "TIME OF LAST OBS" $infile`
+if ("$check" != "") then
+   echo ' '
+   echo 'TIME OF LAST OBS already exists'
+   echo ' '
+   @ warnin +=1
+   goto label999
+endif
 
 # awk last match of "0000000  0"
 # format each component properly with leading zeros
