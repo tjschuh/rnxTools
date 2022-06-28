@@ -13,7 +13,7 @@
 # gzip, bzip2, RNXCMP, rnxTools
 #
 # Originally written by tschuh-at-princeton.edu, 06/07/2022
-# Last modified by tschuh-at-princeton.edu, 06/10/2022
+# Last modified by tschuh-at-princeton.edu, 06/28/2022
 
 set warnin = 0
 if($#argv == 7)then
@@ -24,7 +24,7 @@ set rinexdir = $7
 set navdir = $8
 else
   echo ' '
-  echo 'RNX2PRE: fIVE input arguments expected:'
+  echo 'RNX2PRE: eight input arguments expected:'
   echo ' '
   echo '----------> RNX2PRE stlist yr sdoy edoy prideconfig rinexdir [navdir]'
   echo '----------> where stlist is a list of 4-character station/marker code'
@@ -46,12 +46,22 @@ endif
 
 # start in directory with which the station numbers are in
 
+# define variables from inputs
+set stlist = $1
+set yr = $2
+set split = ($yr:as/20/ /)
+set yr2 = $split[1]
+set sdoy = $3
+set edoy = $4
+set sps = $5
+set prideconfig = $6
+
 # define sequence of days
-set nums = `seq -f %03g $2 $3`
+set nums = `seq -f %03g $sdoy $edoy`
 set sznums = `echo ${#nums}`
 
-# loop over  marker names
-foreach mkr (`cat $1`)
+# loop over marker names
+foreach mkr (`cat $stlist`)
     mkdir $mkr
     cd $mkr
     foreach num ($nums[*])
@@ -65,13 +75,13 @@ foreach mkr (`cat $1`)
 	end
 
 	# now concatenate all the RINEX files for each day into 1 file
-	rnx2cat {$mkr}{$num}a.11o {$mkr}{$num}b.11o ; mv cat.rnx temp
-	set files = `/usr/bin/ls {$1}{$num}[c-x].11o`
+	rnx2cat {$mkr}{$num}a.{$yr2}o {$mkr}{$num}b.{$yr2}o ; mv cat.rnx temp
+	set files = `/usr/bin/ls {$mkr}{$num}[c-x].{$yr2}o`
 	foreach file ($files[*])
 	    rnx2cat temp $file ; mv -f cat.rnx temp
 	end
-	rm -rf {$mkr}{$num}[a-x].11o
-	mv temp {$mkr}{$num}0.11o
+	rm -rf {$mkr}{$num}[a-x].{$yr2}o
+	mv temp {$mkr}{$num}0.{$yr2}o
     end
     cd ..
 end
@@ -86,7 +96,7 @@ foreach mkr ($mkrs[*])
     # working path
     set pth = `pwd`
     # actually run PRIDE
-    pdp3 -cfg $5 -m K -s 2011/$2 -e 2011/$3 -n $mkr -i $4 -f $pth/{$mkr}{$2}0.11o
+    pdp3 -cfg $pth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -f $pth/{$mkr}{$sdoy}0.{$yr2}o
     # cd back up to base directory with all stations
     cd ..
 end
