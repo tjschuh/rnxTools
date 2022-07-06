@@ -1,0 +1,153 @@
+#!/bin/tcsh
+#
+# automatially prepare and process RINEX files from
+# various stations across a range of days
+#
+# INPUT:
+#
+# $1        ASCII file containing list of 4-character station/marker codes i.e. 0842
+# $2        year data is from (currently doesnt work with multiple years)
+# $3        start day of year (doy) in range of days being processed
+# $4        end day of year (doy) in range of days being processed
+# $5        sampling interval of RINEX files in seconds (currently cant take multiple values)
+# $6        "yes" or "no" switch for ambiguity resolution (AR) when using PRIDE PPP-AR
+# $7        "yes" or "no" switch for tidal corrections when using PRIDE PPP-AR
+# $8        name of PRIDE PPP-AR configuration file used throughout run in working directory
+# $9        path/to/directory/containing/directories/of/RINEX/observation/files
+# $10       path/to/directory/containing/directories/of/RINEX/navigation/files (if different)
+#
+# AUXILLARY CODE NEEDED:
+#
+# rnxTools
+#
+# Originally written by tschuh-at-princeton.edu, 06/07/2022
+# Last modified by tschuh-at-princeton.edu, 07/06/2022
+
+set warnin = 0
+if($#argv == 9)then
+set rinexdir = $9
+set navdir = $9
+else if($#argv == 10)then
+set rinexdir = $9
+set navdir = $10
+else
+  echo ' '
+  echo 'RNX2PRO: ten input arguments expected:'
+  echo ' '
+  echo '----------> RNX2PRE stlist yr sdoy edoy sps ar tides prideconfig rinexdir [navdir]'
+  echo '----------> where stlist is a list of 4-character station/marker code'
+  echo '----------> where yr is year'
+  echo '----------> where sdoy is start day of year'
+  echo '----------> where edoy is end day of year'
+  echo '----------> where sps is sampling rate in seconds'
+  echo '----------> where ar is either yes for ambiguity resolution or no for no AR'  
+  echo '----------> where tides is either yes for corrections or no for no corrections'
+  echo '----------> where prideconfig is file containing PRIDE PPP-AR configuration'
+  echo '----------> where rinexdir is directory containing day/station full RINEX files'
+  echo '----------> where navdir is directory containing day/station navigation files'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+#########################################################################
+
+# start in directory with which you want station directories
+# containing various runs i.e. 0842/ 0843/ 0844/
+
+# define variables from inputs
+set stlist = $1
+set yr = $2
+set split = ($yr:as/20/ /)
+set yr2 = $split[1]
+set sdoy = $3
+set edoy = $4
+set sps = $5
+set ar = $6
+set tides = $7
+set prideconfig = $8
+
+# define sequence of days
+set nums = `seq -f %03g $sdoy $edoy`
+set sznums = `echo ${#nums}`
+
+# loop over marker names
+foreach mkr (`cat $stlist`)
+    mkdir $mkr
+    cd $mkr
+    foreach num ($nums[*])
+	# get RINEX files for all hours of DoY and corresponding nav file
+	# change cp to ln
+	# probably need to bzip2 all files in host directory before anything else
+	ls $rinexdir/$num/?/{$mkr}*o >! templist
+	ls $navdir/$num/{$mkr}*n >> templist
+	foreach file ( `cat templist` )
+		ln -s $file
+	end
+
+	# now concatenate all the RINEX files for each day into 1 file
+	rnx2cat {$mkr}{$num}a.{$yr2}o {$mkr}{$num}b.{$yr2}o ; mv cat.rnx temp
+	set files = `/usr/bin/ls {$mkr}{$num}[c-x].{$yr2}o`
+	foreach file ($files[*])
+	    rnx2cat temp $file ; mv -f cat.rnx temp
+	end
+	rm -rf {$mkr}{$num}[a-x].{$yr2}o
+	mv temp {$mkr}{$num}0.{$yr2}o
+    end
+    cd ..
+end
+
+# before actually running PRIDE PPP-AR
+# put 1 config file in same spot as all station
+# directories and use it for every processing run
+set cfgpth = `pwd`
+
+foreach mkr ($mkrs[*])
+    # cd into each station directory
+    cd $mkr
+    # actually run PRIDE (with various options depending on user input)
+    if ($ar == yes) then
+	if ($tides == yes) then
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	else if ($tides == no) then
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	else
+	    echo ' '
+	    echo 'Please select either yes or no for tidal corrections'
+	    echo ' '
+	    @ warnin +=1
+	    goto label999
+	endif
+    else if ($ar == no) then
+	if ($tides == yes) then
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	else if ($tides == no) then
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	else
+	    echo ' '
+	    echo 'Please select either yes or no for tidal corrections'
+	    echo ' '
+	    @ warnin +=1
+	    goto label999
+	endif
+    else
+	echo ' '
+	echo 'Please select either yes or no for ambiguity resolution (AR)'
+	echo ' '
+	@ warnin +=1
+	goto label999
+    endif
+    # cd back up to base directory with all stations
+    cd ..
+end
+
+##############################################################################
+
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNX2PRO stopped, $warnin warning message generated"
+else
+    echo "Script RNX2PRO finished, $warnin warning messages generated"
+endif
+echo ' '
