@@ -1,0 +1,53 @@
+#!/bin/tcsh
+#
+# given a path/to/a/RINEX/directory output a station list also with approx positions
+#
+# INPUT:
+#
+# $1       directory containing RINEX files of interest
+#
+# OUTPUT:
+#
+# file within $1 called stationlist with 4 columns: marker/station name, approx position x, y, z
+#
+# Originally written by tschuh@princeton.edu, 07/06/2022
+
+set warnin = 0
+if($#argv != 1)then
+  echo ' '
+  echo 'RNXSTATLIST: Only one input argument expected:'
+  echo ' '
+  echo '----------> RNXSTATLIST rinexdir'
+  echo '----------> where rinexdir is path to directory containing RINEX files'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+################################################################################
+
+# redefine input for convenience
+set rinexdir = $1
+
+# list all RINEX files within $rinexdir
+unalias ls
+set files = `ls $rinexdir/*o`
+
+# awk marker name and approx position for each RINEX file
+# and output them to file called stationlist
+foreach file ($files[*])
+    set mkr = `awk '/MARKER NAME/ {print $1}' $file`
+    set pos = `awk '/APPROX POS/ {print $1,$2,$3}' $file`
+    echo $mkr $pos >>! $rinexdir/stationlist
+end
+
+################################################################################
+
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNXSTATLIST stopped, $warnin warning message generated"
+else
+    echo "Script RNXSTATLIST finished, $warnin warning messages generated"
+endif
+echo ' '
