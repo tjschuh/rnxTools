@@ -1,37 +1,47 @@
 #!/bin/tcsh
 #
-# pre-process all GEONET_JAPAN/rinex1hz data to run automatically
+# automatially prepare and process RINEX files from
+# various stations across a range of days
 #
 # INPUT:
 #
-# $1        list of 4-character station/marker code i.e. 0842
-# $2        start day of year
-# $3        end day of year
+# $1        ASCII file containing list of 4-character station/marker codes i.e. 0842
+# $2        year data is from (currently doesnt work with multiple years)
+# $3        start day of year (doy) in range of days being processed
+# $4        end day of year (doy) in range of days being processed
+# $5        sampling interval of RINEX files in seconds (currently cant take multiple values)
+# $6        "yes" or "no" switch for ambiguity resolution (AR) when using PRIDE PPP-AR
+# $7        "yes" or "no" switch for tidal corrections when using PRIDE PPP-AR
+# $8        name of PRIDE PPP-AR configuration file used throughout run in working directory
+# $9        path/to/directory/containing/directories/of/RINEX/observation/files
+# $10       path/to/directory/containing/directories/of/RINEX/navigation/files (if different)
 #
 # AUXILLARY CODE NEEDED:
 #
-# gzip, bzip2, RNXCMP, rnxTools
+# rnxTools
 #
 # Originally written by tschuh-at-princeton.edu, 06/07/2022
-# Last modified by tschuh-at-princeton.edu, 06/28/2022
+# Last modified by tschuh-at-princeton.edu, 07/06/2022
 
 set warnin = 0
-if($#argv == 7)then
-set rinexdir = $7
-set navdir = $7
-else if($#argv == 8)then
-set rinexdir = $7
-set navdir = $8
+if($#argv == 9)then
+set rinexdir = $9
+set navdir = $9
+else if($#argv == 10)then
+set rinexdir = $9
+set navdir = $10
 else
   echo ' '
-  echo 'RNX2PRE: eight input arguments expected:'
+  echo 'RNX2PRE: ten input arguments expected:'
   echo ' '
-  echo '----------> RNX2PRE stlist yr sdoy edoy prideconfig rinexdir [navdir]'
+  echo '----------> RNX2PRE stlist yr sdoy edoy sps ar tides prideconfig rinexdir [navdir]'
   echo '----------> where stlist is a list of 4-character station/marker code'
   echo '----------> where yr is year'
   echo '----------> where sdoy is start day of year'
   echo '----------> where edoy is end day of year'
   echo '----------> where sps is sampling rate in seconds'
+  echo '----------> where ar is either yes for ambiguity resolution or no for no AR'  
+  echo '----------> where tides is either yes for corrections or no for no corrections'
   echo '----------> where prideconfig is file containing PRIDE PPP-AR configuration'
   echo '----------> where rinexdir is directory containing day/station full RINEX files'
   echo '----------> where navdir is directory containing day/station navigation files'
@@ -54,7 +64,9 @@ set yr2 = $split[1]
 set sdoy = $3
 set edoy = $4
 set sps = $5
-set prideconfig = $6
+set ar = $6
+set tides = $7
+set prideconfig = $8
 
 # define sequence of days
 set nums = `seq -f %03g $sdoy $edoy`
@@ -86,17 +98,46 @@ foreach mkr (`cat $stlist`)
     cd ..
 end
 
-#############################################################################
-# this will need to be new function
-# put config file in one smart sport and call it on command line
+# before actually running PRIDE PPP-AR
+# put 1 config file in same spot as all station
+# directories and use it for every processing run
+set cfgpth = `pwd`
 
 foreach mkr ($mkrs[*])
     # cd into each station directory
-    cd $mkr    
-    # working path
-    set pth = `pwd`
-    # actually run PRIDE
-    pdp3 -cfg $pth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -f $pth/{$mkr}{$sdoy}0.{$yr2}o
+    cd $mkr
+    # actually run PRIDE (with various options depending on user input)
+    if ($ar == yes) then
+	if ($tides == yes) then
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	else if ($tides == no) then
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	else
+	    echo ' '
+	    echo 'Please select either yes or no for tidal corrections'
+	    echo ' '
+	    @ warnin +=1
+	    goto label999
+	endif
+    else if ($ar == no) then
+	if ($tides == yes) then
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	else if ($tides == no) then
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	else
+	    echo ' '
+	    echo 'Please select either yes or no for tidal corrections'
+	    echo ' '
+	    @ warnin +=1
+	    goto label999
+	endif
+    else
+	echo ' '
+	echo 'Please select either yes or no for ambiguity resolution (AR)'
+	echo ' '
+	@ warnin +=1
+	goto label999
+    endif
     # cd back up to base directory with all stations
     cd ..
 end
