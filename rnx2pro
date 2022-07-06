@@ -34,7 +34,7 @@ else
   echo ' '
   echo 'RNX2PRO: ten input arguments expected:'
   echo ' '
-  echo '----------> RNX2PRE stlist yr sdoy edoy sps ar tides prideconfig rinexdir [navdir]'
+  echo '----------> RNX2PRO stlist yr sdoy edoy sps ar tides prideconfig rinexdir [navdir]'
   echo '----------> where stlist is a list of 4-character station/marker code'
   echo '----------> where yr is year'
   echo '----------> where sdoy is start day of year'
@@ -72,7 +72,7 @@ set nums = `seq -f %03g $sdoy $edoy`
 set sznums = `echo ${#nums}`
 
 # loop over marker names
-foreach mkr (`cat $stlist`)
+foreach mkr (`awk '{print $1}' $stlist`)
     mkdir $mkr
     cd $mkr
     foreach num ($nums[*])
