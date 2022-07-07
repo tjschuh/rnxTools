@@ -21,7 +21,7 @@
 # rnxTools
 #
 # Originally written by tschuh-at-princeton.edu, 06/07/2022
-# Last modified by tschuh-at-princeton.edu, 07/06/2022
+# Last modified by tschuh-at-princeton.edu, 07/07/2022
 
 set warnin = 0
 if($#argv == 9)then
@@ -79,8 +79,8 @@ foreach mkr (`awk '{print $1}' $stlist`)
 	# get RINEX files for all hours of DoY and corresponding nav file
 	# change cp to ln
 	# probably need to bzip2 all files in host directory before anything else
-	ls $rinexdir/$num/?/{$mkr}*o >! templist
-	ls $navdir/$num/{$mkr}*n >> templist
+	ls $rinexdir/$num/?/{$mkr}*.{$yr2}o >! templist
+	ls $navdir/$num/{$mkr}*.{$yr2}n >> templist
 	foreach file ( `cat templist` )
 		ln -s $file
 	end
