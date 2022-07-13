@@ -33,7 +33,7 @@ set rinexdir = $1
 # list all RINEX files within $rinexdir
 #unalias ls
 #set files = `ls $rinexdir/067/?/*.*{o,O}`
-set files = `find $rinexdir/067/?/ -type f -name "*.???" -printf "067/?/%f\n"`
+set files = `find $rinexdir/067/a/ -type f -name "*.???" -printf "067/a/%f\n"`
 
 # awk marker name and approx position for each RINEX file
 # and output them to file called stationlist
