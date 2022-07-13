@@ -21,7 +21,7 @@
 # rnxTools
 #
 # Originally written by tschuh-at-princeton.edu, 06/07/2022
-# Last modified by tschuh-at-princeton.edu, 07/07/2022
+# Last modified by tschuh-at-princeton.edu, 07/13/2022
 
 set warnin = 0
 if($#argv == 9)then
@@ -71,6 +71,9 @@ set prideconfig = $8
 set nums = `seq -f %03g $sdoy $edoy`
 set sznums = `echo ${#nums}`
 
+# use the natural version of ls in case it's aliased
+unalias ls
+
 # loop over marker names
 foreach mkr (`awk '{print $1}' $stlist`)
     mkdir $mkr
@@ -79,20 +82,20 @@ foreach mkr (`awk '{print $1}' $stlist`)
 	# get RINEX files for all hours of DoY and corresponding nav file
 	# change cp to ln
 	# probably need to bzip2 all files in host directory before anything else
-	ls $rinexdir/$num/?/{$mkr}*.{$yr2}o >! templist
-	ls $navdir/$num/{$mkr}*.{$yr2}n >> templist
+	ls $rinexdir/$num/?/{$mkr}*.{$yr2}{o,O} >! templist
+	ls $navdir/$num/{$mkr}*.{$yr2}{n,N} >> templist
 	foreach file ( `cat templist` )
 		ln -s $file
 	end
 
 	# now concatenate all the RINEX files for each day into 1 file
-	rnx2cat {$mkr}{$num}a.{$yr2}o {$mkr}{$num}b.{$yr2}o ; mv cat.rnx temp
-	set files = `/usr/bin/ls {$mkr}{$num}[c-x].{$yr2}o`
+	rnx2cat {$mkr}{$num}{a,A}.{$yr2}{o,O} {$mkr}{$num}{b,B}.{$yr2}{o,O} ; mv cat.rnx temp
+	set files = `/usr/bin/ls {$mkr}{$num}[c-x,C-X].{$yr2}{o,O}`
 	foreach file ($files[*])
 	    rnx2cat temp $file ; mv -f cat.rnx temp
 	end
-	rm -rf {$mkr}{$num}[a-x].{$yr2}o
-	mv temp {$mkr}{$num}0.{$yr2}o
+	rm -rf {$mkr}{$num}[a-x,A-X].{$yr2}{o,O}
+	mv temp {$mkr}{$num}0.{$yr2}{o,O}
     end
     cd ..
 end
@@ -108,9 +111,9 @@ foreach mkr ($mkrs[*])
     # actually run PRIDE (with various options depending on user input)
     if ($ar == yes) then
 	if ($tides == yes) then
-	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}{o,O}
 	else if ($tides == no) then
-	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}{o,O}
 	else
 	    echo ' '
 	    echo 'Please select either yes or no for tidal corrections'
@@ -120,9 +123,9 @@ foreach mkr ($mkrs[*])
 	endif
     else if ($ar == no) then
 	if ($tides == yes) then
-	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}{o,O}
 	else if ($tides == no) then
-	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
+	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}{o,O}
 	else
 	    echo ' '
 	    echo 'Please select either yes or no for tidal corrections'
