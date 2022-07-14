@@ -1,0 +1,56 @@
+#!/bin/tcsh
+#
+# make a list of compact RINEX files and a list of standard RINEX files
+#
+# INPUT:
+#
+# $1        directory containing RINEX files of interest
+#
+# OUTPUT:
+#
+#                     compact.list and standard.list
+#               StationName YYYY/MM/DD JulianDate FullPath
+#
+# Orginally written by tschuh-at-princeton.edu, 07/14/2022
+
+set warnin = 0
+if($#argv != 1)then
+  echo ' '
+  echo 'RNXTYPES: Only one input argument expected:'
+  echo ' '
+  echo '----------> RNXTYPES rinexdir'
+  echo '----------> where rinexdir is path to directory containing RINEX files'
+  echo ' '
+  @ warnin +=1
+  goto label999
+endif
+
+##################################################################################
+
+set rinexdir = $1
+
+set files = `find $rinexdir -type d -name "???" -exec find "{}" -type f -name "*.???" \;`
+
+foreach file ($files[*])
+    set type = `awk 'NR==1 {print $4,$5}' $file`
+    if ($type == "G (GPS)") then
+       set mkr = `awk '/MARKER NAME/ {print $1}' $file`
+       set year = `awk '/TIME OF FIRST OBS/ {print $1}' $file`
+       set month = `awk '/TIME OF FIRST OBS/ {print $2}' $file`
+       set day = `awk '/TIME OF FIRST OBS/ {print $1}' $file`
+       echo $mkr $year/$month/$day $file >>! $rinexdir/standard.list
+    else
+       echo $file >>! $rinexdir/compact.list
+    endif
+end
+
+##################################################################################
+
+label999:
+echo ' '
+if ($warnin == 1) then
+    echo "Script RNXTYPES stopped, $warnin warning message generated"
+else
+    echo "Script RNXTYPES finished, $warnin warning messages generated"
+endif
+echo ' '
