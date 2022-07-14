@@ -11,7 +11,7 @@
 # file within $1 called stationlist with 4 columns: marker/station name, approx position x, y, z
 #
 # Originally written by tschuh-at-princeton.edu, 07/06/2022
-# Last modified by tschuh-at-princeton.edu, 07/13/2022
+# Last modified by tschuh-at-princeton.edu, 07/14/2022
 
 set warnin = 0
 if($#argv != 1)then
@@ -31,7 +31,6 @@ endif
 set rinexdir = $1
 
 # list all RINEX files within $rinexdir
-#set files = `find $rinexdir/067/a/ -type f -name "*.???" -printf "067/a/%f\n"`
 set files = `find $rinexdir -type d -name "???" -exec find "{}" -type f -name "*.???" \;`
 
 # awk marker name and approx position for each RINEX file
@@ -39,8 +38,11 @@ set files = `find $rinexdir -type d -name "???" -exec find "{}" -type f -name "*
 foreach file ($files[*])
     set mkr = `awk '/MARKER NAME/ {print $1}' $file`
     set pos = `awk '/APPROX POS/ {print $1,$2,$3}' $file`
-    echo $mkr $pos >>! $rinexdir/stationlist
+    echo $mkr $pos >>! $rinexdir/draft
 end
+
+# get only unique lines
+#sort -u $rinexdir/draft > $rinexdir/stationlist
 
 ################################################################################
 
