@@ -35,18 +35,18 @@ set files = `find $rinexdir -type d -name "???" -exec find "{}" -type f -name "*
 foreach file ($files[*])
     set type = `awk 'NR==1 {print $2,$3}' $file`
     # if standard rinex
-    if ($type == "OBSERVATION DATA") then
+    if ("$type" == "OBSERVATION DATA") then
        set mkr = `awk '/MARKER NAME/ {print $1}' $file`
        set year = `awk '/TIME OF FIRST OBS/ {print $1}' $file`
-       set month = `awk '/TIME OF FIRST OBS/ {print $2}' $file`
-       set day = `awk '/TIME OF FIRST OBS/ {print $1}' $file`
+       set month = `awk '/TIME OF FIRST OBS/ {printf "%02.f", $2}' $file`
+       set day = `awk '/TIME OF FIRST OBS/ {printf "%02.f", $3}' $file`
        echo $mkr $year/$month/$day $file >>! $rinexdir/standard.list
     # if compact rinex
-    else if ($type = "COMPACT RINEX") then
+    else if ("$type" == "COMPACT RINEX") then
        set mkr = `awk '/MARKER NAME/ {print $1}' $file`
        set year = `awk '/TIME OF FIRST OBS/ {print $1}' $file`
-       set month = `awk '/TIME OF FIRST OBS/ {print $2}' $file`
-       set day = `awk '/TIME OF FIRST OBS/ {print $1}' $file`
+       set month = `awk '/TIME OF FIRST OBS/ {printf "%02.f", $2}' $file`
+       set day = `awk '/TIME OF FIRST OBS/ {printf "%02.f", $3}' $file`
        echo $mkr $year/$month/$day $file >>! $rinexdir/compact.list
     else
        echo $file >>! $rinexdir/other.list
