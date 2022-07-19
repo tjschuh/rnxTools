@@ -11,7 +11,7 @@
 # file within $1 called stationlist with 4 columns: marker/station name, approx position x, y, z
 #
 # Originally written by tschuh-at-princeton.edu, 07/06/2022
-# Last modified by tschuh-at-princeton.edu, 07/14/2022
+# Last modified by tschuh-at-princeton.edu, 07/19/2022
 
 set warnin = 0
 if($#argv != 1)then
@@ -41,8 +41,20 @@ foreach file ($files[*])
     echo $mkr $pos >>! $rinexdir/draft
 end
 
-# get only unique lines
-#sort -u $rinexdir/draft > $rinexdir/stationlist
+# save only unique lines based on column 1 through column 1
+sort -u -k 1,1 $rinexdir/draft > $rinexdir/statlist
+
+rm -f $rinexdir/draft
+
+# get rid of the blank line at the beginning
+if ($OSTYPE  == 'linux') then
+  sed -i '1d' $rinexdir/statlist
+else if ($OSTYPE == 'darwin') then
+  # on MacOS need to add '' in beginning for creation of output file
+  sed -i '' '1d' $rinexdir/statlist
+else
+  echo "Removal of empty line 1 did not work"
+endif
 
 ################################################################################
 
