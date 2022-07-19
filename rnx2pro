@@ -21,7 +21,7 @@
 # rnxTools
 #
 # Originally written by tschuh-at-princeton.edu, 06/07/2022
-# Last modified by tschuh-at-princeton.edu, 07/13/2022
+# Last modified by tschuh-at-princeton.edu, 07/19/2022
 
 set warnin = 0
 if($#argv == 9)then
@@ -140,8 +140,28 @@ foreach mkr ($mkrs[*])
 	@ warnin +=1
 	goto label999
     endif
+
+    # cd into output directory i.e. 2011/067-084/ and run code from kin2prd
+    cd $yr/$sdoy-$edoy/
+    
+    set infile = `ls kin_*`
+    set hdrend = `rnx2hdr $infile`
+    set hdrend = `echo "$hdrend+1" | bc`
+    # create hdr and prd files from original file
+    awk 'NR<='"$hdrend"' {print}' $infile >! $infile:r.hdr
+    awk 'NR>'"$hdrend"' {print}' $infile >! $infile:r.prd
+    # remove any stray asterisks (*) in the prd file
+    if ($OSTYPE == 'linux') then
+	sed -i 's/\*/ /g' $infile:r.prd
+    else if ($OSTYPE == 'darwin') then
+	# on MacOS need to add '' in beginning for creation of output file
+	sed -i '' 's/\*/ /g' $infile:r.prd
+    else
+	echo "Code did not run"
+    endif
+
     # cd back up to base directory with all stations
-    cd ..
+    cd ../../../
 end
 
 ##############################################################################
