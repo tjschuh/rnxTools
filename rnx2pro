@@ -40,7 +40,7 @@ else
   echo '----------> where sdoy is start day of year'
   echo '----------> where edoy is end day of year'
   echo '----------> where sps is sampling rate in seconds'
-  echo '----------> where ar is either yes for ambiguity resolution or no for no AR'  
+  echo '----------> where ar is either yes for ambiguity resolution or no for no AR'
   echo '----------> where tides is either yes for corrections or no for no corrections'
   echo '----------> where prideconfig is file containing PRIDE PPP-AR configuration'
   echo '----------> where rinexdir is directory containing day/station full RINEX files'
@@ -74,38 +74,45 @@ set sznums = `echo ${#nums}`
 # use the natural version of ls in case it's aliased
 unalias ls
 
-# loop over marker names
-foreach mkr (`awk '{print $1}' $stlist`)
-    mkdir $mkr
-    cd $mkr
-    foreach num ($nums[*])
-	# get RINEX files for all hours of DoY and corresponding nav file
-	# change cp to ln
-	# probably need to bzip2 all files in host directory before anything else
-	ls $rinexdir/$num/?/{$mkr}*.{$yr2}{o,O} >! templist
-	ls $navdir/$num/{$mkr}*.{$yr2}{n,N} >> templist
-	foreach file ( `cat templist` )
-		ln -s $file
-	end
-
-	# now concatenate all the RINEX files for each day into 1 file
-	rnx2cat {$mkr}{$num}{a,A}.{$yr2}{o,O} {$mkr}{$num}{b,B}.{$yr2}{o,O} ; mv cat.rnx temp
-	set files = `/usr/bin/ls {$mkr}{$num}[c-x,C-X].{$yr2}{o,O}`
-	foreach file ($files[*])
-	    rnx2cat temp $file ; mv -f cat.rnx temp
-	end
-	rm -rf {$mkr}{$num}[a-x,A-X].{$yr2}{o,O}
-	mv temp {$mkr}{$num}0.{$yr2}{o,O}
-    end
-    cd ..
-end
-
 # before actually running PRIDE PPP-AR
 # put 1 config file in same spot as all station
 # directories and use it for every processing run
 set cfgpth = `pwd`
 
-foreach mkr ($mkrs[*])
+# loop over marker names
+foreach mkr (`awk '{print $1}' $stlist`)
+    mkdir $mkr
+    cd $mkr
+    echo 'Working on marker : '$mkr
+    foreach num ($nums[*])
+	# get RINEX files for all hours of DoY and corresponding nav file
+	# change cp to ln
+	# probably need to bzip2 all files in host directory before anything else
+	ls $rinexdir/$yr/$num/?/{$mkr}*.{$yr2}{o,O} >! templist
+	ls $navdir/$yr/$num/{$mkr}*.{$yr2}{n,N} >> templist
+	foreach file ( `cat templist` )
+		ln -s $file
+	end
+
+    echo 'CONCATENATION PART'
+	# now concatenate all the RINEX files for each day into 1 file
+	set files = `/usr/bin/ls {$mkr}{$num}[a-b,A-B].{$yr2}{o,O}`
+	echo $files
+	rnx2cat $files ; mv -f cat.rnx temp
+	set files = `/usr/bin/ls {$mkr}{$num}[c-x,C-X].{$yr2}{o,O}`
+	foreach file ($files[*])
+	    echo $file
+	    rnx2cat temp $file ; mv -f cat.rnx temp
+	end
+	rm -rf {$mkr}{$num}[a-x,A-X].{$yr2}{o,O}
+	mv -f temp {$mkr}{$num}0.{$yr2}{o}
+    end
+    cd ..
+    echo '################################################'
+    echo ' '
+
+
+    echo 'PRIDE PART'
     # cd into each station directory
     cd $mkr
     # actually run PRIDE (with various options depending on user input)
@@ -143,7 +150,7 @@ foreach mkr ($mkrs[*])
 
     # cd into output directory i.e. 2011/067-084/ and run code from kin2prd
     cd $yr/$sdoy-$edoy/
-    
+
     set infile = `ls kin_*`
     set hdrend = `rnx2hdr $infile`
     set hdrend = `echo "$hdrend+1" | bc`
@@ -162,7 +169,9 @@ foreach mkr ($mkrs[*])
 
     # cd back up to base directory with all stations
     cd ../../../
+
 end
+
 
 ##############################################################################
 
