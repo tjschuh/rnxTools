@@ -21,7 +21,7 @@
 # rnxTools
 #
 # Originally written by tschuh-at-princeton.edu, 06/07/2022
-# Last modified by tschuh-at-princeton.edu, 07/19/2022
+# Last modified by tschuh-at-princeton.edu, 07/26/2022
 
 set warnin = 0
 if($#argv == 9)then
@@ -34,8 +34,8 @@ else
   echo ' '
   echo 'RNX2PRO: ten input arguments expected:'
   echo ' '
-  echo '----------> RNX2PRO stlist yr sdoy edoy sps ar tides prideconfig rinexdir [navdir]'
-  echo '----------> where stlist is a list of 4-character station/marker code'
+  echo '----------> RNX2PRO statlist yr sdoy edoy sps ar tides prideconfig rinexdir [navdir]'
+  echo '----------> where statlist is a list of 4-character station/marker codes'
   echo '----------> where yr is year'
   echo '----------> where sdoy is start day of year'
   echo '----------> where edoy is end day of year'
