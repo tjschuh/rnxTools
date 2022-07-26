@@ -36,9 +36,8 @@ set files = `find $rinexdir -type d -name "???" -exec find "{}" -type f -name "*
 # awk marker name and approx position for each RINEX file
 # and output them to file called stationlist
 foreach file ($files[*])
-    set hdr = `rnx2hdr $file`
-    set mkr = `awk '/MARKER NAME/ && NR<'"$hdr"' {print $1}' $file`
-    set pos = `awk '/APPROX POS/ && NR<'"$hdr"' {print $1,$2,$3}' $file`
+    set mkr = `awk '/MARKER NAME/ {print $1}' $file`
+    set pos = `awk '/APPROX POS/ {print $1,$2,$3}' $file`
     echo $mkr $pos >>! $rinexdir/draft
 end
 
