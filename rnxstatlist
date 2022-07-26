@@ -38,21 +38,21 @@ set files = `find $rinexdir -type d -name "???" -exec find "{}" -type f -name "*
 foreach file ($files[*])
     set mkr = `awk '/MARKER NAME/ {print $1}' $file`
     set pos = `awk '/APPROX POS/ {print $1,$2,$3}' $file`
-    echo $mkr $pos >>! $rinexdir/station.list-draft
+    echo $mkr $pos >>! $rinexdir/stations.list-draft
 end
 
 # save only unique lines based on column 1 through column 1
-sort -u -k 1,1 $rinexdir/station.list-draft > $rinexdir/station.list
+sort -u -k 1,1 $rinexdir/stations.list-draft > $rinexdir/stations.list
 
-rm -f $rinexdir/station.list-draft
+rm -f $rinexdir/stations.list-draft
 
 # get rid of the blank line at the beginning
 # I dont think we need this anymore
 #if ($OSTYPE  == 'linux') then
-#  sed -i '1d' $rinexdir/station.list
+#  sed -i '1d' $rinexdir/stations.list
 #else if ($OSTYPE == 'darwin') then
 #  # on MacOS need to add '' in beginning for creation of output file
-#  sed -i '' '1d' $rinexdir/station.list
+#  sed -i '' '1d' $rinexdir/stations.list
 #else
 #  echo "Removal of empty line 1 did not work"
 #endif
