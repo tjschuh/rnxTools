@@ -8,7 +8,7 @@
 #
 # OUTPUT:
 #
-# file within $1 called stationlist with 4 columns: marker/station name, approx position x, y, z
+# file within $1 called station.list with 4 columns: marker/station name, approx position x, y, z
 #
 # Originally written by tschuh-at-princeton.edu, 07/06/2022
 # Last modified by tschuh-at-princeton.edu, 07/26/2022
@@ -36,24 +36,23 @@ set files = `find $rinexdir -type d -name "???" -exec find "{}" -type f -name "*
 # awk marker name and approx position for each RINEX file
 # and output them to file called stationlist
 foreach file ($files[*])
-    set hdr = `rnx2hdr $file`
-    set mkr = `head -$hdr $file | awk '/MARKER NAME/ {print $1}'`
-    set pos = `head -$hdr $file | awk '/APPROX POS/ {print $1,$2,$3}'`
-    echo $mkr $pos >>! $rinexdir/draft
+    set mkr = `awk '/MARKER NAME/ {print $1}' $file`
+    set pos = `awk '/APPROX POS/ {print $1,$2,$3}' $file`
+    echo $mkr $pos >>! $rinexdir/station.list-draft
 end
 
 # save only unique lines based on column 1 through column 1
-sort -u -k 1,1 $rinexdir/draft > $rinexdir/statlist
+sort -u -k 1,1 $rinexdir/station.list-draft > $rinexdir/station.list
 
-rm -f $rinexdir/draft
+rm -f $rinexdir/station.list-draft
 
 # get rid of the blank line at the beginning
 # I dont think we need this anymore
 #if ($OSTYPE  == 'linux') then
-#  sed -i '1d' $rinexdir/statlist
+#  sed -i '1d' $rinexdir/station.list
 #else if ($OSTYPE == 'darwin') then
 #  # on MacOS need to add '' in beginning for creation of output file
-#  sed -i '' '1d' $rinexdir/statlist
+#  sed -i '' '1d' $rinexdir/station.list
 #else
 #  echo "Removal of empty line 1 did not work"
 #endif
