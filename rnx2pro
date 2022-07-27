@@ -32,10 +32,9 @@
 
 # Things to edit:
 # hour long files are being linked and then concatenated to make file day long ofile
-# but that in itself is not linked and about 90 MB in size so we should so something about that
+# but that in itself is not linked and about 90 MB in size so we will delete it at the end
 # need to eventually address how we are assuming hour long files from the start when that might not
 # always be the case (could have 15 minute files, day long files to begin with, etc.)
-# FIGURE OUT WAY TO ADD LEADING ZEROS TO SDOY AND EDOY IF USER DOES NOT GIVE THEM
 
 set warnin = 0
 if($#argv == 9)then
@@ -71,8 +70,8 @@ set stlist = $1
 set yr = $2
 set split = ($yr:as/20/ /)
 set yr2 = $split[1]
-set sdoy = $3
-set edoy = $4
+set sdoy = `printf "%03.0f" $3`
+set edoy = `printf "%03.0f" $4`
 set sps = $5
 set ar = $6
 set tides = $7
@@ -164,8 +163,15 @@ foreach mkr (`awk '{print $1}' $stlist`)
 	goto label999
     endif
 
+    # PRIDE run is over so can delete nav file and ofile(s)
+    rm -f {$mkr}*0.{$yr2}{o} brdm{$day}0.{$yr2}p
+
     # cd into output directory i.e. 2011/067-084/ and run code from kin2prd
-    cd $yr/$sdoy-$edoy/
+    if ("$sdoy" == "$edoy") then
+	cd $yr/$sdoy/
+    else
+	cd $yr/$sdoy-$edoy/
+    endif
 
     set infile = `ls kin_*`
     set hdrend = `rnx2hdr $infile`
@@ -180,8 +186,17 @@ foreach mkr (`awk '{print $1}' $stlist`)
 	# on MacOS need to add '' in beginning for creation of output file
 	sed -i '' 's/\*/ /g' $infile:r.prd
     else
-	echo "Code did not run"
+	echo ' '
+	echo 'Code did not run'
+	echo ' '
+	@ warnin +=1
+	goto label999
     endif
+
+    # need to extract approx position xyz --> it's inside statlist columns 2-4
+
+    # run prd2msd.py here
+    # prd2msd.py -s $sps -x X Y Z prdfile
 
     # cd back up to base directory with all stations
     cd ../../../
