@@ -21,7 +21,12 @@
 # rnxTools
 #
 # Originally written by tschuh-at-princeton.edu, 06/07/2022
-# Last modified by tschuh-at-princeton.edu, 07/26/2022
+# Last modified by tschuh-at-princeton.edu, 07/27/2022
+
+# Things to edit:
+# change num/nums --> day/days for clarity
+# need to add name change of nav file to brdm...
+# hour long .o files are being linked and then concatenated, but it should be the other way around
 
 set warnin = 0
 if($#argv == 9)then
