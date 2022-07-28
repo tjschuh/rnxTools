@@ -193,16 +193,25 @@ foreach mkr (`awk '{print $1}' $stlist`)
 	goto label999
     endif
 
-    # need to extract approx position xyz --> it's inside statlist columns 2-4
+    # need to extract approx position xyz --> it's inside stlist columns 2-4
+    # in the wrong directory
+    set x = `awk '{print $2}' $stlist`
+    set y = `awk '{print $3}' $stlist`
+    set z = `awk '{print $4}' $stlist`
 
-    # run prd2msd.py here
-    # prd2msd.py -s $sps -x X Y Z prdfile
+    # run prd2msd.py here to generate mseed file
+    prd2msd.py -s $sps -x $x $y $z $infile:r.prd
 
+    # copy mseed file(s) and .hdr file back up to main directory
+    cp GN* ../../
+    cp *.hdr ../../
+    # cd back up to run directory and delete everything except .hdr and .mseed files
+    cd ../../
+    rm -rf $yr/
+    
     # cd back up to base directory with all stations
-    cd ../../../
-
+    cd ../
 end
-
 
 ##############################################################################
 
