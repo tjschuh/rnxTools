@@ -80,7 +80,7 @@ set prideconfig = $8
 # define sequence of days
 set days = `seq -f %03g $sdoy $edoy`
 
-# use the natural version of ls in case it's aliased
+# use the natural version of ls and cd in case it's aliased
 unalias ls
 unalias cd
 
@@ -95,41 +95,47 @@ foreach mkr (`awk '{print $1}' $stlist`)
     cd $mkr
     echo 'Working on marker : '$mkr
     foreach day ($days[*])
-	# get standard RINEX ofiles for all hours of DoY and link them
-	ls $rinexdir/$yr/$day/?/{$mkr}*.{$yr2}{o,O} >! templist       	
-	foreach ofile ( `cat templist` )
+	# if 24 hour file already exists, we can skip concatenation part
+	if (-e $rinexdir/$yr/$day/{$mkr}{$day}0.{$yr2}{o,O}) then
+	    # link this ofile and nfile and change name of nfile
+	    set ofile = `ls $rinexdir/$yr/$day/{$mkr}{$day}0.{$yr2}{o,O}`
+	    ln -s $ofile
+	    set nfile = `ls $navdir/$yr/$day/{$mkr}*.{$yr2}{n,N}`
+	    ln -s $nfile
+	    mv -f {$mkr}*.{$yr2}{n,N} brdm{$day}0.{$yr2}p
+	else
+	    # get standard RINEX ofiles for all hours of DoY and link them
+	    ls $rinexdir/$yr/$day/?/{$mkr}*.{$yr2}{o,O} >! templist       	
+	    foreach ofile ( `cat templist` )
 		ln -s $ofile
 		rnx2tlo $ofile
-	end
-	rm -f templist
+	    end
+	    rm -f templist
 
-	# get corresponding nav file, link it, and change its name
-	set nfile = `ls $navdir/$yr/$day/{$mkr}*.{$yr2}{n,N}`
-	ln -s $nfile
-	# change name of nav file so PRIDE acknowledges it
-	# navfile --> brdm{$day}0.{$yr2}p
-	mv -f {$mkr}*.{$yr2}{n,N} brdm{$day}0.{$yr2}p
+	    # get corresponding nav file, link it, and change its name
+	    set nfile = `ls $navdir/$yr/$day/{$mkr}*.{$yr2}{n,N}`
+	    ln -s $nfile
+	    # change name of nav file so PRIDE acknowledges it
+	    # navfile --> brdm{$day}0.{$yr2}p
+	    mv -f {$mkr}*.{$yr2}{n,N} brdm{$day}0.{$yr2}p
 
-    echo 'CONCATENATION PART'
-	# now concatenate all the RINEX files for each day into 1 file
-	set files = `/usr/bin/ls {$mkr}{$day}[a-b,A-B].{$yr2}{o,O}`
-	echo $files
-	rnx2cat $files ; mv -f cat.rnx tempfile
-	set files = `/usr/bin/ls {$mkr}{$day}[c-x,C-X].{$yr2}{o,O}`
-	foreach file ($files[*])
-	    echo $file
-	    rnx2cat tempfile $file ; mv -f cat.rnx tempfile
-	end
-	rm -rf {$mkr}{$day}[a-x,A-X].{$yr2}{o,O}
-	mv -f tempfile {$mkr}{$day}0.{$yr2}{o}
+	echo 'CONCATENATION PART'
+	    # now concatenate all the RINEX files for each day into 1 file
+	    set files = `/usr/bin/ls {$mkr}{$day}[a-b,A-B].{$yr2}{o,O}`
+	    echo $files
+	    rnx2cat $files ; mv -f cat.rnx tempfile
+	    set files = `/usr/bin/ls {$mkr}{$day}[c-x,C-X].{$yr2}{o,O}`
+	    foreach file ($files[*])
+		echo $file
+		rnx2cat tempfile $file ; mv -f cat.rnx tempfile
+	    end
+	    rm -rf {$mkr}{$day}[a-x,A-X].{$yr2}{o,O}
+	    mv -f tempfile {$mkr}{$day}0.{$yr2}{o}
+	endif
     end
-    cd ..
     echo '################################################'
     echo ' '
-
     echo 'PRIDE PART'
-    # cd into each station directory
-    cd $mkr
     # actually run PRIDE (with various options depending on user input)
     if ($ar == yes) then
 	if ($tides == yes) then
