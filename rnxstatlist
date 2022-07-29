@@ -11,7 +11,7 @@
 # file within $1 called station.list with 4 columns: marker/station name, approx position x, y, z
 #
 # Originally written by tschuh-at-princeton.edu, 07/06/2022
-# Last modified by tschuh-at-princeton.edu, 07/26/2022
+# Last modified by tschuh-at-princeton.edu, 07/29/2022
 
 set warnin = 0
 if($#argv != 1)then
@@ -41,21 +41,13 @@ foreach file ($files[*])
     echo $mkr $pos >>! $rinexdir/stations.list-draft
 end
 
+# before the sorting of unique lines, remove both empty columns and ones with blank approx positions 
+awk 'NF>1' $rinexdir/stations.list-draft > $rinexdir/stations.list-draft2
+
 # save only unique lines based on column 1 through column 1
-sort -u -k 1,1 $rinexdir/stations.list-draft > $rinexdir/stations.list
+sort -u -k 1,1 $rinexdir/stations.list-draft2 > $rinexdir/stations.list
 
-rm -f $rinexdir/stations.list-draft
-
-# get rid of the blank line at the beginning
-# I dont think we need this anymore
-#if ($OSTYPE  == 'linux') then
-#  sed -i '1d' $rinexdir/stations.list
-#else if ($OSTYPE == 'darwin') then
-#  # on MacOS need to add '' in beginning for creation of output file
-#  sed -i '' '1d' $rinexdir/stations.list
-#else
-#  echo "Removal of empty line 1 did not work"
-#endif
+rm -f $rinexdir/stations.list-draft*
 
 ################################################################################
 
