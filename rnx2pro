@@ -12,7 +12,7 @@
 # $5        sampling interval of RINEX files in seconds (currently cant take multiple values)
 # $6        "yes" or "no" switch for ambiguity resolution (AR) when using PRIDE PPP-AR
 # $7        "yes" or "no" switch for tidal corrections when using PRIDE PPP-AR
-# $8        name of PRIDE PPP-AR configuration file used throughout run in working directory
+# $8        full file path to PRIDE PPP-AR configuration file used throughout run
 # $9        path/to/directory/containing/directories/of/RINEX/observation/files
 # $10       path/to/directory/containing/directories/of/RINEX/navigation/files (if different)
 #
@@ -25,16 +25,18 @@
 # rnx2pro path/2/stations.list 2011 67 67 1 no no path/2/config_daily_GEONET_JAPAN_2011_DAYS_67_TO_85 /home/seismogeodesy/DATA/NETWORKS/GEONET_JAPAN/rinex1hz/ /home/seismogeodesy/DATA/NETWORKS/GEONET_JAPAN/rinex/
 #
 # Originally written by tschuh-at-princeton.edu, 06/07/2022
-# Last modified by tschuh-at-princeton.edu, 07/27/2022
+# Last modified by tschuh-at-princeton.edu, 07/28/2022
 
 # start in directory with which you want station directories
 # containing various runs i.e. 0842/ 0843/ 0844/
 
-# Things to edit:
+# Notes:
 # hour long files are being linked and then concatenated to make file day long ofile
 # but that in itself is not linked and about 90 MB in size so we will delete it at the end
-# need to eventually address how we are assuming hour long files from the start when that might not
-# always be the case (could have 15 minute files, day long files to begin with, etc.)
+# need to eventually build in concatenating 15 minute files
+
+# To do:
+# consider what to do with .O files
 
 set warnin = 0
 if($#argv == 9)then
@@ -55,7 +57,7 @@ else
   echo '----------> where sps is sampling rate in seconds'
   echo '----------> where ar is either yes for ambiguity resolution or no for no AR'
   echo '----------> where tides is either yes for corrections or no for no corrections'
-  echo '----------> where prideconfig is file containing PRIDE PPP-AR configuration'
+  echo '----------> where prideconfig is full file path to PRIDE PPP-AR configuration file'
   echo '----------> where rinexdir is directory containing day/station full RINEX files'
   echo '----------> where navdir is directory containing day/station navigation files'
   echo ' '
@@ -84,11 +86,6 @@ set days = `seq -f %03g $sdoy $edoy`
 unalias ls
 unalias cd
 
-# before actually running PRIDE PPP-AR
-# put 1 config file in same spot as all station
-# directories and use it for every processing run
-set cfgpth = `pwd`
-
 # loop over marker names
 foreach mkr (`awk '{print $1}' $stlist`)
     mkdir $mkr
@@ -96,16 +93,16 @@ foreach mkr (`awk '{print $1}' $stlist`)
     echo 'Working on marker : '$mkr
     foreach day ($days[*])
 	# if 24 hour file already exists, we can skip concatenation part
-	if (-e $rinexdir/$yr/$day/{$mkr}{$day}0.{$yr2}{o,O}) then
+	if (-f $rinexdir/$yr/$day/{$mkr}{$day}0.{$yr2}o) then
 	    # link this ofile and nfile and change name of nfile
-	    set ofile = `ls $rinexdir/$yr/$day/{$mkr}{$day}0.{$yr2}{o,O}`
+	    set ofile = `ls $rinexdir/$yr/$day/{$mkr}{$day}0.{$yr2}o`
 	    ln -s $ofile
 	    set nfile = `ls $navdir/$yr/$day/{$mkr}*.{$yr2}{n,N}`
 	    ln -s $nfile
-	    mv -f {$mkr}*.{$yr2}{n,N} brdm{$day}0.{$yr2}p
+	    mv -f {$mkr}*.{$yr2}n brdm{$day}0.{$yr2}p
 	else
 	    # get standard RINEX ofiles for all hours of DoY and link them
-	    ls $rinexdir/$yr/$day/?/{$mkr}*.{$yr2}{o,O} >! templist       	
+	    ls $rinexdir/$yr/$day/?/{$mkr}*.{$yr2}o >! templist       	
 	    foreach ofile ( `cat templist` )
 		ln -s $ofile
 		rnx2tlo $ofile
@@ -113,35 +110,36 @@ foreach mkr (`awk '{print $1}' $stlist`)
 	    rm -f templist
 
 	    # get corresponding nav file, link it, and change its name
-	    set nfile = `ls $navdir/$yr/$day/{$mkr}*.{$yr2}{n,N}`
+	    set nfile = `ls $navdir/$yr/$day/{$mkr}*.{$yr2}n`
 	    ln -s $nfile
 	    # change name of nav file so PRIDE acknowledges it
 	    # navfile --> brdm{$day}0.{$yr2}p
-	    mv -f {$mkr}*.{$yr2}{n,N} brdm{$day}0.{$yr2}p
+	    mv -f {$mkr}*.{$yr2}n brdm{$day}0.{$yr2}p
 
 	echo 'CONCATENATION PART'
 	    # now concatenate all the RINEX files for each day into 1 file
-	    set files = `/usr/bin/ls {$mkr}{$day}[a-b,A-B].{$yr2}{o,O}`
+	    set files = `/usr/bin/ls {$mkr}{$day}[a-b,A-B].{$yr2}o`
 	    echo $files
 	    rnx2cat $files ; mv -f cat.rnx tempfile
-	    set files = `/usr/bin/ls {$mkr}{$day}[c-x,C-X].{$yr2}{o,O}`
+	    set files = `/usr/bin/ls {$mkr}{$day}[c-x,C-X].{$yr2}o`
 	    foreach file ($files[*])
 		echo $file
 		rnx2cat tempfile $file ; mv -f cat.rnx tempfile
 	    end
-	    rm -rf {$mkr}{$day}[a-x,A-X].{$yr2}{o,O}
-	    mv -f tempfile {$mkr}{$day}0.{$yr2}{o}
+	    rm -rf {$mkr}{$day}[a-x,A-X].{$yr2}o
+	    mv -f tempfile {$mkr}{$day}0.{$yr2}o
 	endif
     end
     echo '################################################'
     echo ' '
     echo 'PRIDE PART'
     # actually run PRIDE (with various options depending on user input)
+    set pth = `pwd`
     if ($ar == yes) then
 	if ($tides == yes) then
-	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}{o}
+	    pdp3 -cfg $prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps $pth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
 	else if ($tides == no) then
-	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}{o}
+	    pdp3 -cfg $prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP $pth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
 	else
 	    echo ' '
 	    echo 'Please select either yes or no for tidal corrections'
@@ -151,9 +149,9 @@ foreach mkr (`awk '{print $1}' $stlist`)
 	endif
     else if ($ar == no) then
 	if ($tides == yes) then
-	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}{o}
+	    pdp3 -cfg $prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -f $pth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
 	else if ($tides == no) then
-	    pdp3 -cfg $cfgpth/$prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP -f $cfgpth/$mkr/{$mkr}{$sdoy}0.{$yr2}{o}
+	    pdp3 -cfg $prideconfig -m K -s $yr/$sdoy -e $yr/$edoy -n $mkr -i $sps -toff SOP -f $pth/$mkr/{$mkr}{$sdoy}0.{$yr2}o
 	else
 	    echo ' '
 	    echo 'Please select either yes or no for tidal corrections'
