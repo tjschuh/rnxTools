@@ -25,18 +25,14 @@
 # rnx2pro path/2/stations.list 2011 67 67 1 no no path/2/config_daily_GEONET_JAPAN_2011_DAYS_67_TO_85 /home/seismogeodesy/DATA/NETWORKS/GEONET_JAPAN/rinex1hz/ /home/seismogeodesy/DATA/NETWORKS/GEONET_JAPAN/rinex/
 #
 # Originally written by tschuh-at-princeton.edu, 06/07/2022
-# Last modified by tschuh-at-princeton.edu, 07/28/2022
-
-# start in directory with which you want station directories
-# containing various runs i.e. 0842/ 0843/ 0844/
-
-# Notes:
-# hour long files are being linked and then concatenated to make file day long ofile
-# but that in itself is not linked and about 90 MB in size so we will delete it at the end
-# need to eventually build in concatenating 15 minute files
+# Last modified by tschuh-at-princeton.edu, 07/29/2022
 
 # To do:
 # consider what to do with .O files
+# eventually build in concatenating 15 minute files
+
+# start in directory with which you want station directories
+# containing various runs i.e. 0842/ 0843/ 0844/
 
 set warnin = 0
 if($#argv == 9)then
